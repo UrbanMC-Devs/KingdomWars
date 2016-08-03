@@ -14,8 +14,8 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.palmergames.bukkit.towny.utils.CombatUtil;
 
+import ca.xshade.questionmanager.LinkedQuestion;
 import ca.xshade.questionmanager.Option;
-import ca.xshade.questionmanager.Question;
 import ca.xshade.questionmanager.QuestionTask;
 
 public class TownyUtil {
@@ -57,7 +57,7 @@ public class TownyUtil {
 		return nation1.hasAlly(nation2) && nation2.hasAlly(nation1);
 	}
 
-	public void truceQuestion(String playerName, String otherNation) {
+	public void truceQuestion(Nation recievingNation, String otherNation) {
 		List<Option> options = new ArrayList<Option>();
 
 		options.add(new Option("accept", new QuestionTask() {
@@ -72,15 +72,33 @@ public class TownyUtil {
 			}
 		}));
 
-		Question question = new Question(playerName, "Would you like to accept a truce with " + otherNation
-				+ "? You will receive %configTruceAmount% from their nation bank.", options);
+		List<String> targets = new ArrayList<String>();
+
+		for (Player p : getOnlineInNation(recievingNation, "KingdomWars.nationstaff")) {
+			targets.add(p.getName());
+		}
+
+		LinkedQuestion question = new LinkedQuestion(
+				KingdomWars.getQuestioner().getQuestionManager().getNextQuestionId(), targets,
+				"Would you like to accept a truce with " + otherNation
+						+ "? You will receive %configTruceAmount% from their nation bank.",
+				options);
 
 		try {
-			KingdomWars.getQuestioner().appendQuestion(question);
+			KingdomWars.getQuestioner().getQuestionManager().appendLinkedQuestion(question);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+
+		Player tempp;
+		for (String pname : targets) {
+			tempp = Bukkit.getPlayer(pname);
+			for (String line : KingdomWars.getQuestioner().formatQuestion(question, "New Question"))
+				tempp.sendMessage(line);
+		}
+
+		return;
 	}
 
 	public static List<Player> getOnlineInNation(Nation nation, String permission) {
