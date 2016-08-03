@@ -26,8 +26,8 @@ public class KingdomWars extends JavaPlugin {
 	private static Questioner questioner;
 	private static Economy econ;
 
-	private static int finishAmount;
-	private static int truceAmount;
+	private static double finishAmount;
+	private static double truceAmount;
 	private static int winningKills;
 
 	@Override
@@ -89,8 +89,8 @@ public class KingdomWars extends JavaPlugin {
 
 		FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
-		finishAmount = data.getInt("finish-amount");
-		truceAmount = data.getInt("truce-amount");
+		finishAmount = data.getDouble("finish-amount");
+		truceAmount = data.getDouble("truce-amount");
 		winningKills = data.getInt("winning-kills");
 	}
 
@@ -106,11 +106,11 @@ public class KingdomWars extends JavaPlugin {
 		return econ;
 	}
 
-	public static int getFinishAmount() {
+	public static double getFinishAmount() {
 		return finishAmount;
 	}
 
-	public static int getTruceAmount() {
+	public static double getTruceAmount() {
 		return truceAmount;
 	}
 

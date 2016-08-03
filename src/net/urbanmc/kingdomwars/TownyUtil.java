@@ -103,6 +103,10 @@ public class TownyUtil {
 		return;
 	}
 
+	public static void deleteNation(Nation nation) {
+		TownyUniverse.getDataSource().removeNation(nation);
+	}
+
 	public static List<Player> getOnlineInNation(Nation nation, String permission) {
 		List<Player> players = new ArrayList<Player>();
 		List<String> residents = new ArrayList<String>();

@@ -127,9 +127,26 @@ public class WarUtil {
 		}
 	}
 
-	public synchronized static void win(Nation winner, Nation loser, int amount) {
+	@SuppressWarnings("deprecation")
+	public synchronized static void win(Nation winner, Nation loser, double amount) {
 		War war = getWar(winner);
 
+		wars.remove(war);
+		saveFile();
+
+		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
+		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + loser.getName() + "!");
+
+		KingdomWars.getEcon().withdrawPlayer("nation_" + winner.getName(), amount);
+
+		double balance = KingdomWars.getEcon().getBalance("nation_" + loser.getName());
+
+		if (balance < amount) {
+			TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
+			TownyUtil.deleteNation(loser);
+		}
+
+		KingdomWars.getEcon().withdrawPlayer("nation_" + loser.getName(), amount);
 	}
 
 	private static void saveFile() {
