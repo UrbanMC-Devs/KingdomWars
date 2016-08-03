@@ -23,14 +23,8 @@ public class WarBoard {
 		Score sc = obj.getScore(ChatColor.BLUE + war.getDeclaringNation());
 		sc.setScore(10);
 
-		Score s1 = obj.getScore("Kills:" + String.valueOf(0));
-		s1.setScore(9);
-
 		Score s2 = obj.getScore(ChatColor.AQUA + war.getDeclaredNation());
 		s2.setScore(7);
-
-		Score s3 = obj.getScore("Kills:" + String.valueOf(0));
-		s3.setScore(6);
 
 		Score s4 = obj.getScore(
 				ChatColor.ITALIC + String.valueOf(KingdomWars.getWinningKills()) + ChatColor.ITALIC + " kills");
@@ -40,23 +34,15 @@ public class WarBoard {
 		s5.setScore(3);
 
 		war.setScoreBoard(warboard);
+		WarUtil.updateWar(war);
 
-		Nation n1 = TownyUtil.getNation(war.getDeclaringNation());
-		Nation n2 = TownyUtil.getNation(war.getDeclaredNation());
-
-		Nation tempnation;
-		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-			tempnation = TownyUtil.getNation(p);
-			if (tempnation.equals(n1) || tempnation.equals(n2))
-				p.setScoreboard(warboard);
-			continue;
-		}
-		return;
+		updateBoard(war);
 	}
 
 	public void updateBoard(War war) {
-		if (war.getScoreBoard() == null)
-			return;
+		if (war.getScoreBoard() == null) {
+			createBoard(war);
+		}
 
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
@@ -71,27 +57,25 @@ public class WarBoard {
 		Nation n2 = TownyUtil.getNation(war.getDeclaredNation());
 
 		war.setScoreBoard(warboard);
-		
-		Nation tempnation;
+		WarUtil.updateWar(war);
+
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-			tempnation = TownyUtil.getNation(p);
-			if (tempnation.equals(n1) || tempnation.equals(n2))
+			Nation nation = TownyUtil.getNation(p);
+			if (nation.equals(n1) || nation.equals(n2)) {
 				p.setScoreboard(warboard);
-			continue;
+			}
 		}
-		return;
 	}
 
 	public void showBoard(Player p) {
-		Nation n;	
-		if (TownyUtil.getNation(p) == null)
+		Nation n = TownyUtil.getNation(p);
+
+		if (n == null)
 			return;
-		
-		n = TownyUtil.getNation(p);	
+
 		if (!WarUtil.inWar(n))
 			return;
 
 		p.setScoreboard(WarUtil.getWar(n).getScoreBoard());
 	}
-
 }

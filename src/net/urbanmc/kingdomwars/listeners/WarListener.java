@@ -74,14 +74,13 @@ public class WarListener implements Listener {
 			return;
 
 		war.addPoints(nation2, 1);
-		KingdomWars.getWarBoard().updateBoard(war);
 		WarUtil.updateWar(war);
+		KingdomWars.getWarBoard().updateBoard(war);
 		WarUtil.checkWin(war);
 	}
-	
-	@EventHandler 
+
+	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-			KingdomWars.getWarBoard().showBoard(p);
+		KingdomWars.getWarBoard().showBoard(e.getPlayer());
 	}
 }

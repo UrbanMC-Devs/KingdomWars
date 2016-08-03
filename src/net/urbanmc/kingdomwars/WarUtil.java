@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.object.Nation;
@@ -134,6 +137,15 @@ public class WarUtil {
 
 		wars.remove(war);
 		saveFile();
+
+		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+			Nation nation = TownyUtil.getNation(p);
+			if (nation.equals(winner) || nation.equals(loser)) {
+				if (p.getScoreboard().equals(war.getScoreBoard())) {
+					p.setScoreboard(null);
+				}
+			}
+		}
 
 		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
 		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + loser.getName() + "!");
