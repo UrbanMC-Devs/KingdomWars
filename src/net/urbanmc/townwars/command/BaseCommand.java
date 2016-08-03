@@ -23,7 +23,7 @@ public class BaseCommand implements CommandExecutor {
 		// Possible subs: start [town], end [town], truce [town]
 
 		if (args.length == 0) {
-			infoMessage(p);
+			infoMessage(p, label);
 			return true;
 		}
 
@@ -41,14 +41,11 @@ public class BaseCommand implements CommandExecutor {
 		return true;
 	}
 
-	private void infoMessage(Player p) {
-		p.sendMessage(ChatColor.AQUA + "=== Kingdom Wars ===");
-		p.sendMessage(ChatColor.AQUA + "Developed by: Elian & Silverwolfg11");
-		p.sendMessage("");
-		p.sendMessage(
-				ChatColor.AQUA + "/twars start (nation)" + ChatColor.WHITE + ": Start a war with another nation!");
-		p.sendMessage(ChatColor.AQUA + "/twars end" + ChatColor.WHITE + ": End a war you started!");
-		p.sendMessage(ChatColor.AQUA + "/twars truce" + ChatColor.WHITE
-				+ ": Declare a truce with the nation who started a battle!");
+	private void infoMessage(Player p, String label) {
+		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + ChatColor.AQUA + "/" + label + " start (nation)"
+				+ ChatColor.WHITE + ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end"
+				+ ChatColor.WHITE + ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce"
+				+ ChatColor.WHITE + ": Declare a truce with the nation who started a battle!";
+		p.sendMessage(message);
 	}
 }
