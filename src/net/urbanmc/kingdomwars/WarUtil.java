@@ -62,6 +62,7 @@ public class WarUtil {
 
 	public static void startWar(War war) {
 		wars.add(war);
+		saveFile();
 	}
 
 	public static void endWar(Nation nation) {
@@ -70,6 +71,18 @@ public class WarUtil {
 
 	public static void endWar(War war) {
 		wars.remove(war);
+		saveFile();
+	}
+
+	public static void updateWar(War war) {
+		War oldWar = getWar(TownyUtil.getNation(war.getDeclaringNation()));
+
+		if (oldWar != null) {
+			wars.remove(oldWar);
+		}
+
+		wars.add(war);
+		saveFile();
 	}
 
 	public static boolean inWar(Nation nation) {
