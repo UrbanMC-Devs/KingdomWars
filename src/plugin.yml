@@ -8,4 +8,4 @@ softdepend: [Towny]
 commands:
   townwars:
     description: Manage your nation's wars
-    aliases: [tw]
+    aliases: [tw, twar]
