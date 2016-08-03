@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -9,6 +10,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.data.War;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
 
 public class Start {
@@ -52,9 +54,15 @@ public class Start {
 			return;
 		}
 
-		
+		War war = WarUtil.createWar(nation1, nation2);
 
-		WarUtil.startWar(nation1, nation2);
+		WarStartEvent event = new WarStartEvent(war);
+		Bukkit.getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
+			return;
+
+		WarUtil.startWar(war);
 
 		TownyMessaging.sendNationMessage(nation1, "Your nation has declared war against " + nation2.getName() + "!");
 		TownyMessaging.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation!");

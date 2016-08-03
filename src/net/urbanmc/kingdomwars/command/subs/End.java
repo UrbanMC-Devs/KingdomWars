@@ -7,8 +7,8 @@ import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
-import net.urbanmc.kingdomwars.War;
 import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.data.War;
 
 public class End {
 

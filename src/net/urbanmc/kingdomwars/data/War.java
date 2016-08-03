@@ -1,4 +1,4 @@
-package net.urbanmc.kingdomwars;
+package net.urbanmc.kingdomwars.data;
 
 public class War {
 

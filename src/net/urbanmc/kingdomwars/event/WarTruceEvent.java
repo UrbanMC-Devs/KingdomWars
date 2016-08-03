@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 
 import net.urbanmc.kingdomwars.data.War;
 
-public class WarStartEvent extends Event implements Cancellable {
+public class WarTruceEvent extends Event implements Cancellable {
 
 	private War war;
 
@@ -14,7 +14,7 @@ public class WarStartEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
 
-	public WarStartEvent(War war) {
+	public WarTruceEvent(War war) {
 		this.war = war;
 	}
 
