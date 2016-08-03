@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.War;
+import net.urbanmc.kingdomwars.event.WarPointAddEvent;
 
 public class WarListener implements Listener {
 
@@ -45,6 +47,12 @@ public class WarListener implements Listener {
 		War war = WarUtil.getWar(nation1);
 
 		if (!war.getDeclaringNation().equals(nation2.getName()) && !war.getDeclaredNation().equals(nation2.getName()))
+			return;
+
+		WarPointAddEvent event = new WarPointAddEvent(war, nation2, 1);
+		Bukkit.getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
 			return;
 
 		war.addPoints(nation2, 1);
