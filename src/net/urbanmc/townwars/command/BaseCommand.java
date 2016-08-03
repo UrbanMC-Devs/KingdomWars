@@ -1,4 +1,4 @@
-package net.urbanmc.townwars.comamnd;
+package net.urbanmc.townwars.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
