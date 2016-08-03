@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import net.md_5.bungee.api.ChatColor;
 import net.urbanmc.townwars.command.subs.End;
 import net.urbanmc.townwars.command.subs.Start;
+import net.urbanmc.townwars.command.subs.Truce;
 
 public class BaseCommand implements CommandExecutor {
 
@@ -35,6 +36,9 @@ public class BaseCommand implements CommandExecutor {
 			break;
 		case "end":
 			new End(p, args);
+			break;
+		case "truce":
+			new Truce(p, args);
 			break;
 		}
 
