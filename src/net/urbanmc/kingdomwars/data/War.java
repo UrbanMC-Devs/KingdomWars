@@ -4,18 +4,12 @@ import com.palmergames.bukkit.towny.object.Nation;
 
 public class War {
 
-	private int warId;
 	private String nation1, nation2;
 	private int points1 = 0, points2 = 0;
 
-	public War(int warId, String nation1, String nation2) {
-		this.warId = warId;
+	public War(String nation1, String nation2) {
 		this.nation1 = nation1;
 		this.nation2 = nation2;
-	}
-
-	public int getWarId() {
-		return this.warId;
 	}
 
 	public String getDeclaringNation() {

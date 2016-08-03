@@ -57,7 +57,7 @@ public class WarUtil {
 	}
 
 	public static void startWar(Nation nation1, Nation nation2) {
-		startWar(createWar(nation1, nation2));
+		startWar(new War(nation1.getName(), nation2.getName()));
 	}
 
 	public static void startWar(War war) {
@@ -130,11 +130,6 @@ public class WarUtil {
 	public synchronized static void win(Nation winner, Nation loser, int amount) {
 		War war = getWar(winner);
 
-		
-	}
-
-	public static War createWar(Nation nation1, Nation nation2) {
-		return new War(wars.size(), nation1.getName(), nation2.getName());
 	}
 
 	private static void saveFile() {

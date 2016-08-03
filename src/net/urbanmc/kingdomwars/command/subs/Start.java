@@ -53,7 +53,7 @@ public class Start {
 			return;
 		}
 
-		War war = WarUtil.createWar(nation1, nation2);
+		War war = new War(nation1.getName(), nation2.getName());
 
 		WarStartEvent event = new WarStartEvent(war);
 		Bukkit.getPluginManager().callEvent(event);

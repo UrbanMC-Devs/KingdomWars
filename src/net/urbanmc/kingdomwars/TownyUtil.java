@@ -63,7 +63,7 @@ public class TownyUtil {
 
 		options.add(new Option("accept", new QuestionTask() {
 			public void run() {
-				
+				WarUtil.win(receivingNation, otherNation, KingdomWars.getTruceAmount());
 			}
 		}));
 
