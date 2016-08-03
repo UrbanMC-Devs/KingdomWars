@@ -52,6 +52,11 @@ public class Start {
 			return;
 		}
 
+		if (TownyUtil.allied(nation1, nation2)) {
+			p.sendMessage(ChatColor.RED + "You cannot have a war with your ally!");
+			return;
+		}
+
 		War war = WarUtil.createWar(nation1, nation2);
 
 		WarStartEvent event = new WarStartEvent(war);

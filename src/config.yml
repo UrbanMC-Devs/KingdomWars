@@ -1,0 +1,11 @@
+# KingdomWars by Elian & Silverwolfg11 #
+########################################
+
+# How much money is awarded/taken away when war ends (not with forceend)
+finish-amount: 100000
+
+# How much money is awarded/taken away when war ends by truce
+truce-amount: 50000
+
+# How many kills a nation must receive to win the war
+winning-kills: 25

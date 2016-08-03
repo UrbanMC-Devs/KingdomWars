@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.TownyMessaging;
@@ -11,6 +12,7 @@ import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 import ca.xshade.questionmanager.Option;
 import ca.xshade.questionmanager.Question;
@@ -41,6 +43,10 @@ public class TownyUtil {
 		}
 
 		return nation;
+	}
+
+	public static boolean allied(Nation nation1, Nation nation2) {
+		return nation1.hasAlly(nation2) && nation2.hasAlly(nation1);
 	}
 
 	public void truceQuestion(String playerName, String otherNation) {
@@ -84,5 +90,9 @@ public class TownyUtil {
 		}
 
 		return players;
+	}
+
+	public static boolean damageCancelled(Entity attacker, Entity defender) {
+		return CombatUtil.preventDamageCall(KingdomWars.getTowny(), attacker, defender);
 	}
 }
