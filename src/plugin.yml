@@ -9,3 +9,30 @@ commands:
   townywar:
     description: Manage your nation's wars
     aliases: [twar, twars]
+permissions:
+  kingdomwars.*:
+    default: op
+    children:
+      kingdomwars.nationstaff: true
+      kingdomwars.forceend: true
+  kingdomwars.nationstaff:
+    default: false
+    children:
+      kingdomwars.nationres: true
+      kingdomwars.start: true
+      kingdomwars.end: true
+      kingdomwars.truce: true
+  kingdomwars.nationres:
+    default: false
+    children:
+      kingdomwars.status: true
+  kingdomwars.start:
+    default: false
+  kingdomwars.end:
+    default: false
+  kingdomwars.truce:
+    default: false
+  kingdomwars.status:
+    default: false
+  kingdomwars.forceend:
+    default: false
