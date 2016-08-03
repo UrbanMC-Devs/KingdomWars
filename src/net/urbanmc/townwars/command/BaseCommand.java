@@ -5,6 +5,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.md_5.bungee.api.ChatColor;
+import net.urbanmc.townwars.command.subs.End;
 import net.urbanmc.townwars.command.subs.Start;
 
 public class BaseCommand implements CommandExecutor {
@@ -21,9 +23,7 @@ public class BaseCommand implements CommandExecutor {
 		// Possible subs: start [town], end [town], truce [town]
 
 		if (args.length == 0) {
-			String message = "";
-			p.sendMessage(message);
-
+			infoMessage(p);
 			return true;
 		}
 
@@ -33,8 +33,22 @@ public class BaseCommand implements CommandExecutor {
 		case "start":
 			new Start(p, args);
 			break;
+		case "end":
+			new End(p, args);
+			break;
 		}
 
 		return true;
-	}	
+	}
+
+	private void infoMessage(Player p) {
+		p.sendMessage(ChatColor.AQUA + "=== Kingdom Wars ===");
+		p.sendMessage(ChatColor.AQUA + "Developed by: Elian & Silverwolfg11");
+		p.sendMessage("");
+		p.sendMessage(
+				ChatColor.AQUA + "/twars start (nation)" + ChatColor.WHITE + ": Start a war with another nation!");
+		p.sendMessage(ChatColor.AQUA + "/twars end" + ChatColor.WHITE + ": End a war you started!");
+		p.sendMessage(ChatColor.AQUA + "/twars truce" + ChatColor.WHITE
+				+ ": Declare a truce with the nation who started a battle!");
+	}
 }

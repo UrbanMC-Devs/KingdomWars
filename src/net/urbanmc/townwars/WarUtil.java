@@ -1,6 +1,6 @@
 package net.urbanmc.townwars;
 
-import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.Nation;
 
 public class WarUtil {
 
@@ -8,11 +8,11 @@ public class WarUtil {
 		
 	}
 
-	public static void startWar(Town town1, Town town2) {
-		
+	public static void startWar(Nation nation1, Nation nation2) {
+		 
 	}
 
-	public static void endWar(Town town1, Town town2) {
+	public static void endWar(Nation nation1, Nation nation2) {
 		
 	}
 }
