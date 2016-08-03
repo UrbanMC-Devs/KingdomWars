@@ -25,6 +25,7 @@ public class KingdomWars extends JavaPlugin {
 	private static Towny towny;
 	private static Questioner questioner;
 	private static Economy econ;
+	private static WarBoard wbclass = new WarBoard();
 
 	private static int finishAmount;
 	private static int truceAmount;
@@ -116,5 +117,9 @@ public class KingdomWars extends JavaPlugin {
 
 	public static int getWinningKills() {
 		return winningKills;
+	}
+	
+	public static WarBoard getWarBoard() {
+		return wbclass;
 	}
 }
