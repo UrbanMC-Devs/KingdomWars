@@ -1,11 +1,14 @@
 package net.urbanmc.kingdomwars.data;
 
+import org.bukkit.scoreboard.Scoreboard;
+
 import com.palmergames.bukkit.towny.object.Nation;
 
 public class War {
 
 	private String nation1, nation2;
 	private int points1 = 0, points2 = 0;
+	private Scoreboard board;
 
 	public War(String nation1, String nation2) {
 		this.nation1 = nation1;
@@ -34,5 +37,14 @@ public class War {
 		} else if (nation2.equals(nation.getName())) {
 			points2 += points;
 		}
+	}
+	
+	public void setScoreBoard(Scoreboard board) {
+		this.board = board;
+		return;
+	}
+	
+	public Scoreboard getScoreBoard() {
+		return this.board;
 	}
 }

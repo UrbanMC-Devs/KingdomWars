@@ -63,6 +63,7 @@ public class WarUtil {
 	public static void startWar(War war) {
 		wars.add(war);
 		saveFile();
+		KingdomWars.getWarBoard().createBoard(war);
 	}
 
 	public static void endWar(Nation nation) {

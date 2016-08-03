@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.War;
@@ -65,5 +66,6 @@ public class Start {
 
 		TownyUtil.sendNationMessage(nation1, "Your nation has declared war against " + nation2.getName() + "!");
 		TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation!");
+		KingdomWars.getWarBoard().createBoard(war);
 	}
 }

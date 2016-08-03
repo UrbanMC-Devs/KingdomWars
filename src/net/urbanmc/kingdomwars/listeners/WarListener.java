@@ -7,9 +7,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.War;
@@ -72,7 +74,14 @@ public class WarListener implements Listener {
 			return;
 
 		war.addPoints(nation2, 1);
+		KingdomWars.getWarBoard().updateBoard(war);
 		WarUtil.updateWar(war);
 		WarUtil.checkWin(war);
+	}
+	
+	@EventHandler 
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+			KingdomWars.getWarBoard().showBoard(p);
 	}
 }
