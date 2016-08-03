@@ -56,5 +56,7 @@ public class WarListener implements Listener {
 			return;
 
 		war.addPoints(nation2, 1);
+		WarUtil.updateWar(war);
+		WarUtil.checkWin(war);
 	}
 }

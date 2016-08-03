@@ -16,6 +16,7 @@ import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 import ca.xshade.questionmanager.LinkedQuestion;
 import ca.xshade.questionmanager.Option;
+import ca.xshade.questionmanager.QuestionManager;
 import ca.xshade.questionmanager.QuestionTask;
 
 public class TownyUtil {
@@ -57,45 +58,46 @@ public class TownyUtil {
 		return nation1.hasAlly(nation2) && nation2.hasAlly(nation1);
 	}
 
-	public void truceQuestion(Nation recievingNation, String otherNation) {
+	public void truceQuestion(Nation receivingNation, Nation otherNation) {
 		List<Option> options = new ArrayList<Option>();
 
 		options.add(new Option("accept", new QuestionTask() {
 			public void run() {
-
+				
 			}
 		}));
 
 		options.add(new Option("deny", new QuestionTask() {
 			public void run() {
-
+				sendNationMessage(receivingNation,
+						"Your nation has declined the request to truce with " + otherNation.getName() + ".");
+				sendNationMessage(otherNation, receivingNation.getName() + " has declined your request to truce.");
 			}
 		}));
 
 		List<String> targets = new ArrayList<String>();
 
-		for (Player p : getOnlineInNation(recievingNation, "KingdomWars.nationstaff")) {
+		for (Player p : getOnlineInNation(receivingNation, "kingdomwars.nationstaff")) {
 			targets.add(p.getName());
 		}
 
-		LinkedQuestion question = new LinkedQuestion(
-				KingdomWars.getQuestioner().getQuestionManager().getNextQuestionId(), targets,
-				"Would you like to accept a truce with " + otherNation
-						+ "? You will receive %configTruceAmount% from their nation bank.",
+		LinkedQuestion question = new LinkedQuestion(QuestionManager.getNextQuestionId(), targets,
+				"Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
+						+ KingdomWars.getTruceAmount() + " from their nation bank.",
 				options);
 
 		try {
 			KingdomWars.getQuestioner().getQuestionManager().appendLinkedQuestion(question);
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
-		Player tempp;
-		for (String pname : targets) {
-			tempp = Bukkit.getPlayer(pname);
-			for (String line : KingdomWars.getQuestioner().formatQuestion(question, "New Question"))
-				tempp.sendMessage(line);
+		for (String name : targets) {
+			Player p = Bukkit.getPlayer(name);
+
+			for (String line : KingdomWars.getQuestioner().formatQuestion(question, "New Question")) {
+				p.sendMessage(line);
+			}
 		}
 
 		return;

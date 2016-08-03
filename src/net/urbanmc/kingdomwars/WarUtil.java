@@ -111,6 +111,28 @@ public class WarUtil {
 		return null;
 	}
 
+	public synchronized static void checkWin(War war) {
+		Nation winner = null, loser = null;
+
+		if (war.getDeclaringPoints() == 25) {
+			winner = TownyUtil.getNation(war.getDeclaringNation());
+			loser = TownyUtil.getNation(war.getDeclaredNation());
+		} else if (war.getDeclaredPoints() == 25) {
+			winner = TownyUtil.getNation(war.getDeclaredNation());
+			loser = TownyUtil.getNation(war.getDeclaringNation());
+		}
+
+		if (winner != null && loser != null) {
+			win(winner, loser, KingdomWars.getFinishAmount());
+		}
+	}
+
+	public synchronized static void win(Nation winner, Nation loser, int amount) {
+		War war = getWar(winner);
+
+		
+	}
+
 	public static War createWar(Nation nation1, Nation nation2) {
 		return new War(wars.size(), nation1.getName(), nation2.getName());
 	}
@@ -119,9 +141,9 @@ public class WarUtil {
 		try {
 			PrintWriter writer = new PrintWriter(new File("plugins/KindomWars/wars.json"));
 
-			WarList list = new WarList(wars);
+			writer.write(new Gson().toJson(new WarList(wars)));
 
-			writer.write(new Gson().toJson(list));
+			writer.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
