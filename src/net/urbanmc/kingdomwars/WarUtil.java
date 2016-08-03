@@ -20,11 +20,19 @@ public class WarUtil {
 	}
 
 	public static void startWar(Nation nation1, Nation nation2) {
-		// TODO: Start war method
+		startWar(new War(wars.size(), nation1.getName(), nation2.getName()));
 	}
 
-	public static void endWar(Nation nation1, Nation nation2) {
-		// TODO: End war method
+	public static void startWar(War war) {
+		wars.add(war);
+	}
+
+	public static void endWar(Nation nation) {
+		endWar(getWar(nation));
+	}
+
+	public static void endWar(War war) {
+		wars.remove(war);
 	}
 
 	public static boolean inWar(Nation nation) {
