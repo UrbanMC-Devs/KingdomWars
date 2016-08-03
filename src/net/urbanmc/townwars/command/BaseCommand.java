@@ -46,7 +46,7 @@ public class BaseCommand implements CommandExecutor {
 	}
 
 	private void infoMessage(Player p, String label) {
-		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + ChatColor.AQUA + "/" + label + " start (nation)"
+		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + "/" + label + " start (nation)"
 				+ ChatColor.WHITE + ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end"
 				+ ChatColor.WHITE + ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce"
 				+ ChatColor.WHITE + ": Declare a truce with the nation who started a battle!";
