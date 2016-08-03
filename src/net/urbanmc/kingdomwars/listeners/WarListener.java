@@ -20,7 +20,9 @@ public class WarListener implements Listener {
 	@EventHandler
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
 		Entity defender = e.getEntity(), attacker = e.getDamager();
-
+		
+		if(!WarUtil.inWar(TownyUtil.getNation((Player)defender)) && !WarUtil.inWar(TownyUtil.getNation((Player)attacker))) return;
+		
 		if (e.isCancelled() && TownyUtil.damageCancelled(attacker, defender)) {
 			e.setCancelled(false);
 		}
