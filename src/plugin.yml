@@ -1,0 +1,11 @@
+main: net.urbanmc.townwars.TownWars
+name: TownWars
+version: 1.0
+authors: [Elian, Silverwolfg11]
+description: Allows for individual wars between towns
+softdepend: [Towny]
+
+commands:
+  townwars:
+    description: Manage your nation's wars
+    aliases: [tw]
