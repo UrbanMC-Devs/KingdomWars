@@ -9,9 +9,7 @@ import java.util.Scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import net.urbanmc.kingdomwars.data.War;
 import net.urbanmc.kingdomwars.data.WarDeserializer;
