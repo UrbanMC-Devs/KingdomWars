@@ -9,6 +9,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.event.WarStartEvent;
 
 public class Start {
 
@@ -50,6 +51,8 @@ public class Start {
 			p.sendMessage(ChatColor.RED + "That nation is already in a war!");
 			return;
 		}
+
+		
 
 		WarUtil.startWar(nation1, nation2);
 
