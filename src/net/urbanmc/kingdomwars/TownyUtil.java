@@ -24,6 +24,14 @@ public class TownyUtil {
 		TownyMessaging.sendNationMessage(nation, message);
 	}
 
+	public static Nation getNation(Player p) {
+		try {
+			return TownyUniverse.getDataSource().getResident(p.getName()).getTown().getNation();
+		} catch (NotRegisteredException ex) {
+			return null;
+		}
+	}
+
 	public static Nation getNation(String name) {
 		Nation nation = null;
 
@@ -68,7 +76,7 @@ public class TownyUtil {
 				+ "? You will receive %configTruceAmount% from their nation bank.", options);
 
 		try {
-			KingdomWars.getQuestioner().getQuestionManager().appendQuestion(question);
+			KingdomWars.getQuestioner().appendQuestion(question);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

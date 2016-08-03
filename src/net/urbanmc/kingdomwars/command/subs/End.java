@@ -6,9 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
@@ -23,11 +21,9 @@ public class End {
 			return;
 		}
 
-		Nation nation1;
+		Nation nation1 = TownyUtil.getNation(p);
 
-		try {
-			nation1 = TownyUniverse.getDataSource().getResident(p.getName()).getTown().getNation();
-		} catch (NotRegisteredException ex) {
+		if (nation1 == null) {
 			p.sendMessage(ChatColor.RED + "You are not in a nation!");
 			return;
 		}

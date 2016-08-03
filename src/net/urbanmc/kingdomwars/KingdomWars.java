@@ -15,6 +15,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.palmergames.bukkit.towny.Towny;
 
 import ca.xshade.bukkit.questioner.Questioner;
+import net.urbanmc.kingdomwars.command.BaseCommand;
+import net.urbanmc.kingdomwars.listeners.WarListener;
 
 public class KingdomWars extends JavaPlugin {
 
@@ -43,6 +45,9 @@ public class KingdomWars extends JavaPlugin {
 		questioner = getPlugin(Questioner.class);
 
 		loadConfig();
+
+		getCommand("townywar").setExecutor(new BaseCommand());
+		getServer().getPluginManager().registerEvents(new WarListener(), this);
 	}
 
 	private void loadConfig() {
