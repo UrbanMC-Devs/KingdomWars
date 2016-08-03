@@ -5,6 +5,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.urbanmc.townwars.command.subs.Start;
+
 public class BaseCommand implements CommandExecutor {
 
 	@Override
@@ -16,12 +18,23 @@ public class BaseCommand implements CommandExecutor {
 
 		Player p = (Player) sender;
 
+		// Possible subs: start [town], end [town], truce [town]
+
 		if (args.length == 0) {
 			String message = "";
 			p.sendMessage(message);
 
 			return true;
 		}
+
+		String sub = args[0].toLowerCase();
+
+		switch (sub) {
+		case "start":
+			new Start(p, args);
+			break;
+		}
+
 		return true;
 	}	
 }
