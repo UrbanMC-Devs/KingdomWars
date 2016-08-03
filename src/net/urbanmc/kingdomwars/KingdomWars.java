@@ -1,10 +1,10 @@
-package net.urbanmc.townwars;
+package net.urbanmc.kingdomwars;
 
 import java.util.logging.Level;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class TownWars extends JavaPlugin {
+public class KingdomWars extends JavaPlugin {
 
 	@Override
 	public void onEnable() {

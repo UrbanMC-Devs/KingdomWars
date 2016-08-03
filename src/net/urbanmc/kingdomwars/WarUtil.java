@@ -1,4 +1,4 @@
-package net.urbanmc.townwars;
+package net.urbanmc.kingdomwars;
 
 import com.palmergames.bukkit.towny.object.Nation;
 

@@ -1,4 +1,4 @@
-package net.urbanmc.townwars.command;
+package net.urbanmc.kingdomwars.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -6,9 +6,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
-import net.urbanmc.townwars.command.subs.End;
-import net.urbanmc.townwars.command.subs.Start;
-import net.urbanmc.townwars.command.subs.Truce;
+import net.urbanmc.kingdomwars.command.subs.End;
+import net.urbanmc.kingdomwars.command.subs.Start;
+import net.urbanmc.kingdomwars.command.subs.Truce;
 
 public class BaseCommand implements CommandExecutor {
 

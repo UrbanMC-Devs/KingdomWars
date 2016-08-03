@@ -1,11 +1,11 @@
-main: net.urbanmc.townwars.TownWars
+main: net.urbanmc.kindomwars.KingdomWars
 name: TownWars
 version: 1.0
 authors: [Elian, Silverwolfg11]
-description: Allows for individual wars between towns
+description: Allows for individual wars between nations
 softdepend: [Towny]
 
 commands:
-  townwars:
+  townywar:
     description: Manage your nation's wars
-    aliases: [tw, twar]
+    aliases: [twar, twars]

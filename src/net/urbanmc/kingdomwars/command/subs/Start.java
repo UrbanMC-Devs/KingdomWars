@@ -1,4 +1,4 @@
-package net.urbanmc.townwars.command.subs;
+package net.urbanmc.kingdomwars.command.subs;
 
 import org.bukkit.entity.Player;
 
