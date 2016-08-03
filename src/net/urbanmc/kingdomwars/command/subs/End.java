@@ -41,23 +41,7 @@ public class End {
 		
 	
 		
-       try {
-    	   nation1 = TownyUniverse.getDataSource().getNation(war.getDeclaringNation());
-       } catch (NotRegisteredException e) {
-    	   // Idk what to put for this?
-    	   return;
-       }
-       
-       Nation nation2; 
-       
-       try {
-    	   nation2 = TownyUniverse.getDataSource().getNation(war.getDeclaredNation());
-       } catch (NotRegisteredException e) {
-    	   // Idk what to put for this?
-    	   return;
-       }
-		
-       WarUtil.endWar(nation1, nation2);
+       WarUtil.endWar(war);
        return;
 		
 	}
