@@ -7,7 +7,9 @@ import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
 import net.urbanmc.kingdomwars.command.subs.End;
+import net.urbanmc.kingdomwars.command.subs.ForceEnd;
 import net.urbanmc.kingdomwars.command.subs.Start;
+import net.urbanmc.kingdomwars.command.subs.Status;
 import net.urbanmc.kingdomwars.command.subs.Truce;
 
 public class BaseCommand implements CommandExecutor {
@@ -21,14 +23,14 @@ public class BaseCommand implements CommandExecutor {
 
 		Player p = (Player) sender;
 
-		// Possible subs: start [town], end [town], truce [town]
-
 		if (args.length == 0) {
 			infoMessage(p, label);
 			return true;
 		}
 
 		String sub = args[0].toLowerCase();
+
+		// TODO: All commands lol
 
 		switch (sub) {
 		case "start":
@@ -39,6 +41,12 @@ public class BaseCommand implements CommandExecutor {
 			break;
 		case "truce":
 			new Truce(p, args);
+			break;
+		case "status":
+			new Status(p, args);
+			break;
+		case "forceend":
+			new ForceEnd(p, args);
 			break;
 		}
 
