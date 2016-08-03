@@ -118,10 +118,10 @@ public class WarUtil {
 	public synchronized static void checkWin(War war) {
 		Nation winner = null, loser = null;
 
-		if (war.getDeclaringPoints() == 25) {
+		if (war.getDeclaringPoints() == KingdomWars.getWinningKills()) {
 			winner = TownyUtil.getNation(war.getDeclaringNation());
 			loser = TownyUtil.getNation(war.getDeclaredNation());
-		} else if (war.getDeclaredPoints() == 25) {
+		} else if (war.getDeclaredPoints() == KingdomWars.getWinningKills()) {
 			winner = TownyUtil.getNation(war.getDeclaredNation());
 			loser = TownyUtil.getNation(war.getDeclaringNation());
 		}
@@ -160,6 +160,26 @@ public class WarUtil {
 		}
 
 		KingdomWars.getEcon().withdrawPlayer("nation_" + loser.getName(), amount);
+	}
+
+	public static void end(War war) {
+		wars.remove(war);
+		saveFile();
+
+		Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
+		Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+
+		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+			Nation nation = TownyUtil.getNation(p);
+			if (nation.equals(nation1) || nation.equals(nation2)) {
+				if (p.getScoreboard().equals(war.getScoreBoard())) {
+					p.setScoreboard(null);
+				}
+			}
+		}
+
+		TownyUtil.sendNationMessage(nation1, "Your war against " + nation2.getName() + " has been ended by an admin.");
+		TownyUtil.sendNationMessage(nation2, "Your war against " + nation1.getName() + " has been ended by an admin.");
 	}
 
 	private static void saveFile() {
