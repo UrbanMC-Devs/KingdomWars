@@ -2,10 +2,5 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="../spigot-api-1.10.2-R0.1-SNAPSHOT-shaded.jar" sourcepath="C:/Users/Elian/Permanent Jars/spigot-1.8.8-20150820a.jar"/>
-	<classpathentry kind="lib" path="../Towny.jar"/>
-	<classpathentry kind="lib" path="../Questioner.jar"/>
-	<classpathentry kind="lib" path="../Vault.jar"/>
-	<classpathentry kind="lib" path="../commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
