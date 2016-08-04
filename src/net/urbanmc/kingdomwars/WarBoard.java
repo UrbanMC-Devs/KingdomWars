@@ -20,17 +20,23 @@ public class WarBoard {
 		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 		obj.setDisplayName(ChatColor.RED + "WarBoard");
 
-		Score sc = obj.getScore(ChatColor.BLUE + war.getDeclaringNation());
+		Score sc = obj.getScore(ChatColor.BLUE + "" + ChatColor.BOLD + war.getDeclaringNation());
 		sc.setScore(10);
 
-		Score s1 = obj.getScore("Kills: " + String.valueOf(0));
+		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(0));
 		s1.setScore(9);
 
-		Score s2 = obj.getScore(ChatColor.AQUA + war.getDeclaredNation());
+		Score s6 = obj.getScore("");
+		s6.setScore(8);
+		
+		Score s2 = obj.getScore(ChatColor.AQUA + "" + ChatColor.BOLD + war.getDeclaredNation());
 		s2.setScore(7);
 
-		Score s3 = obj.getScore("Kills: " + String.valueOf(0));
+		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(0));
 		s3.setScore(6);
+		
+		Score s7 = obj.getScore(" ");
+		s7.setScore(5);
 
 		Score s4 = obj.getScore(
 				ChatColor.ITALIC + String.valueOf(KingdomWars.getWinningKills()) + ChatColor.ITALIC + " kills");
@@ -53,10 +59,10 @@ public class WarBoard {
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
-		Score s1 = obj.getScore("Kills: " + String.valueOf(war.getDeclaringPoints()));
+		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints()));
 		s1.setScore(9);
 
-		Score s3 = obj.getScore("Kills: " + String.valueOf(war.getDeclaredPoints()));
+		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints()));
 		s3.setScore(6);
 
 		Nation n1 = TownyUtil.getNation(war.getDeclaringNation());
