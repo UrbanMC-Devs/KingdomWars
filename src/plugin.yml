@@ -1,6 +1,6 @@
-main: net.urbanmc.kindomwars.KingdomWars
+main: net.urbanmc.kingdomwars.KingdomWars
 name: KingdomWars
-version: 0.1
+version: 1.0
 authors: [Elian, Silverwolfg11]
 description: Allows for individual wars between nations
 softdepend: [Towny, Questioner, Vault]
