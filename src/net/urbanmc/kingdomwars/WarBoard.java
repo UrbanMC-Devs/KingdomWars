@@ -22,9 +22,15 @@ public class WarBoard {
 
 		Score sc = obj.getScore(ChatColor.BLUE + war.getDeclaringNation());
 		sc.setScore(10);
+		
+		Score s1 = obj.getScore("Kills: " + String.valueOf(0));
+		s1.setScore(9);
 
 		Score s2 = obj.getScore(ChatColor.AQUA + war.getDeclaredNation());
 		s2.setScore(7);
+		
+		Score s3 = obj.getScore("Kills: " + String.valueOf(0));
+		s3.setScore(6);
 
 		Score s4 = obj.getScore(
 				ChatColor.ITALIC + String.valueOf(KingdomWars.getWinningKills()) + ChatColor.ITALIC + " kills");
@@ -47,10 +53,10 @@ public class WarBoard {
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
-		Score s1 = obj.getScore("Kills:" + String.valueOf(war.getDeclaringPoints()));
+		Score s1 = obj.getScore("Kills: " + String.valueOf(war.getDeclaringPoints()));
 		s1.setScore(9);
 
-		Score s3 = obj.getScore("Kills:" + String.valueOf(war.getDeclaredPoints()));
+		Score s3 = obj.getScore("Kills: " + String.valueOf(war.getDeclaredPoints()));
 		s3.setScore(6);
 
 		Nation n1 = TownyUtil.getNation(war.getDeclaringNation());
