@@ -99,11 +99,7 @@ public class WarUtil {
 
 		ArrayList<LastWar> remove = new ArrayList<LastWar>();
 
-		for (LastWar lastWar : last) {
-			if (millis >= lastWar.getMillis()) {
-				remove.add(lastWar);
-			}
-		}
+		last.stream().filter(t -> t.getMillis() <= millis).forEach(remove::add);
 
 		last.removeAll(remove);
 
