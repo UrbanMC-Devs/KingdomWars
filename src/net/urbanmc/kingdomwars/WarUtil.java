@@ -97,7 +97,15 @@ public class WarUtil {
 	private static void reloadLast() {
 		long millis = System.currentTimeMillis();
 
-		last.stream().filter(w -> w.getMillis() < millis).forEach(last::remove);
+		ArrayList<LastWar> remove = new ArrayList<LastWar>();
+
+		for (LastWar lastWar : last) {
+			if (millis >= lastWar.getMillis()) {
+				remove.add(lastWar);
+			}
+		}
+
+		last.removeAll(remove);
 
 		saveLast();
 	}
