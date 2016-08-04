@@ -49,6 +49,11 @@ public class Start {
 			return;
 		}
 
+		if (nation1.getName().equals(nation2.getName())) {
+			p.sendMessage(ChatColor.RED + "This plug-in does not support civil wars!");
+			return;
+		}
+
 		if (TownyUtil.allied(nation1, nation2)) {
 			p.sendMessage(ChatColor.RED + "You cannot have a war with your ally!");
 			return;
