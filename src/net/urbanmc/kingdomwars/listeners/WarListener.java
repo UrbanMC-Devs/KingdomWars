@@ -3,12 +3,14 @@ package net.urbanmc.kingdomwars.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.projectiles.ProjectileSource;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
@@ -24,6 +26,17 @@ public class WarListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
 		Entity defender = e.getEntity(), attacker = e.getDamager();
+
+		if (attacker instanceof Projectile) {
+			ProjectileSource source = ((Projectile) attacker).getShooter();
+
+			if (source instanceof Entity) {
+				attacker = (Entity) source;
+			}
+		}
+
+		if (!(defender instanceof Player) || !(attacker instanceof Player))
+			return;
 
 		if (e.isCancelled() && TownyUtil.damageCancelled(attacker, defender)) {
 			Nation nation1 = TownyUtil.getNation((Player) attacker);
