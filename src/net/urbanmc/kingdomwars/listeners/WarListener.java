@@ -94,8 +94,8 @@ public class WarListener implements Listener {
 		}
 
 		war.addPoints(nation2, 1);
-		WarUtil.updateWar(war);
 		WarBoard.updateBoard(war);
+		WarUtil.updateWar(war);
 		WarUtil.checkWin(war);
 	}
 
