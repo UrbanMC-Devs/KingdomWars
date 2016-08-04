@@ -30,34 +30,34 @@ public class BaseCommand implements CommandExecutor {
 
 		String sub = args[0].toLowerCase();
 
-		// TODO: All commands lol
-
 		switch (sub) {
 		case "start":
 			new Start(p, args);
-			break;
+			return true;
 		case "end":
 			new End(p, args);
-			break;
+			return true;
 		case "truce":
-			new Truce(p, args);
-			break;
+			new Truce(p, label, args);
+			return true;
 		case "status":
 			new Status(p, args);
-			break;
+			return true;
 		case "forceend":
 			new ForceEnd(p, args);
-			break;
+			return true;
 		}
+
+		infoMessage(p, label);
 
 		return true;
 	}
 
 	private void infoMessage(Player p, String label) {
-		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + "/" + label + " start (nation)"
-				+ ChatColor.WHITE + ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end"
-				+ ChatColor.WHITE + ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce"
-				+ ChatColor.WHITE + ": Declare a truce with the nation who started a battle!";
+		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + "/" + label + " start (nation)" + ChatColor.WHITE
+				+ ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE
+				+ ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
+				+ ": Declare a truce with the nation who started a battle!";
 		p.sendMessage(message);
 	}
 }

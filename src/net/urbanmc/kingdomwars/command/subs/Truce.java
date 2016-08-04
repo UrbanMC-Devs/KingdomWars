@@ -12,7 +12,7 @@ import net.urbanmc.kingdomwars.data.War;
 
 public class Truce {
 
-	public Truce(Player p, String[] args) {
+	public Truce(Player p, String label, String[] args) {
 		if (!p.hasPermission("kingdomwars.truce")) {
 			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
 			return;
@@ -33,7 +33,8 @@ public class Truce {
 		War war = WarUtil.getWar(nation);
 
 		if (!war.getDeclaredNation().equals(nation.getName())) {
-			p.sendMessage(ChatColor.RED + "You are the nation that started the war! You must do /twar end instead.");
+			p.sendMessage(
+					ChatColor.RED + "You are the nation that started the war! You must do /" + label + " end instead.");
 			return;
 		}
 
