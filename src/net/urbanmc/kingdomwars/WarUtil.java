@@ -184,7 +184,7 @@ public class WarUtil {
 
 	private static void saveFile() {
 		try {
-			PrintWriter writer = new PrintWriter(new File("plugins/KindomWars/wars.json"));
+			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/wars.json"));
 
 			writer.write(new Gson().toJson(new WarList(wars)));
 

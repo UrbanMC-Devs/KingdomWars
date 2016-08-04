@@ -71,7 +71,7 @@ public class KingdomWars extends JavaPlugin {
 	}
 
 	private void loadConfig() {
-		File file = new File("plugin/KingdomWars/config.yml");
+		File file = new File("plugins/KingdomWars/config.yml");
 
 		if (!file.getParentFile().exists()) {
 			file.getParentFile().mkdir();
