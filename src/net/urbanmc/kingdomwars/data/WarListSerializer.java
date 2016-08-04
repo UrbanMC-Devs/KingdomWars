@@ -6,12 +6,28 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
-public class WarListDeserializer implements JsonDeserializer<WarList> {
+public class WarListSerializer implements JsonSerializer<WarList>, JsonDeserializer<WarList> {
+
+	@Override
+	public JsonElement serialize(WarList list, Type type, JsonSerializationContext context) {
+		JsonArray array = new JsonArray();
+
+		Gson gson = new GsonBuilder().registerTypeAdapter(War.class, new WarSerializer()).create();
+
+		for (War war : list.getWars()) {
+			array.add(gson.toJsonTree(war));;
+		}
+
+		return array;
+	}
 
 	@Override
 	public WarList deserialize(JsonElement element, Type type, JsonDeserializationContext context)
@@ -20,7 +36,7 @@ public class WarListDeserializer implements JsonDeserializer<WarList> {
 
 		Gson gson = new GsonBuilder().registerTypeAdapter(War.class, new WarSerializer()).create();
 
-		for (JsonElement je : element.getAsJsonObject().getAsJsonArray("wars")) {
+		for (JsonElement je : element.getAsJsonArray()) {
 			wars.add(gson.fromJson(je, War.class));
 		}
 

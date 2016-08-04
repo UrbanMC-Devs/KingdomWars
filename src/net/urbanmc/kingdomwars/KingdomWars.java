@@ -60,7 +60,8 @@ public class KingdomWars extends JavaPlugin {
 	}
 
 	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager()
+				.getRegistration(net.milkbowl.vault.economy.Economy.class);
 
 		if (rsp != null) {
 			econ = rsp.getProvider();

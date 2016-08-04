@@ -15,14 +15,17 @@ import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.data.War;
-import net.urbanmc.kingdomwars.data.WarListDeserializer;
+import net.urbanmc.kingdomwars.data.WarListSerializer;
 import net.urbanmc.kingdomwars.data.WarList;
 
 public class WarUtil {
 
+	private static Gson gson;
+
 	private static List<War> wars;
 
 	static {
+		gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListSerializer()).create();
 		createFile();
 		loadWars();
 	}
@@ -48,8 +51,6 @@ public class WarUtil {
 
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/wars.json"));
-
-			Gson gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListDeserializer()).create();
 
 			wars = gson.fromJson(scanner.nextLine(), WarList.class).getWars();
 
@@ -186,7 +187,7 @@ public class WarUtil {
 		try {
 			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/wars.json"));
 
-			writer.write(new Gson().toJson(new WarList(wars)));
+			writer.write(gson.toJson(new WarList(wars)));
 
 			writer.close();
 		} catch (IOException ex) {

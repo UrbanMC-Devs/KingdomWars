@@ -36,14 +36,14 @@ public class Status {
 
 		UUID id = p.getUniqueId();
 
-		war.setDisabled(id, !war.isDisabled(id));
-
 		boolean disabled = war.isDisabled(id);
+
+		war.setDisabled(id, !disabled);
 
 		if (!disabled) {
 			WarBoard.showBoard(p);
 		}
 
-		p.sendMessage(ChatColor.GOLD + "War scoreboard has been " + (disabled ? "disabled" : "enabled") + ".");
+		p.sendMessage(ChatColor.GOLD + "War scoreboard has been " + (disabled ? "enabled" : "disabled") + ".");
 	}
 }
