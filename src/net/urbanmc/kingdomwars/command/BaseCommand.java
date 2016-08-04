@@ -1,11 +1,11 @@
 package net.urbanmc.kingdomwars.command;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import net.md_5.bungee.api.ChatColor;
 import net.urbanmc.kingdomwars.command.subs.End;
 import net.urbanmc.kingdomwars.command.subs.ForceEnd;
 import net.urbanmc.kingdomwars.command.subs.Start;
@@ -54,10 +54,11 @@ public class BaseCommand implements CommandExecutor {
 	}
 
 	private void infoMessage(Player p, String label) {
-		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n\n" + "/" + label + " start (nation)" + ChatColor.WHITE
+		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n" + "/" + label + " start (nation)" + ChatColor.WHITE
 				+ ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE
 				+ ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
-				+ ": Declare a truce with the nation who started a battle!";
+				+ ": Declare a truce with the nation who started a battle!\n" + ChatColor.AQUA + "/" + label + " status"
+				+ ChatColor.WHITE + ": Toggle the war scoreboard";
 		p.sendMessage(message);
 	}
 }
