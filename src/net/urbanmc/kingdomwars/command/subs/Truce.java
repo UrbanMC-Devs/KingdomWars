@@ -8,6 +8,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.data.War;
 
 public class Truce {
 
@@ -17,22 +18,28 @@ public class Truce {
 			return;
 		}
 
-		Nation nation1 = TownyUtil.getNation(p);
+		Nation nation = TownyUtil.getNation(p);
 
-		if (nation1 == null) {
+		if (nation == null) {
 			p.sendMessage(ChatColor.RED + "You are not in a nation!");
 			return;
 		}
 
-		if (!WarUtil.inWar(nation1)) {
+		if (!WarUtil.inWar(nation)) {
 			p.sendMessage(ChatColor.RED + "You are not in a war!");
 			return;
 		}
-		
-		String onation = (WarUtil.getWar(nation1).getDeclaringNation().equalsIgnoreCase(nation1.getName()))
-				? nation1.getName() : WarUtil.getWar(nation1).getDeclaredNation();
-				
-		TownyMessaging.sendNationMessage(nation1, "Your nation has requested a truce with " + onation);
-		TownyUtil.truceQuestion(TownyUtil.getNation(onation), nation1);
+
+		War war = WarUtil.getWar(nation);
+
+		if (!war.getDeclaredNation().equals(nation.getName())) {
+			p.sendMessage(ChatColor.RED + "You are the nation that started the war! You must do /twar end instead.");
+			return;
+		}
+
+		Nation receivingNation = TownyUtil.getNation(war.getDeclaringNation());
+
+		TownyMessaging.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName());
+		TownyUtil.truceQuestion(receivingNation, nation);
 	}
 }
