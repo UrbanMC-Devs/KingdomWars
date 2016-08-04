@@ -176,9 +176,6 @@ public class WarUtil {
 				}
 			}
 		}
-
-		TownyUtil.sendNationMessage(nation1, "Your war against " + nation2.getName() + " has been ended by an admin.");
-		TownyUtil.sendNationMessage(nation2, "Your war against " + nation1.getName() + " has been ended by an admin.");
 	}
 
 	private static void saveFile() {

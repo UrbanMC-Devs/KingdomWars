@@ -7,6 +7,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.data.War;
 
 public class ForceEnd {
 
@@ -33,7 +34,16 @@ public class ForceEnd {
 			return;
 		}
 
-		WarUtil.end(WarUtil.getWar(nation));
+		War war = WarUtil.getWar(nation);
+
+		WarUtil.end(war);
 		p.sendMessage(ChatColor.GOLD + "Ended war.");
+
+		Nation otherNation = war.getOtherNation(nation);
+
+		TownyUtil.sendNationMessage(nation,
+				"Your war against " + otherNation.getName() + " has been ended by an admin.");
+		TownyUtil.sendNationMessage(otherNation,
+				"Your war against " + nation.getName() + " has been ended by an admin.");
 	}
 }

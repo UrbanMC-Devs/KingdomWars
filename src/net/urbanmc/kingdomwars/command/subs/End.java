@@ -48,7 +48,7 @@ public class End {
 
 		WarUtil.endWar(war);
 
-		Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+		Nation nation2 = war.getOtherNation(nation1);
 
 		if (nation2 == null) {
 			Bukkit.getLogger().log(Level.WARNING,

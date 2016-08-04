@@ -8,6 +8,8 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
+import net.urbanmc.kingdomwars.TownyUtil;
+
 public class War {
 
 	private String nation1, nation2;
@@ -26,6 +28,24 @@ public class War {
 
 	public String getDeclaredNation() {
 		return this.nation2;
+	}
+
+	public String getOtherNation(String nation) {
+		if (nation1.equals(nation))
+			return nation2;
+		else if (nation2.equals(nation))
+			return nation1;
+		else
+			return "";
+	}
+
+	public Nation getOtherNation(Nation nation) {
+		if (nation1.equals(nation.getName()))
+			return TownyUtil.getNation(nation2);
+		else if (nation2.equals(nation.getName()))
+			return TownyUtil.getNation(nation1);
+		else
+			return null;
 	}
 
 	public int getDeclaringPoints() {
