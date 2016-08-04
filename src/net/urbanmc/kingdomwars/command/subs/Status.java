@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
+import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.War;
 
@@ -41,7 +41,7 @@ public class Status {
 		boolean disabled = war.isDisabled(id);
 
 		if (!disabled) {
-			KingdomWars.getWarBoard().showBoard(p);
+			WarBoard.showBoard(p);
 		}
 
 		p.sendMessage(ChatColor.GOLD + "War scoreboard has been " + (disabled ? "disabled" : "enabled") + ".");

@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.data.War;
-import net.urbanmc.kingdomwars.data.WarDeserializer;
+import net.urbanmc.kingdomwars.data.WarListDeserializer;
 import net.urbanmc.kingdomwars.data.WarList;
 
 public class WarUtil {
@@ -49,7 +49,7 @@ public class WarUtil {
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/wars.json"));
 
-			Gson gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarDeserializer()).create();
+			Gson gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListDeserializer()).create();
 
 			wars = gson.fromJson(scanner.nextLine(), WarList.class).getWars();
 
@@ -66,7 +66,7 @@ public class WarUtil {
 	public static void startWar(War war) {
 		wars.add(war);
 		saveFile();
-		KingdomWars.getWarBoard().createBoard(war);
+		WarBoard.createBoard(war);
 	}
 
 	public static void endWar(Nation nation) {

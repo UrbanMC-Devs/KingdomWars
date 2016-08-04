@@ -36,6 +36,14 @@ public class War {
 		return points2;
 	}
 
+	public void setDeclaringPoints(int points) {
+		points1 = points;
+	}
+
+	public void setDeclaredPoints(int points) {
+		points2 = points;
+	}
+
 	public void addPoints(Nation nation, int points) {
 		if (nation1.equals(nation.getName())) {
 			points1 += points;

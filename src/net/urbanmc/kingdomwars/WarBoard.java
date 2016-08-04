@@ -14,7 +14,7 @@ import net.urbanmc.kingdomwars.data.War;
 
 public class WarBoard {
 
-	public void createBoard(War war) {
+	public static void createBoard(War war) {
 		Scoreboard warboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		Objective obj = warboard.registerNewObjective("test", "dummy");
 		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
@@ -45,7 +45,7 @@ public class WarBoard {
 		updateBoard(war);
 	}
 
-	public void updateBoard(War war) {
+	public static void updateBoard(War war) {
 		if (war.getScoreBoard() == null) {
 			createBoard(war);
 		}
@@ -73,7 +73,7 @@ public class WarBoard {
 		}
 	}
 
-	public void showBoard(Player p) {
+	public static void showBoard(Player p) {
 		Nation n = TownyUtil.getNation(p);
 
 		if (n == null)
@@ -86,6 +86,10 @@ public class WarBoard {
 
 		if (war.isDisabled(p.getUniqueId()))
 			return;
+
+		if (war.getScoreBoard() == null) {
+			createBoard(war);
+		}
 
 		p.setScoreboard(war.getScoreBoard());
 	}

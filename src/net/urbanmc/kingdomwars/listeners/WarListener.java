@@ -11,8 +11,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
+import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.War;
 import net.urbanmc.kingdomwars.event.WarPointAddEvent;
@@ -75,12 +75,12 @@ public class WarListener implements Listener {
 
 		war.addPoints(nation2, 1);
 		WarUtil.updateWar(war);
-		KingdomWars.getWarBoard().updateBoard(war);
+		WarBoard.updateBoard(war);
 		WarUtil.checkWin(war);
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		KingdomWars.getWarBoard().showBoard(e.getPlayer());
+		WarBoard.showBoard(e.getPlayer());
 	}
 }
