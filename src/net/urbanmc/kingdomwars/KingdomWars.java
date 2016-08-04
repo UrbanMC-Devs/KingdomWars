@@ -79,7 +79,7 @@ public class KingdomWars extends JavaPlugin {
 
 		if (!file.exists()) {
 			try {
-				InputStream input = getClass().getResourceAsStream("config.yml");
+				InputStream input = getClass().getClassLoader().getResourceAsStream("config.yml");
 				OutputStream output = new FileOutputStream(file);
 
 				IOUtils.copy(input, output);
@@ -118,7 +118,7 @@ public class KingdomWars extends JavaPlugin {
 	public static int getWinningKills() {
 		return winningKills;
 	}
-	
+
 	public static WarBoard getWarBoard() {
 		return wbclass;
 	}
