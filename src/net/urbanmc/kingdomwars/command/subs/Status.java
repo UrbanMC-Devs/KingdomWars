@@ -2,6 +2,7 @@ package net.urbanmc.kingdomwars.command.subs;
 
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -40,8 +41,10 @@ public class Status {
 
 		war.setDisabled(id, !disabled);
 
-		if (!disabled) {
+		if (disabled) {
 			WarBoard.showBoard(p);
+		} else {
+			p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 		}
 
 		p.sendMessage(ChatColor.GOLD + "War scoreboard has been " + (disabled ? "enabled" : "disabled") + ".");

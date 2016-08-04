@@ -77,6 +77,7 @@ public class WarUtil {
 	public static void endWar(War war) {
 		wars.remove(war);
 		saveFile();
+		end(war);
 	}
 
 	public static void updateWar(War war) {
@@ -143,7 +144,7 @@ public class WarUtil {
 			Nation nation = TownyUtil.getNation(p);
 			if (nation.equals(winner) || nation.equals(loser)) {
 				if (p.getScoreboard().equals(war.getScoreBoard())) {
-					p.setScoreboard(null);
+					p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 				}
 			}
 		}
@@ -164,9 +165,6 @@ public class WarUtil {
 	}
 
 	public static void end(War war) {
-		wars.remove(war);
-		saveFile();
-
 		Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
 		Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
 
@@ -174,7 +172,7 @@ public class WarUtil {
 			Nation nation = TownyUtil.getNation(p);
 			if (nation.equals(nation1) || nation.equals(nation2)) {
 				if (p.getScoreboard().equals(war.getScoreBoard())) {
-					p.setScoreboard(null);
+					p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 				}
 			}
 		}
