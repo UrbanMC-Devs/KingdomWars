@@ -28,13 +28,13 @@ public class WarBoard {
 
 		Score s6 = obj.getScore("");
 		s6.setScore(8);
-		
+
 		Score s2 = obj.getScore(ChatColor.AQUA + "" + ChatColor.BOLD + war.getDeclaredNation());
 		s2.setScore(7);
 
 		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(0));
 		s3.setScore(6);
-		
+
 		Score s7 = obj.getScore(" ");
 		s7.setScore(5);
 
@@ -60,9 +60,9 @@ public class WarBoard {
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
-		warboard.resetScores(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints()-1));
-		warboard.resetScores(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaredPoints()-1));
-		
+		warboard.resetScores(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints() - 1));
+		warboard.resetScores(ChatColor.AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints() - 1));
+
 		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints()));
 		s1.setScore(9);
 		
