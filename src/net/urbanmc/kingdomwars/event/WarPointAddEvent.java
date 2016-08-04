@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.data.War;
+import net.urbanmc.kingdomwars.data.war.War;
 
 public class WarPointAddEvent extends Event implements Cancellable {
 

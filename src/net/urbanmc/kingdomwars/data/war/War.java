@@ -1,4 +1,4 @@
-package net.urbanmc.kingdomwars.data;
+package net.urbanmc.kingdomwars.data.war;
 
 import java.util.ArrayList;
 import java.util.List;

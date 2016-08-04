@@ -10,7 +10,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.md_5.bungee.api.ChatColor;
-import net.urbanmc.kingdomwars.data.War;
+import net.urbanmc.kingdomwars.data.war.War;
 
 public class WarBoard {
 

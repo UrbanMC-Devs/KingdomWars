@@ -11,10 +11,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.WarUtil;
-import net.urbanmc.kingdomwars.data.War;
+import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarPointAddEvent;
 
 public class WarListener implements Listener {
@@ -72,6 +73,11 @@ public class WarListener implements Listener {
 
 		if (event.isCancelled())
 			return;
+
+		if (TownyUtil.isNationKing(p)) {
+			WarUtil.win(nation2, nation1, KingdomWars.getFinishAmount());
+			return;
+		}
 
 		war.addPoints(nation2, 1);
 		WarUtil.updateWar(war);

@@ -4,7 +4,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import net.urbanmc.kingdomwars.data.War;
+import net.urbanmc.kingdomwars.data.war.War;
 
 public class WarStartEvent extends Event implements Cancellable {
 

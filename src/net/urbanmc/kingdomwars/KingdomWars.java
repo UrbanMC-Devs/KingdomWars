@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
@@ -29,6 +30,7 @@ public class KingdomWars extends JavaPlugin {
 	private static double finishAmount;
 	private static double truceAmount;
 	private static int winningKills;
+	private static long millis;
 
 	@Override
 	public void onEnable() {
@@ -93,6 +95,7 @@ public class KingdomWars extends JavaPlugin {
 		finishAmount = data.getDouble("finish-amount");
 		truceAmount = data.getDouble("truce-amount");
 		winningKills = data.getInt("winning-kills");
+		millis = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
 	}
 
 	public static Towny getTowny() {
@@ -117,5 +120,9 @@ public class KingdomWars extends JavaPlugin {
 
 	public static int getWinningKills() {
 		return winningKills;
+	}
+
+	public static long getMillis() {
+		return millis;
 	}
 }

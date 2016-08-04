@@ -14,23 +14,28 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.data.War;
-import net.urbanmc.kingdomwars.data.WarListSerializer;
-import net.urbanmc.kingdomwars.data.WarList;
+import net.urbanmc.kingdomwars.data.last.LastWar;
+import net.urbanmc.kingdomwars.data.last.LastWarList;
+import net.urbanmc.kingdomwars.data.last.LastWarListDeserializer;
+import net.urbanmc.kingdomwars.data.war.War;
+import net.urbanmc.kingdomwars.data.war.WarList;
+import net.urbanmc.kingdomwars.data.war.WarListSerializer;
 
 public class WarUtil {
 
 	private static Gson gson;
 
 	private static List<War> wars;
+	private static List<LastWar> last;
 
 	static {
 		gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListSerializer()).create();
-		createFile();
+		createFiles();
 		loadWars();
+		loadLast();
 	}
 
-	private static void createFile() {
+	private static void createFiles() {
 		File file = new File("plugins/KingdomWars/wars.json");
 
 		if (!file.getParentFile().isDirectory()) {
@@ -40,6 +45,16 @@ public class WarUtil {
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		File last = new File("plugins/KingdomWars/last.json");
+
+		if (!last.exists()) {
+			try {
+				last.createNewFile();
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
@@ -58,6 +73,33 @@ public class WarUtil {
 		} catch (Exception ex) {
 			;
 		}
+	}
+
+	private static void loadLast() {
+		last = new ArrayList<LastWar>();
+
+		try {
+			Scanner scanner = new Scanner(new File("plugins/KingdomWars/last.json"));
+
+			Gson gson = new GsonBuilder().registerTypeAdapter(LastWarList.class, new LastWarListDeserializer())
+					.create();
+
+			last = gson.fromJson(scanner.nextLine(), LastWarList.class).getLast();
+
+			scanner.close();
+		} catch (Exception ex) {
+			;
+		}
+
+		reloadLast();
+	}
+
+	private static void reloadLast() {
+		long millis = System.currentTimeMillis();
+
+		last.stream().filter(w -> w.getMillis() < millis).forEach(last::remove);
+
+		saveLast();
 	}
 
 	public static void startWar(Nation nation1, Nation nation2) {
@@ -162,6 +204,10 @@ public class WarUtil {
 		}
 
 		KingdomWars.getEcon().withdrawPlayer("nation_" + loser.getName(), amount);
+
+		LastWar lastWar = new LastWar(winner.getName(), loser.getName(),
+				System.currentTimeMillis() + KingdomWars.getMillis());
+		addLast(lastWar);
 	}
 
 	public static void end(War war) {
@@ -176,6 +222,40 @@ public class WarUtil {
 				}
 			}
 		}
+
+		LastWar lastWar = new LastWar(nation1.getName(), nation2.getName(),
+				System.currentTimeMillis() + KingdomWars.getMillis());
+		addLast(lastWar);
+	}
+
+	public static boolean hasLast(String nation1, String nation2) {
+		reloadLast();
+
+		for (LastWar lastWar : last) {
+			if (lastWar.getDeclaringNation().equals(nation1) && lastWar.getDeclaredNation().equals(nation2))
+				return true;
+			if (lastWar.getDeclaringNation().equals(nation2) && lastWar.getDeclaredNation().equals(nation1))
+				return true;
+		}
+
+		return false;
+	}
+
+	public static void addLast(LastWar lastWar) {
+		last.add(lastWar);
+		reloadLast();
+	}
+
+	public static LastWar getLast(Nation nation) {
+		reloadLast();
+
+		for (LastWar lastWar : last) {
+			if (lastWar.getDeclaringNation().equals(nation.getName())
+					|| lastWar.getDeclaredNation().equals(nation.getName()))
+				return lastWar;
+		}
+
+		return null;
 	}
 
 	private static void saveFile() {
@@ -183,6 +263,21 @@ public class WarUtil {
 			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/wars.json"));
 
 			writer.write(gson.toJson(new WarList(wars)));
+
+			writer.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private static void saveLast() {
+		try {
+			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/last.json"));
+
+			Gson gson = new GsonBuilder().registerTypeAdapter(LastWarList.class, new LastWarListDeserializer())
+					.create();
+
+			writer.write(gson.toJson(new LastWarList(last)));
 
 			writer.close();
 		} catch (IOException ex) {

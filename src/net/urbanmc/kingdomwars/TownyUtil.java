@@ -55,6 +55,15 @@ public class TownyUtil {
 		return nation;
 	}
 
+	public static boolean isNationKing(Player p) {
+		try {
+			return TownyUniverse.getDataSource().getResident(p.getName()).isKing();
+		} catch (NotRegisteredException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+
 	public static boolean allied(Nation nation1, Nation nation2) {
 		return nation1.hasAlly(nation2) && nation2.hasAlly(nation1);
 	}
