@@ -21,6 +21,7 @@ import net.urbanmc.kingdomwars.data.last.LastWarListDeserializer;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.data.war.WarList;
 import net.urbanmc.kingdomwars.data.war.WarListSerializer;
+import net.urbanmc.kingdomwars.event.WarEndEvent;
 
 public class WarUtil {
 
@@ -183,6 +184,12 @@ public class WarUtil {
 	public synchronized static void win(Nation winner, Nation loser, double amount) {
 		War war = getWar(winner);
 
+		WarEndEvent event = new WarEndEvent(war);
+		Bukkit.getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
+			return;
+
 		wars.remove(war);
 		saveFile();
 
@@ -235,6 +242,15 @@ public class WarUtil {
 	public static void end(War war) {
 		Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
 		Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+
+		WarEndEvent event = new WarEndEvent(war);
+		Bukkit.getPluginManager().callEvent(event);
+
+		wars.remove(war);
+		saveFile();
+
+		if (event.isCancelled())
+			return;
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
