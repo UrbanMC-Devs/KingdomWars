@@ -56,7 +56,6 @@ public class WarBoard {
 			createBoard(war);
 		}
 
-		
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
@@ -65,7 +64,7 @@ public class WarBoard {
 
 		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints()));
 		s1.setScore(9);
-		
+
 		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints()));
 		s3.setScore(6);
 
@@ -77,6 +76,10 @@ public class WarBoard {
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
+
+			if (nation == null)
+				continue;
+
 			if (nation.equals(n1) || nation.equals(n2)) {
 				p.setScoreboard(warboard);
 			}

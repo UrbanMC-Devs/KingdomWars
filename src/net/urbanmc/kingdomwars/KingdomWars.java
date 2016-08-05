@@ -11,13 +11,12 @@ import java.util.logging.Level;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 
 import ca.xshade.bukkit.questioner.Questioner;
-import net.milkbowl.vault.economy.Economy;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listeners.WarListener;
 
@@ -25,7 +24,7 @@ public class KingdomWars extends JavaPlugin {
 
 	private static Towny towny;
 	private static Questioner questioner;
-	private static Economy econ;
+	private static Essentials essentials;
 
 	private static double finishAmount;
 	private static double truceAmount;
@@ -46,10 +45,8 @@ public class KingdomWars extends JavaPlugin {
 			return;
 		}
 
-		if (!setupEconomy()) {
-			getLogger().log(Level.SEVERE, "Vault could not be loaded!");
-			setEnabled(false);
-			return;
+		if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
+			essentials = getPlugin(Essentials.class);
 		}
 
 		towny = getPlugin(Towny.class);
@@ -59,17 +56,6 @@ public class KingdomWars extends JavaPlugin {
 
 		getCommand("townywar").setExecutor(new BaseCommand());
 		getServer().getPluginManager().registerEvents(new WarListener(), this);
-	}
-
-	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager()
-				.getRegistration(net.milkbowl.vault.economy.Economy.class);
-
-		if (rsp != null) {
-			econ = rsp.getProvider();
-		}
-
-		return econ != null;
 	}
 
 	private void loadConfig() {
@@ -106,8 +92,12 @@ public class KingdomWars extends JavaPlugin {
 		return questioner;
 	}
 
-	public static Economy getEcon() {
-		return econ;
+	public static boolean hasEssentials() {
+		return essentials != null;
+	}
+
+	public static Essentials getEssentials() {
+		return essentials;
 	}
 
 	public static double getFinishAmount() {

@@ -48,6 +48,11 @@ public class Start {
 			return;
 		}
 
+		if (nation2.isNeutral()) {
+			p.sendMessage(ChatColor.RED + "That nation is neutral!");
+			return;
+		}
+
 		if (nation1.getName().equals(nation2.getName())) {
 			p.sendMessage(ChatColor.RED + "This plug-in does not support civil wars!");
 			return;

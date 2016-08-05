@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.data.last.LastWar;
@@ -179,7 +180,6 @@ public class WarUtil {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public synchronized static void win(Nation winner, Nation loser, double amount) {
 		War war = getWar(winner);
 
@@ -188,6 +188,10 @@ public class WarUtil {
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
+
+			if (nation == null)
+				continue;
+
 			if (nation.equals(winner) || nation.equals(loser)) {
 				if (p.getScoreboard().equals(war.getScoreBoard())) {
 					p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
@@ -196,22 +200,36 @@ public class WarUtil {
 		}
 
 		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
-		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + loser.getName() + "!");
-
-		KingdomWars.getEcon().withdrawPlayer("nation_" + winner.getName(), amount);
-
-		double balance = KingdomWars.getEcon().getBalance("nation_" + loser.getName());
-
-		if (balance < amount) {
-			TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
-			TownyUtil.deleteNation(loser);
-		}
-
-		KingdomWars.getEcon().withdrawPlayer("nation_" + loser.getName(), amount);
+		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + winner.getName() + "!");
 
 		LastWar lastWar = new LastWar(winner.getName(), loser.getName(),
 				System.currentTimeMillis() + KingdomWars.getMillis());
 		addLast(lastWar);
+
+		try {
+			winner.setBalance(winner.getHoldingBalance() + amount, "War win");
+		} catch (EconomyException ex) {
+			ex.printStackTrace();
+		}
+
+		double balance = 0;
+
+		try {
+			balance = loser.getHoldingBalance();
+		} catch (EconomyException ex) {
+			ex.printStackTrace();
+		}
+
+		if (balance < amount) {
+			TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
+			TownyUtil.deleteNation(loser);
+		} else {
+			try {
+				loser.setBalance(balance - amount, "War loss");
+			} catch (EconomyException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public static void end(War war) {
@@ -220,6 +238,10 @@ public class WarUtil {
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
+
+			if (nation == null)
+				continue;
+
 			if (nation.equals(nation1) || nation.equals(nation2)) {
 				if (p.getScoreboard().equals(war.getScoreBoard())) {
 					p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());

@@ -3,7 +3,7 @@ name: KingdomWars
 version: 1.0
 authors: [Elian, Silverwolfg11]
 description: Allows for individual wars between nations
-softdepend: [Towny, Questioner, Vault]
+softdepend: [Essentials, Towny, Questioner, Vault]
 
 commands:
   townywar:

@@ -12,6 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
+import com.earth2me.essentials.User;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.KingdomWars;
@@ -54,6 +55,14 @@ public class WarListener implements Listener {
 			if (!war.getDeclaringNation().equals(nation2.getName())
 					&& !war.getDeclaredNation().equals(nation2.getName()))
 				return;
+
+			if (KingdomWars.hasEssentials()) {
+				User user = KingdomWars.getEssentials().getUser((Player) defender);
+
+				if (user.isGodModeEnabled()) {
+					user.setGodModeEnabled(false);
+				}
+			}
 
 			e.setCancelled(false);
 		}
