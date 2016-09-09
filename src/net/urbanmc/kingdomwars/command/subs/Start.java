@@ -48,6 +48,11 @@ public class Start {
 			return;
 		}
 
+		if (nation1.isNeutral()) {
+			p.sendMessage(ChatColor.RED + "Your nation is neutral!");
+			return;
+		}
+
 		if (nation2.isNeutral()) {
 			p.sendMessage(ChatColor.RED + "That nation is neutral!");
 			return;
@@ -58,7 +63,7 @@ public class Start {
 			return;
 		}
 
-		if (TownyUtil.allied(nation1, nation2)) {
+		if (nation1.hasAlly(nation2)) {
 			p.sendMessage(ChatColor.RED + "You cannot have a war with your ally!");
 			return;
 		}

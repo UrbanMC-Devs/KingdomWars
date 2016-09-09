@@ -1,18 +1,14 @@
-package net.urbanmc.kingdomwars.listeners;
+package net.urbanmc.kingdomwars.listener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.projectiles.ProjectileSource;
 
 import com.earth2me.essentials.User;
+import com.palmergames.bukkit.towny.event.DisallowedPVPEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.KingdomWars;
@@ -24,48 +20,55 @@ import net.urbanmc.kingdomwars.event.WarPointAddEvent;
 
 public class WarListener implements Listener {
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
-		Entity defender = e.getEntity(), attacker = e.getDamager();
+	@EventHandler
+	public void onDisallowedPVP(DisallowedPVPEvent e) {
+		Player attacker = e.getAttacker();
+		Player defender = e.getDefender();
 
-		if (attacker instanceof Projectile) {
-			ProjectileSource source = ((Projectile) attacker).getShooter();
-
-			if (source instanceof Entity) {
-				attacker = (Entity) source;
-			}
-		}
-
-		if (!(defender instanceof Player) || !(attacker instanceof Player))
+		if (attacker == null || defender == null)
 			return;
 
-		if (e.isCancelled() && TownyUtil.damageCancelled(attacker, defender)) {
-			Nation nation1 = TownyUtil.getNation((Player) attacker);
+		Nation nation1 = TownyUtil.getNation(attacker);
+		Nation nation2 = TownyUtil.getNation(defender);
 
-			if (nation1 == null || !WarUtil.inWar(nation1))
-				return;
+		if (nation1 == null || nation2 == null)
+			return;
 
-			Nation nation2 = TownyUtil.getNation((Player) defender);
+		War war = WarUtil.getWar(nation1);
 
-			if (nation2 == null || !WarUtil.inWar(nation2))
-				return;
+		if (war == null)
+			return;
 
-			War war = WarUtil.getWar(nation1);
+		if (!war.getDeclaringNation().equals(nation2.getName()) && !war.getDeclaredNation().equals(nation2.getName()))
+			return;
 
-			if (!war.getDeclaringNation().equals(nation2.getName())
-					&& !war.getDeclaredNation().equals(nation2.getName()))
-				return;
+		if (nation1.getName().equals(nation2.getName()))
+			return;
 
-			if (KingdomWars.hasEssentials()) {
-				User user = KingdomWars.getEssentials().getUser((Player) defender);
+		if (KingdomWars.hasEssentials()) {
+			User attackerUser = KingdomWars.getEssentials().getUser(attacker);
+			User defenderUser = KingdomWars.getEssentials().getUser(defender);
 
-				if (user.isGodModeEnabled()) {
-					user.setGodModeEnabled(false);
-				}
+			if (attackerUser.isGodModeEnabled()) {
+				attackerUser.setGodModeEnabled(false);
 			}
 
-			e.setCancelled(false);
+			if (defenderUser.isGodModeEnabled()) {
+				defenderUser.setGodModeEnabled(false);
+			}
 		}
+
+		if (attacker.getAllowFlight() || attacker.isFlying()) {
+			attacker.setFlying(false);
+			attacker.setAllowFlight(false);
+		}
+
+		if (defender.getAllowFlight() || defender.isFlying()) {
+			defender.setFlying(false);
+			defender.setAllowFlight(false);
+		}
+
+		e.setCancelled(true);
 	}
 
 	@EventHandler
@@ -89,6 +92,9 @@ public class WarListener implements Listener {
 		War war = WarUtil.getWar(nation1);
 
 		if (!war.getDeclaringNation().equals(nation2.getName()) && !war.getDeclaredNation().equals(nation2.getName()))
+			return;
+
+		if (nation1.getName().equals(nation2.getName()))
 			return;
 
 		WarPointAddEvent event = new WarPointAddEvent(war, nation2, 1);

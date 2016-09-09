@@ -18,7 +18,7 @@ import com.palmergames.bukkit.towny.Towny;
 
 import ca.xshade.bukkit.questioner.Questioner;
 import net.urbanmc.kingdomwars.command.BaseCommand;
-import net.urbanmc.kingdomwars.listeners.WarListener;
+import net.urbanmc.kingdomwars.listener.WarListener;
 
 public class KingdomWars extends JavaPlugin {
 

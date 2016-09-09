@@ -64,10 +64,6 @@ public class TownyUtil {
 		}
 	}
 
-	public static boolean allied(Nation nation1, Nation nation2) {
-		return nation1.hasAlly(nation2) && nation2.hasAlly(nation1);
-	}
-
 	public static void truceQuestion(Nation receivingNation, Nation otherNation) {
 		List<Option> options = new ArrayList<Option>();
 
