@@ -11,6 +11,7 @@ import net.urbanmc.kingdomwars.command.subs.ForceEnd;
 import net.urbanmc.kingdomwars.command.subs.Start;
 import net.urbanmc.kingdomwars.command.subs.Status;
 import net.urbanmc.kingdomwars.command.subs.Truce;
+import net.urbanmc.kingdomwars.command.subs.Wars;
 
 public class BaseCommand implements CommandExecutor {
 
@@ -45,6 +46,9 @@ public class BaseCommand implements CommandExecutor {
 			return true;
 		case "forceend":
 			new ForceEnd(p, args);
+			return true;
+		case "wars":
+			new Wars(p, args);
 			return true;
 		}
 

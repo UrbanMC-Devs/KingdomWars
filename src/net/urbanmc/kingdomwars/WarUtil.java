@@ -151,6 +151,10 @@ public class WarUtil {
 
 		return false;
 	}
+	
+	public static List<War> getWarList() {
+		return wars;
+	}
 
 	public static War getWar(Nation nation) {
 		String name = nation.getName();

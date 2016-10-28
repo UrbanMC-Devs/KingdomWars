@@ -26,6 +26,7 @@ permissions:
     default: false
     children:
       kingdomwars.status: true
+      kingdomwars.wars: true
   kingdomwars.start:
     default: false
   kingdomwars.end:
@@ -35,4 +36,6 @@ permissions:
   kingdomwars.status:
     default: false
   kingdomwars.forceend:
+    default: false
+  kingdomwars.wars:
     default: false
