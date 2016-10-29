@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import net.urbanmc.kingdomwars.command.subs.End;
 import net.urbanmc.kingdomwars.command.subs.ForceEnd;
+import net.urbanmc.kingdomwars.command.subs.Leaderboard;
 import net.urbanmc.kingdomwars.command.subs.Start;
 import net.urbanmc.kingdomwars.command.subs.Status;
 import net.urbanmc.kingdomwars.command.subs.Truce;
@@ -50,6 +51,9 @@ public class BaseCommand implements CommandExecutor {
 		case "wars":
 			new Wars(p, args);
 			return true;
+		case "leaderboard":
+			new Leaderboard(p, args);
+			return true;
 		}
 
 		infoMessage(p, label);
@@ -62,7 +66,9 @@ public class BaseCommand implements CommandExecutor {
 				+ ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE
 				+ ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
 				+ ": Declare a truce with the nation who started a battle!\n" + ChatColor.AQUA + "/" + label + " status"
-				+ ChatColor.WHITE + ": Toggle the war scoreboard";
+				+ ChatColor.WHITE + ": Toggle the war scoreboard\n" + ChatColor.AQUA + "/" + label + " wars"
+						+ ChatColor.WHITE + ": View the current wars!\n" + ChatColor.AQUA + "/" + label + " leaderboard"
+								+ ChatColor.WHITE + ": Check out which nation has the most wins!";;
 		p.sendMessage(message);
 	}
 }

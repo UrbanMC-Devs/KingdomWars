@@ -19,7 +19,7 @@ public class Wars {
 		
 		if(!WarUtil.getWarList().isEmpty()) {
 		for(War war: WarUtil.getWarList()) {
-			p.sendMessage(ChatColor.BOLD + war.getDeclaringNation() + ChatColor.ITALIC + " vs " + ChatColor.BOLD + war.getDeclaredNation());
+			p.sendMessage(ChatColor.BOLD + war.getDeclaringNation() + ChatColor.RESET +  ChatColor.ITALIC + " vs " + ChatColor.RESET +  ChatColor.BOLD + war.getDeclaredNation());
 		}
 		p.sendMessage(ChatColor.GREEN + "=======");
 		return;
