@@ -2,18 +2,15 @@ package net.urbanmc.kingdomwars.data.leaderboard;
 
 import java.util.List;
 
-import net.urbanmc.kingdomwars.data.last.LastWar;
-
 public class LeaderboardList {
 
-	private List<Leaderbrd> leaderboard;
+	private List<Leaderboard> leaderboards;
 
-	public LeaderboardList(List<Leaderbrd> leaderboard) {
-		this.leaderboard = leaderboard;
+	public LeaderboardList(List<Leaderboard> leaderboards) {
+		this.leaderboards = leaderboards;
 	}
 
-	public List<Leaderbrd> getLeaderboards() {
-		return this.leaderboard;
+	public List<Leaderboard> getLeaderboards() {
+		return this.leaderboards;
 	}
-	
 }

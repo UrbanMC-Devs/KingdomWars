@@ -120,14 +120,14 @@ public class WarListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		WarBoard.showBoard(e.getPlayer());
 	}
-	
+
 	@EventHandler
 	public void renameNation(RenameNationEvent e) {
 		WarUtil.leaderBoardNationRename(e);
 	}
-	
-	@EventHandler 
-	public void deleteNation (DeleteNationEvent e) {
+
+	@EventHandler
+	public void deleteNation(DeleteNationEvent e) {
 		WarUtil.leaderBoardNationDelete(e);
 	}
 }

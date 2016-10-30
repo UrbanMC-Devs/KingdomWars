@@ -1,51 +1,45 @@
 package net.urbanmc.kingdomwars.data.leaderboard;
 
-public class Leaderbrd {
+public class Leaderboard {
 
-	private int wins;
-	private int losses;
-	private String nation;
-	private String lastwarinfo;
-	
-	public Leaderbrd(String nation) {
+	private int wins, losses;
+	private String nation, lastWarInfo;
+
+	public Leaderboard(String nation) {
 		this.nation = nation;
-		wins = 0;
-		losses = 0;
+		this.wins = 0;
+		this.losses = 0;
 	}
-	
+
 	public int getWins() {
-		return wins;
+		return this.wins;
 	}
-	
+
 	public void setWins(int wins) {
 		this.wins = wins;
-		return;
 	}
-	
+
 	public int getLosses() {
-		return losses;
+		return this.losses;
 	}
-	
+
 	public void setLosses(int losses) {
 		this.losses = losses;
-		return;
 	}
-	
+
 	public String getLastWarInfo() {
-		return lastwarinfo;
+		return this.lastWarInfo;
 	}
-	
-	public void setLastWarInfo(String lastwarinfo) {
-		this.lastwarinfo = lastwarinfo;
-		return;
+
+	public void setLastWarInfo(String lastWarInfo) {
+		this.lastWarInfo = lastWarInfo;
 	}
-	
+
 	public String getNation() {
-		return nation;
+		return this.nation;
 	}
-	
+
 	public void setNation(String nation) {
 		this.nation = nation;
 	}
-	
 }

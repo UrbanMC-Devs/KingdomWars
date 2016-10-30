@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import net.urbanmc.kingdomwars.command.subs.End;
 import net.urbanmc.kingdomwars.command.subs.ForceEnd;
-import net.urbanmc.kingdomwars.command.subs.Leaderboard;
+import net.urbanmc.kingdomwars.command.subs.LeaderboardSub;
 import net.urbanmc.kingdomwars.command.subs.Start;
 import net.urbanmc.kingdomwars.command.subs.Status;
 import net.urbanmc.kingdomwars.command.subs.Truce;
@@ -52,7 +52,7 @@ public class BaseCommand implements CommandExecutor {
 			new Wars(p, args);
 			return true;
 		case "leaderboard":
-			new Leaderboard(p, args);
+			new LeaderboardSub(p, args);
 			return true;
 		}
 

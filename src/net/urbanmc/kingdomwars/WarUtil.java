@@ -22,10 +22,8 @@ import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.data.last.LastWarList;
-import net.urbanmc.kingdomwars.data.last.LastWarListDeserializer;
+import net.urbanmc.kingdomwars.data.leaderboard.Leaderboard;
 import net.urbanmc.kingdomwars.data.leaderboard.LeaderboardList;
-import net.urbanmc.kingdomwars.data.leaderboard.LeaderboardListDeserializer;
-import net.urbanmc.kingdomwars.data.leaderboard.Leaderbrd;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.data.war.WarList;
 import net.urbanmc.kingdomwars.data.war.WarListSerializer;
@@ -37,7 +35,7 @@ public class WarUtil {
 
 	private static List<War> wars;
 	private static List<LastWar> last;
-	public static List<Leaderbrd> leaderboardlist;
+	private static List<Leaderboard> leaderboardList;
 
 	static {
 		gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListSerializer()).create();
@@ -71,8 +69,7 @@ public class WarUtil {
 				ex.printStackTrace();
 			}
 		}
-		
-		
+
 		File leaderboard = new File("plugins/KingdomWars/leaderboard.json");
 
 		if (!leaderboard.exists()) {
@@ -82,7 +79,7 @@ public class WarUtil {
 				ex.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	private static void loadWars() {
@@ -105,8 +102,7 @@ public class WarUtil {
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/last.json"));
 
-			Gson gson = new GsonBuilder().registerTypeAdapter(LastWarList.class, new LastWarListDeserializer())
-					.create();
+			Gson gson = new Gson();
 
 			last = gson.fromJson(scanner.nextLine(), LastWarList.class).getLast();
 
@@ -117,23 +113,22 @@ public class WarUtil {
 
 		reloadLast();
 	}
-	
+
 	private static void loadLeaderboard() {
-		leaderboardlist = new ArrayList<Leaderbrd>();
-		
+		leaderboardList = new ArrayList<Leaderboard>();
+
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/leaderboard.json"));
 
-			Gson gson = new GsonBuilder().registerTypeAdapter(LeaderboardList.class, new LeaderboardListDeserializer())
-					.create();
+			Gson gson = new Gson();
 
-			leaderboardlist = gson.fromJson(scanner.nextLine(), LeaderboardList.class).getLeaderboards();
+			leaderboardList = gson.fromJson(scanner.nextLine(), LeaderboardList.class).getLeaderboards();
 
 			scanner.close();
 		} catch (Exception ex) {
 			;
 		}
-		
+
 	}
 
 	private static void reloadLast() {
@@ -191,7 +186,7 @@ public class WarUtil {
 
 		return false;
 	}
-	
+
 	public static List<War> getWarList() {
 		return wars;
 	}
@@ -252,14 +247,14 @@ public class WarUtil {
 
 		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
 		addWinToLeaderBoard(winner.getName(), true);
-		
+
 		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + winner.getName() + "!");
 		addWinToLeaderBoard(loser.getName(), false);
 
 		LastWar lastWar = new LastWar(winner.getName(), loser.getName(),
 				System.currentTimeMillis() + KingdomWars.getMillis());
 		addLast(lastWar);
-        updateWarInfoInLeaderboard(winner.getName(), loser.getName());
+		updateWarInfoInLeaderboard(winner.getName(), loser.getName());
 		try {
 			winner.setBalance(winner.getHoldingBalance() + amount, "War win");
 		} catch (EconomyException ex) {
@@ -314,7 +309,7 @@ public class WarUtil {
 
 		LastWar lastWar = new LastWar(nation1.getName(), nation2.getName(),
 				System.currentTimeMillis() + KingdomWars.getMillis());
-		addLast(lastWar);		
+		addLast(lastWar);
 	}
 
 	public static boolean hasLast(String nation1, String nation2) {
@@ -363,8 +358,7 @@ public class WarUtil {
 		try {
 			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/last.json"));
 
-			Gson gson = new GsonBuilder().registerTypeAdapter(LastWarList.class, new LastWarListDeserializer())
-					.create();
+			Gson gson = new Gson();
 
 			writer.write(gson.toJson(new LastWarList(last)));
 
@@ -373,83 +367,88 @@ public class WarUtil {
 			ex.printStackTrace();
 		}
 	}
-	
-	
+
 	private static void saveLeaderboard() {
-			PrintWriter writer;
-			try {
-				writer = new PrintWriter(new File("plugins/KingdomWars/leaderboard.json"));			
-				Gson gson = new Gson();
-				writer.write(gson.toJson(new LeaderboardList(leaderboardlist)));
-				writer.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
+		try {
+			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/leaderboard.json"));
+
+			writer.write(new Gson().toJson(new LeaderboardList(leaderboardList)));
+
+			writer.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
-	
+
+	public static List<Leaderboard> getLeaderboards() {
+		return leaderboardList;
+	}
+
 	public static void addWinToLeaderBoard(String nation, boolean won) {
-		int f = findIndexForNationInLeaderboard(nation);
-		
-		if(f == -1) {
-			Leaderbrd ldbrd = new Leaderbrd(nation);
-			if(won) ldbrd.setWins(1);
-			else ldbrd.setLosses(1);
-			leaderboardlist.add(ldbrd);
-			saveLeaderboard();
-			return;
+		int i = findIndexForNationInLeaderboard(nation);
+
+		Leaderboard lb;
+
+		if (i == -1) {
+			lb = new Leaderboard(nation);
+		} else {
+			lb = leaderboardList.get(i);
 		}
-	   Leaderbrd lbrd = leaderboardlist.get(f);
-	   if(won)
-	   leaderboardlist.get(f).setWins(lbrd.getWins() + 1);
-	   else
-	   leaderboardlist.get(f).setLosses(lbrd.getLosses() + 1);
-	   saveLeaderboard();
-	   return;
+
+		if (won) {
+			leaderboardList.get(i).setWins(lb.getWins() + 1);
+		} else {
+			leaderboardList.get(i).setLosses(lb.getLosses() + 1);
+		}
+
+		if (i == -1) {
+			leaderboardList.add(lb);
+		}
+
+		saveLeaderboard();
 	}
-	
+
 	private static void updateWarInfoInLeaderboard(String winner, String loser) {
-	
-	  DateFormat df = new SimpleDateFormat("dd/MM/yy");
-	  Date dateobj = new Date();
-	  
-	  String lastwarinfo = winner + ";" + loser +  ";" + df.format(dateobj);
-		
-	int f = findIndexForNationInLeaderboard(winner);
-	leaderboardlist.get(f).setLastWarInfo(lastwarinfo);
-	saveLeaderboard();
-	
-	 f = findIndexForNationInLeaderboard(loser);
-	leaderboardlist.get(f).setLastWarInfo(lastwarinfo);
-	saveLeaderboard();
-	
-	return;
+		DateFormat df = new SimpleDateFormat("dd/MM/yy");
+
+		String lastwarinfo = winner + ";" + loser + ";" + df.format(new Date());
+
+		int i = findIndexForNationInLeaderboard(winner);
+		leaderboardList.get(i).setLastWarInfo(lastwarinfo);
+		saveLeaderboard();
+
+		i = findIndexForNationInLeaderboard(loser);
+		leaderboardList.get(i).setLastWarInfo(lastwarinfo);
+		saveLeaderboard();
 	}
-	
+
 	public static void leaderBoardNationRename(RenameNationEvent e) {
-		int f = findIndexForNationInLeaderboard(e.getOldName());
-		if(f == -1) return;
-		leaderboardlist.get(f).setNation(e.getNation().getName());
-		saveLeaderboard();
-	}
-	
-	public static void leaderBoardNationDelete (DeleteNationEvent e) {
-		int f = findIndexForNationInLeaderboard(e.getNationName());
-		if(f == -1) return;
-		leaderboardlist.remove(f);
-		saveLeaderboard();
-	}
-	
-	private static int findIndexForNationInLeaderboard (String nation) {
-		loadLeaderboard();
-		
-		if(leaderboardlist.isEmpty()) return -1;
-		
-		int i = 0;
-		for(i = 0; i < leaderboardlist.size(); i++) {
-			if(leaderboardlist.get(i).getNation().equalsIgnoreCase(nation)) return i;
+		int i = findIndexForNationInLeaderboard(e.getOldName());
+
+		if (i != -1) {
+			leaderboardList.get(i).setNation(e.getNation().getName());
+			saveLeaderboard();
 		}
-		
+	}
+
+	public static void leaderBoardNationDelete(DeleteNationEvent e) {
+		int i = findIndexForNationInLeaderboard(e.getNationName());
+
+		if (i != -1) {
+			leaderboardList.remove(i);
+			saveLeaderboard();
+		}
+	}
+
+	private static int findIndexForNationInLeaderboard(String nation) {
+		if (leaderboardList.isEmpty())
+			return -1;
+
+		for (int i = 0; i < leaderboardList.size(); i++) {
+			if (leaderboardList.get(i).getNation().equalsIgnoreCase(nation))
+				return i;
+		}
+
 		return -1;
 	}
 }
