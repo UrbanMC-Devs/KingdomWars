@@ -123,7 +123,7 @@ public class WarUtil {
 			Gson gson = new Gson();
 
 			leaderboardList = gson.fromJson(scanner.nextLine(), LeaderboardList.class).getLeaderboards();
-
+            if(leaderboardList == null) System.out.println("Loading LList = null");
 			scanner.close();
 		} catch (Exception ex) {
 			;
@@ -381,6 +381,7 @@ public class WarUtil {
 	}
 
 	public static List<Leaderboard> getLeaderboards() {
+		if(leaderboardList == null) System.out.println("Returning LList = Null");
 		return leaderboardList;
 	}
 
@@ -391,19 +392,19 @@ public class WarUtil {
 
 		if (i == -1) {
 			lb = new Leaderboard(nation);
+			leaderboardList.add(lb);
 		} else {
 			lb = leaderboardList.get(i);
 		}
 
+		i = findIndexForNationInLeaderboard(nation);
+		
 		if (won) {
 			leaderboardList.get(i).setWins(lb.getWins() + 1);
 		} else {
 			leaderboardList.get(i).setLosses(lb.getLosses() + 1);
 		}
 
-		if (i == -1) {
-			leaderboardList.add(lb);
-		}
 
 		saveLeaderboard();
 	}
