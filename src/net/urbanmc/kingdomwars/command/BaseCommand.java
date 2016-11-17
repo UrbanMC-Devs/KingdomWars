@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.urbanmc.kingdomwars.command.subs.Develop;
 import net.urbanmc.kingdomwars.command.subs.End;
 import net.urbanmc.kingdomwars.command.subs.ForceEnd;
 import net.urbanmc.kingdomwars.command.subs.LeaderboardSub;
@@ -54,6 +55,11 @@ public class BaseCommand implements CommandExecutor {
 		case "leaderboard":
 			new LeaderboardSub(p, args);
 			return true;
+		//DO NOT REMOVE The purpose of the develop subcommand is used for testing only, but so I don't have to create it again
+		//please leave it. It is commented out
+//		case "develop":
+//			new Develop(p, args);
+//			return true;
 		}
 
 		infoMessage(p, label);
