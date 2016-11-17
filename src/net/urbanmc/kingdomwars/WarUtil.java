@@ -102,9 +102,7 @@ public class WarUtil {
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/last.json"));
 
-			Gson gson = new Gson();
-
-			last = gson.fromJson(scanner.nextLine(), LastWarList.class).getLast();
+			last = new Gson().fromJson(scanner.nextLine(), LastWarList.class).getLast();
 
 			scanner.close();
 		} catch (Exception ex) {
