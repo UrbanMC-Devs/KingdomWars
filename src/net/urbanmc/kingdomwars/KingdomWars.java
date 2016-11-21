@@ -80,8 +80,7 @@ public class KingdomWars extends JavaPlugin {
 
 		finishAmount = data.getDouble("finish-amount");
 		truceAmount = data.getDouble("truce-amount");
-//		winningKills = data.getInt("winning-kills");
-		winningKills = 2;
+		winningKills = data.getInt("winning-kills");
 		millis = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
 	}
 
