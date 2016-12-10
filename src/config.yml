@@ -1,7 +1,10 @@
 # KingdomWars by Elian & Silverwolfg11 #
 ########################################
 
-# How much money is awarded/taken away when war ends (not with forceend)
+# How much money it costs to start a war
+start-amount: 25000
+
+# How much money is awarded/taken away when war ends (not with forceend) * IF STARTING NATION WINS, START AMOUNT IS RETURNED TO THEM
 finish-amount: 100000
 
 # How much money is awarded/taken away when war ends by truce
@@ -12,3 +15,6 @@ winning-kills: 25
 
 # Hours between two nations can war again
 hours-between: 168
+
+# Hours before a war must end
+hours-end: 168

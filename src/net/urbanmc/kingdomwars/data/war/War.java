@@ -16,6 +16,7 @@ public class War {
 	private int points1 = 0, points2 = 0;
 	private Scoreboard board;
 	private List<UUID> disabled;
+	private long started;
 
 	public War(String nation1, String nation2) {
 		this.nation1 = nation1;
@@ -54,6 +55,18 @@ public class War {
 
 	public int getDeclaredPoints() {
 		return points2;
+	}
+
+	public void setDeclaringNation(String nation) {
+		this.nation1 = nation;
+	}
+
+	public void setDeclaredNation(String nation) {
+		this.nation2 = nation;
+	}
+
+	public boolean isDeclaringNation(String nation) {
+		return this.nation1.equals(nation);
 	}
 
 	public void setDeclaringPoints(int points) {
@@ -98,5 +111,13 @@ public class War {
 		} else {
 			this.disabled.remove(id);
 		}
+	}
+
+	public void setStarted() {
+		this.started = System.currentTimeMillis();
+	}
+
+	public long getStarted() {
+		return this.started;
 	}
 }

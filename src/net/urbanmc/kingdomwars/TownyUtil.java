@@ -9,6 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.TownyMessaging;
+import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
@@ -53,6 +54,23 @@ public class TownyUtil {
 		}
 
 		return nation;
+	}
+
+	public static double getNationBalance(Nation nation) {
+		try {
+			return nation.getHoldingBalance();
+		} catch (EconomyException ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+
+	public static void setNationBalance(Nation nation, double balance, String reason) {
+		try {
+			nation.setBalance(balance, reason);
+		} catch (EconomyException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public static boolean isNationKing(Player p) {
@@ -105,8 +123,6 @@ public class TownyUtil {
 				p.sendMessage(line);
 			}
 		}
-
-		return;
 	}
 
 	public static void deleteNation(Nation nation) {

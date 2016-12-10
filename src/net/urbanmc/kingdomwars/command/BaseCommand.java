@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.command.subs.End;
 import net.urbanmc.kingdomwars.command.subs.ForceEnd;
 import net.urbanmc.kingdomwars.command.subs.LeaderboardSub;
@@ -62,14 +63,19 @@ public class BaseCommand implements CommandExecutor {
 	}
 
 	private void infoMessage(Player p, String label) {
-		String message = ChatColor.AQUA + "=== Kingdom Wars ===\n" + "/" + label + " start (nation)" + ChatColor.WHITE
-				+ ": Start a war with another nation!\n" + ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE
-				+ ": End a war you started!\n" + ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
-				+ ": Declare a truce with the nation who started a battle!\n" + ChatColor.AQUA + "/" + label + " status"
-				+ ChatColor.WHITE + ": Toggle the war scoreboard\n" + ChatColor.AQUA + "/" + label + " wars"
-				+ ChatColor.WHITE + ": View the current wars!\n" + ChatColor.AQUA + "/" + label + " leaderboard"
-				+ ChatColor.WHITE + ": Check out which nation has the most wins!";
-		;
-		p.sendMessage(message);
+		StringBuilder message = new StringBuilder();
+
+		message.append(ChatColor.AQUA + "=== Kingdom Wars ===\n");
+		message.append("/" + label + " start (nation)" + ChatColor.WHITE + ": Start a war with another nation! "
+				+ ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")\n");
+		message.append(ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE + ": End a war you started!\n");
+		message.append(ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
+				+ ": Declare a truce with the nation who started a battle!\n");
+		message.append(ChatColor.AQUA + "/" + label + " status" + ChatColor.WHITE + ": Toggle the war scoreboard\n");
+		message.append(ChatColor.AQUA + "/" + label + " wars" + ChatColor.WHITE + ": View the current wars!\n");
+		message.append(ChatColor.AQUA + "/" + label + " leaderboard" + ChatColor.WHITE
+				+ ": Check out which nation has the most wins!");
+
+		p.sendMessage(message.toString());
 	}
 }

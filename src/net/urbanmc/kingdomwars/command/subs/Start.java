@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
@@ -71,6 +72,12 @@ public class Start {
 		if (WarUtil.hasLast(nation1.getName(), nation2.getName())) {
 			p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast(nation1)
 					+ " seconds from now!");
+			return;
+		}
+
+		if (TownyUtil.getNationBalance(nation1) < KingdomWars.getStartAmount()) {
+			p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
+					+ ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")");
 			return;
 		}
 

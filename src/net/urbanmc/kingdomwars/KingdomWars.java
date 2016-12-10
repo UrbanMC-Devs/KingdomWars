@@ -26,10 +26,9 @@ public class KingdomWars extends JavaPlugin {
 	private static Questioner questioner;
 	private static Essentials essentials;
 
-	private static double finishAmount;
-	private static double truceAmount;
+	private static double startAmount, finishAmount, truceAmount;
 	private static int winningKills;
-	private static long millis;
+	private static long lastTime, endTime;
 
 	@Override
 	public void onEnable() {
@@ -78,10 +77,12 @@ public class KingdomWars extends JavaPlugin {
 
 		FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
+		startAmount = data.getDouble("start-amount");
 		finishAmount = data.getDouble("finish-amount");
 		truceAmount = data.getDouble("truce-amount");
 		winningKills = data.getInt("winning-kills");
-		millis = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
+		lastTime = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
+		endTime = TimeUnit.HOURS.toMillis(data.getInt("hours-end"));
 	}
 
 	public static Towny getTowny() {
@@ -100,6 +101,10 @@ public class KingdomWars extends JavaPlugin {
 		return essentials;
 	}
 
+	public static double getStartAmount() {
+		return startAmount;
+	}
+
 	public static double getFinishAmount() {
 		return finishAmount;
 	}
@@ -112,7 +117,11 @@ public class KingdomWars extends JavaPlugin {
 		return winningKills;
 	}
 
-	public static long getMillis() {
-		return millis;
+	public static long getLastTime() {
+		return lastTime;
+	}
+
+	public static long getEndTime() {
+		return endTime;
 	}
 }

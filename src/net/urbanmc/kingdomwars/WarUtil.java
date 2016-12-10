@@ -15,8 +15,6 @@ import org.bukkit.entity.Player;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.palmergames.bukkit.towny.event.DeleteNationEvent;
-import com.palmergames.bukkit.towny.event.RenameNationEvent;
 import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
 
@@ -121,7 +119,8 @@ public class WarUtil {
 			Gson gson = new Gson();
 
 			leaderboardList = gson.fromJson(scanner.nextLine(), LeaderboardList.class).getLeaderboards();
-            if(leaderboardList == null) System.out.println("Loading LList = null");
+			if (leaderboardList == null)
+				System.out.println("Loading LList = null");
 			scanner.close();
 		} catch (Exception ex) {
 			;
@@ -146,9 +145,14 @@ public class WarUtil {
 	}
 
 	public static void startWar(War war) {
+		war.setStarted();
 		wars.add(war);
-		saveFile();
+		saveWars();
 		WarBoard.createBoard(war);
+
+		Nation declaring = TownyUtil.getNation(war.getDeclaringNation());
+		TownyUtil.setNationBalance(declaring, TownyUtil.getNationBalance(declaring) - KingdomWars.getStartAmount(),
+				"War start with " + war.getDeclaredNation());
 	}
 
 	public static void endWar(Nation nation) {
@@ -157,7 +161,7 @@ public class WarUtil {
 
 	public static void endWar(War war) {
 		wars.remove(war);
-		saveFile();
+		saveWars();
 		end(war);
 	}
 
@@ -169,16 +173,18 @@ public class WarUtil {
 		}
 
 		wars.add(war);
-		saveFile();
+		saveWars();
 	}
 
 	public static boolean inWar(Nation nation) {
-		String name = nation.getName();
+		return inWar(nation.getName());
+	}
 
+	public static boolean inWar(String nation) {
 		for (War war : wars) {
-			if (war.getDeclaringNation().equals(name))
+			if (war.getDeclaringNation().equals(nation))
 				return true;
-			if (war.getDeclaredNation().equals(name))
+			if (war.getDeclaredNation().equals(nation))
 				return true;
 		}
 
@@ -190,16 +196,35 @@ public class WarUtil {
 	}
 
 	public static War getWar(Nation nation) {
-		String name = nation.getName();
+		return getWar(nation.getName());
+	}
 
+	public static War getWar(String nation) {
 		for (War war : wars) {
-			if (war.getDeclaringNation().equals(name))
+			if (war.getDeclaringNation().equals(nation))
 				return war;
-			if (war.getDeclaredNation().equals(name))
+			if (war.getDeclaredNation().equals(nation))
 				return war;
 		}
 
 		return null;
+	}
+
+	public synchronized static boolean checkForceEnd(War war) {
+		long millis = System.currentTimeMillis() - war.getStarted();
+
+		if (millis >= KingdomWars.getEndTime()) {
+			endWar(war);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public synchronized static void checkForceEndAll() {
+		for (War war : wars) {
+			checkForceEnd(war);
+		}
 	}
 
 	public synchronized static void checkWin(War war) {
@@ -228,7 +253,7 @@ public class WarUtil {
 			return;
 
 		wars.remove(war);
-		saveFile();
+		saveWars();
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
@@ -244,17 +269,20 @@ public class WarUtil {
 		}
 
 		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
-		addWinToLeaderBoard(winner.getName(), true);
-
 		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + winner.getName() + "!");
-		addWinToLeaderBoard(loser.getName(), false);
 
 		LastWar lastWar = new LastWar(winner.getName(), loser.getName(),
-				System.currentTimeMillis() + KingdomWars.getMillis());
+				System.currentTimeMillis() + KingdomWars.getLastTime());
 		addLast(lastWar);
-		updateWarInfoInLeaderboard(winner.getName(), loser.getName());
+
 		try {
-			winner.setBalance(winner.getHoldingBalance() + amount, "War win");
+			double balance = winner.getHoldingBalance() + amount;
+
+			if (war.getDeclaringNation().equals(winner.getName())) {
+				balance += KingdomWars.getStartAmount();
+			}
+
+			winner.setBalance(balance, "War win against " + loser.getName());
 		} catch (EconomyException ex) {
 			ex.printStackTrace();
 		}
@@ -277,6 +305,10 @@ public class WarUtil {
 				ex.printStackTrace();
 			}
 		}
+
+		addWinToLeaderBoard(winner.getName(), true);
+		addWinToLeaderBoard(loser.getName(), false);
+		updateWarInfoInLeaderboard(winner.getName(), loser.getName());
 	}
 
 	public static void end(War war) {
@@ -287,7 +319,7 @@ public class WarUtil {
 		Bukkit.getPluginManager().callEvent(event);
 
 		wars.remove(war);
-		saveFile();
+		saveWars();
 
 		if (event.isCancelled())
 			return;
@@ -306,7 +338,7 @@ public class WarUtil {
 		}
 
 		LastWar lastWar = new LastWar(nation1.getName(), nation2.getName(),
-				System.currentTimeMillis() + KingdomWars.getMillis());
+				System.currentTimeMillis() + KingdomWars.getLastTime());
 		addLast(lastWar);
 	}
 
@@ -340,7 +372,19 @@ public class WarUtil {
 		return null;
 	}
 
-	private static void saveFile() {
+	public static void removeAllLast(String nation) {
+		List<LastWar> remove = new ArrayList<LastWar>();
+
+		for (LastWar lastWar : last) {
+			if (lastWar.getDeclaringNation().equals(nation) || lastWar.getDeclaredNation().equals(nation)) {
+				remove.add(lastWar);
+			}
+		}
+
+		last.removeAll(remove);
+	}
+
+	private static void saveWars() {
 		try {
 			PrintWriter writer = new PrintWriter(new File("plugins/KingdomWars/wars.json"));
 
@@ -379,7 +423,8 @@ public class WarUtil {
 	}
 
 	public static List<Leaderboard> getLeaderboards() {
-		if(leaderboardList == null) System.out.println("Returning LList = Null");
+		if (leaderboardList == null)
+			System.out.println("Returning LList = Null");
 		return leaderboardList;
 	}
 
@@ -396,13 +441,12 @@ public class WarUtil {
 		}
 
 		i = findIndexForNationInLeaderboard(nation);
-		
+
 		if (won) {
 			leaderboardList.get(i).setWins(lb.getWins() + 1);
 		} else {
 			leaderboardList.get(i).setLosses(lb.getLosses() + 1);
 		}
-
 
 		saveLeaderboard();
 	}
@@ -421,17 +465,48 @@ public class WarUtil {
 		saveLeaderboard();
 	}
 
-	public static void leaderBoardNationRename(RenameNationEvent e) {
-		int i = findIndexForNationInLeaderboard(e.getOldName());
+	public static void warNationRename(String oldName, String newName) {
+		War war = getWar(oldName);
+
+		boolean declaring = war.isDeclaringNation(oldName);
+
+		if (declaring) {
+			war.setDeclaringNation(newName);
+		} else {
+			war.setDeclaredNation(newName);
+		}
+
+		saveWars();
+	}
+
+	public static void leaderBoardNationRename(String oldName, String newName) {
+		int i = findIndexForNationInLeaderboard(oldName);
 
 		if (i != -1) {
-			leaderboardList.get(i).setNation(e.getNation().getName());
+			leaderboardList.get(i).setNation(newName);
 			saveLeaderboard();
 		}
 	}
 
-	public static void leaderBoardNationDelete(DeleteNationEvent e) {
-		int i = findIndexForNationInLeaderboard(e.getNationName());
+	public static void lastNationRename(String oldName, String newName) {
+		for (LastWar lastWar : last) {
+			if (!lastWar.getDeclaringNation().equals(oldName) || lastWar.getDeclaredNation().equals(oldName))
+				continue;
+
+			boolean declaring = lastWar.isDeclaringNation(oldName);
+
+			if (declaring) {
+				lastWar.setDeclaringNation(newName);
+			} else {
+				lastWar.setDeclaredNation(newName);
+			}
+		}
+
+		saveLast();
+	}
+
+	public static void leaderBoardNationDelete(String nation) {
+		int i = findIndexForNationInLeaderboard(nation);
 
 		if (i != -1) {
 			leaderboardList.remove(i);
@@ -444,7 +519,7 @@ public class WarUtil {
 			return -1;
 
 		for (int i = 0; i < leaderboardList.size(); i++) {
-			if (leaderboardList.get(i).getNation().equalsIgnoreCase(nation))
+			if (leaderboardList.get(i).getNation().equals(nation))
 				return i;
 		}
 

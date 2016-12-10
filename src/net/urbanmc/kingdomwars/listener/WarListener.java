@@ -8,9 +8,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.earth2me.essentials.User;
-import com.palmergames.bukkit.towny.event.DeleteNationEvent;
 import com.palmergames.bukkit.towny.event.DisallowedPVPEvent;
-import com.palmergames.bukkit.towny.event.RenameNationEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.KingdomWars;
@@ -45,6 +43,9 @@ public class WarListener implements Listener {
 			return;
 
 		if (nation1.getName().equals(nation2.getName()))
+			return;
+
+		if (WarUtil.checkForceEnd(war))
 			return;
 
 		if (KingdomWars.hasEssentials()) {
@@ -99,6 +100,9 @@ public class WarListener implements Listener {
 		if (nation1.getName().equals(nation2.getName()))
 			return;
 
+		if (WarUtil.checkForceEnd(war))
+			return;
+
 		WarPointAddEvent event = new WarPointAddEvent(war, nation2, 1);
 		Bukkit.getPluginManager().callEvent(event);
 
@@ -119,15 +123,5 @@ public class WarListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		WarBoard.showBoard(e.getPlayer());
-	}
-
-	@EventHandler
-	public void renameNation(RenameNationEvent e) {
-		WarUtil.leaderBoardNationRename(e);
-	}
-
-	@EventHandler
-	public void deleteNation(DeleteNationEvent e) {
-		WarUtil.leaderBoardNationDelete(e);
 	}
 }

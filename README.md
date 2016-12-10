@@ -1,5 +1,5 @@
 #KingdomWars
-A developing plug-in to allow nations to fight each other, but not the whole server
+A developing plug-in to allow two nations to fight each other at once
 
 #Server
 This plug-in is developed for the Minecraft server of http://urbanmc.net/

@@ -23,4 +23,16 @@ public class LastWar {
 	public long getMillis() {
 		return this.millis;
 	}
+
+	public boolean isDeclaringNation(String nation) {
+		return this.nation1.equals(nation);
+	}
+
+	public void setDeclaringNation(String nation) {
+		this.nation1 = nation;
+	}
+
+	public void setDeclaredNation(String nation) {
+		this.nation2 = nation;
+	}
 }

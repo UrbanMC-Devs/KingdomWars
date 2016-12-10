@@ -12,10 +12,8 @@ import net.urbanmc.kingdomwars.data.war.War;
 
 public class Develop {
 	public Develop(Player p, String[] args) {
-		if (!p.hasPermission("kingdomwars.develop")) {
-			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
+		if (!p.hasPermission("kingdomwars.develop"))
 			return;
-		}
 
 		/*
 		 * Purpose of this sub command is for developing use only. Currently the
