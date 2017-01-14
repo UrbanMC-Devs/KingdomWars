@@ -33,6 +33,7 @@ public class Develop {
 
 		if (!WarUtil.inWar(nation)) {
 			p.sendMessage(ChatColor.RED + "That nation is not in a war!");
+			WarUtil.removeAllLast(nation.getName());
 			return;
 		}
 
@@ -40,5 +41,6 @@ public class Develop {
 		Nation loser = (nation.getName().equalsIgnoreCase(war.getDeclaredNation()))
 				? TownyUtil.getNation(war.getDeclaringNation()) : TownyUtil.getNation(war.getDeclaredNation());
 		WarUtil.win(nation, loser, KingdomWars.getFinishAmount());
+		WarUtil.removeAllLast(nation.getName());
 	}
 }
