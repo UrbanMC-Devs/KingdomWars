@@ -1,7 +1,6 @@
 package net.urbanmc.kingdomwars.listener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,8 +11,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import com.earth2me.essentials.User;
 import com.palmergames.bukkit.towny.event.DisallowedPVPEvent;
 import com.palmergames.bukkit.towny.object.Nation;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
-import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.TownyUtil;
@@ -77,15 +74,10 @@ public class WarListener implements Listener {
 
 		e.setCancelled(true);
 	}
-	
+
 	@EventHandler
 	public void onEntityDamage(EntityDamageByEntityEvent e) {
-	    Entity attacker = e.getDamager();
-	    
-	    if (!TownyUniverse.isWarTime())
-	    {
-	      CombatUtil.preventDamageCall(KingdomWars.getTowny(), attacker, e.getEntity());
-	    }
+		TownyUtil.damageCancelled(e.getDamager(), e.getEntity());
 	}
 
 	@EventHandler

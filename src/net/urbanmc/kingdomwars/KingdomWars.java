@@ -51,6 +51,12 @@ public class KingdomWars extends JavaPlugin {
 		towny = getPlugin(Towny.class);
 		questioner = getPlugin(Questioner.class);
 
+		if (towny.isError()) {
+			getLogger().log(Level.SEVERE, "There was an error while enabling Towny. Disabling..");
+			setEnabled(false);
+			return;
+		}
+
 		loadConfig();
 
 		getCommand("townywar").setExecutor(new BaseCommand());
