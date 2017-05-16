@@ -1,5 +1,20 @@
 package net.urbanmc.kingdomwars;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.palmergames.bukkit.towny.exceptions.EconomyException;
+import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.data.last.LastWar;
+import net.urbanmc.kingdomwars.data.last.LastWarList;
+import net.urbanmc.kingdomwars.data.leaderboard.Leaderboard;
+import net.urbanmc.kingdomwars.data.leaderboard.LeaderboardList;
+import net.urbanmc.kingdomwars.data.war.War;
+import net.urbanmc.kingdomwars.data.war.WarList;
+import net.urbanmc.kingdomwars.data.war.WarListSerializer;
+import net.urbanmc.kingdomwars.event.WarEndEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,23 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.palmergames.bukkit.towny.exceptions.EconomyException;
-import com.palmergames.bukkit.towny.object.Nation;
-
-import net.urbanmc.kingdomwars.data.last.LastWar;
-import net.urbanmc.kingdomwars.data.last.LastWarList;
-import net.urbanmc.kingdomwars.data.leaderboard.Leaderboard;
-import net.urbanmc.kingdomwars.data.leaderboard.LeaderboardList;
-import net.urbanmc.kingdomwars.data.war.War;
-import net.urbanmc.kingdomwars.data.war.WarList;
-import net.urbanmc.kingdomwars.data.war.WarListSerializer;
-import net.urbanmc.kingdomwars.event.WarEndEvent;
 
 public class WarUtil {
 
@@ -81,7 +79,7 @@ public class WarUtil {
 	}
 
 	private static void loadWars() {
-		wars = new ArrayList<War>();
+		wars = new ArrayList<>();
 
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/wars.json"));
@@ -89,13 +87,12 @@ public class WarUtil {
 			wars = gson.fromJson(scanner.nextLine(), WarList.class).getWars();
 
 			scanner.close();
-		} catch (Exception ex) {
-			;
+		} catch (Exception ignored) {
 		}
 	}
 
 	private static void loadLast() {
-		last = new ArrayList<LastWar>();
+		last = new ArrayList<>();
 
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/last.json"));
@@ -103,15 +100,14 @@ public class WarUtil {
 			last = new Gson().fromJson(scanner.nextLine(), LastWarList.class).getLast();
 
 			scanner.close();
-		} catch (Exception ex) {
-			;
+		} catch (Exception ignored) {
 		}
 
 		reloadLast();
 	}
 
 	private static void loadLeaderboard() {
-		leaderboardList = new ArrayList<Leaderboard>();
+		leaderboardList = new ArrayList<>();
 
 		try {
 			Scanner scanner = new Scanner(new File("plugins/KingdomWars/leaderboard.json"));
@@ -122,8 +118,7 @@ public class WarUtil {
 			if (leaderboardList == null)
 				System.out.println("Loading LList = null");
 			scanner.close();
-		} catch (Exception ex) {
-			;
+		} catch (Exception ignored) {
 		}
 
 	}
@@ -131,17 +126,13 @@ public class WarUtil {
 	private static void reloadLast() {
 		long millis = System.currentTimeMillis();
 
-		ArrayList<LastWar> remove = new ArrayList<LastWar>();
+		ArrayList<LastWar> remove = new ArrayList<>();
 
 		last.stream().filter(t -> t.getMillis() <= millis).forEach(remove::add);
 
 		last.removeAll(remove);
 
 		saveLast();
-	}
-
-	public static void startWar(Nation nation1, Nation nation2) {
-		startWar(new War(nation1.getName(), nation2.getName()));
 	}
 
 	public static void startWar(War war) {
@@ -151,12 +142,9 @@ public class WarUtil {
 		WarBoard.createBoard(war);
 
 		Nation declaring = TownyUtil.getNation(war.getDeclaringNation());
-		TownyUtil.setNationBalance(declaring, TownyUtil.getNationBalance(declaring) - KingdomWars.getStartAmount(),
-				"War start with " + war.getDeclaredNation());
-	}
-
-	public static void endWar(Nation nation) {
-		endWar(getWar(nation));
+		TownyUtil.setNationBalance(declaring,
+		                           TownyUtil.getNationBalance(declaring) - KingdomWars.getStartAmount(),
+		                           "War start with " + war.getDeclaredNation());
 	}
 
 	public static void endWar(War war) {
@@ -271,8 +259,8 @@ public class WarUtil {
 		TownyUtil.sendNationMessage(winner, "Your nation has won the war against " + loser.getName() + "!");
 		TownyUtil.sendNationMessage(loser, "Your nation has lost the war against " + winner.getName() + "!");
 
-		LastWar lastWar = new LastWar(winner.getName(), loser.getName(),
-				System.currentTimeMillis() + KingdomWars.getLastTime());
+		LastWar lastWar =
+				new LastWar(winner.getName(), loser.getName(), System.currentTimeMillis() + KingdomWars.getLastTime());
 		addLast(lastWar);
 
 		try {
@@ -337,8 +325,9 @@ public class WarUtil {
 			}
 		}
 
-		LastWar lastWar = new LastWar(nation1.getName(), nation2.getName(),
-				System.currentTimeMillis() + KingdomWars.getLastTime());
+		LastWar lastWar = new LastWar(nation1.getName(),
+		                              nation2.getName(),
+		                              System.currentTimeMillis() + KingdomWars.getLastTime());
 		addLast(lastWar);
 	}
 
@@ -355,7 +344,7 @@ public class WarUtil {
 		return false;
 	}
 
-	public static void addLast(LastWar lastWar) {
+	private static void addLast(LastWar lastWar) {
 		last.add(lastWar);
 		reloadLast();
 	}
@@ -364,8 +353,8 @@ public class WarUtil {
 		reloadLast();
 
 		for (LastWar lastWar : last) {
-			if (lastWar.getDeclaringNation().equals(nation.getName())
-					|| lastWar.getDeclaredNation().equals(nation.getName()))
+			if (lastWar.getDeclaringNation().equals(nation.getName()) ||
+					lastWar.getDeclaredNation().equals(nation.getName()))
 				return lastWar;
 		}
 
@@ -373,7 +362,7 @@ public class WarUtil {
 	}
 
 	public static void removeAllLast(String nation) {
-		List<LastWar> remove = new ArrayList<LastWar>();
+		List<LastWar> remove = new ArrayList<>();
 
 		for (LastWar lastWar : last) {
 			if (lastWar.getDeclaringNation().equals(nation) || lastWar.getDeclaredNation().equals(nation)) {
@@ -428,24 +417,18 @@ public class WarUtil {
 		return leaderboardList;
 	}
 
-	public static void addWinToLeaderBoard(String nation, boolean won) {
-		int i = findIndexForNationInLeaderboard(nation);
+	private static void addWinToLeaderBoard(String nation, boolean won) {
+		Leaderboard leaderboard = getLeaderboardForNation(nation);
 
-		Leaderboard lb;
-
-		if (i == -1) {
-			lb = new Leaderboard(nation);
-			leaderboardList.add(lb);
-		} else {
-			lb = leaderboardList.get(i);
+		if (leaderboard == null) {
+			leaderboard = new Leaderboard(nation);
+			leaderboardList.add(leaderboard);
 		}
 
-		i = findIndexForNationInLeaderboard(nation);
-
 		if (won) {
-			leaderboardList.get(i).setWins(lb.getWins() + 1);
+			leaderboard.setWins(leaderboard.getWins() + 1);
 		} else {
-			leaderboardList.get(i).setLosses(lb.getLosses() + 1);
+			leaderboard.setLosses(leaderboard.getLosses() + 1);
 		}
 
 		saveLeaderboard();
@@ -456,12 +439,13 @@ public class WarUtil {
 
 		String lastwarinfo = winner + ";" + loser + ";" + df.format(new Date());
 
-		int i = findIndexForNationInLeaderboard(winner);
-		leaderboardList.get(i).setLastWarInfo(lastwarinfo);
+		Leaderboard leaderboard = getLeaderboardForNation(winner);
+
+		leaderboard.setLastWarInfo(lastwarinfo);
 		saveLeaderboard();
 
-		i = findIndexForNationInLeaderboard(loser);
-		leaderboardList.get(i).setLastWarInfo(lastwarinfo);
+		leaderboard = getLeaderboardForNation(loser);
+		leaderboard.setLastWarInfo(lastwarinfo);
 		saveLeaderboard();
 	}
 
@@ -480,10 +464,10 @@ public class WarUtil {
 	}
 
 	public static void leaderBoardNationRename(String oldName, String newName) {
-		int i = findIndexForNationInLeaderboard(oldName);
+		Leaderboard leaderboard = getLeaderboardForNation(oldName);
 
-		if (i != -1) {
-			leaderboardList.get(i).setNation(newName);
+		if (leaderboard != null) {
+			leaderboard.setNation(newName);
 			saveLeaderboard();
 		}
 	}
@@ -506,23 +490,23 @@ public class WarUtil {
 	}
 
 	public static void leaderBoardNationDelete(String nation) {
-		int i = findIndexForNationInLeaderboard(nation);
+		Leaderboard leaderboard = getLeaderboardForNation(nation);
 
-		if (i != -1) {
-			leaderboardList.remove(i);
+		if (leaderboard != null) {
+			leaderboardList.remove(leaderboard);
 			saveLeaderboard();
 		}
 	}
 
-	private static int findIndexForNationInLeaderboard(String nation) {
+	private static Leaderboard getLeaderboardForNation(String nation) {
 		if (leaderboardList.isEmpty())
-			return -1;
+			return null;
 
-		for (int i = 0; i < leaderboardList.size(); i++) {
-			if (leaderboardList.get(i).getNation().equals(nation))
-				return i;
+		for (Leaderboard leaderboard : leaderboardList) {
+			if (leaderboard.getNation().equals(nation))
+				return leaderboard;
 		}
 
-		return -1;
+		return null;
 	}
 }
