@@ -460,6 +460,8 @@ public class WarUtil {
 			war.setDeclaredNation(newName);
 		}
 
+		WarBoard.updateNationNames(war, oldName, declaring);
+
 		saveWars();
 	}
 

@@ -86,6 +86,39 @@ public class WarBoard {
 		}
 	}
 
+	public static void updateNationNames(War war, String oldName, boolean isDeclaring) {
+		if (war.getScoreBoard() == null) {
+			updateBoard(war);
+		}
+
+		Scoreboard warboard = war.getScoreBoard();
+		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
+
+		ChatColor color = (isDeclaring) ? ChatColor.BLUE : ChatColor.AQUA;
+		String newNationName = (isDeclaring) ? war.getDeclaringNation() : war.getDeclaredNation();
+
+		warboard.resetScores(color + "" + ChatColor.BOLD + oldName);
+		obj.getScore(color + "" + ChatColor.BOLD + newNationName).setScore((isDeclaring) ? 10 : 7);
+
+		Nation n1 = TownyUtil.getNation(war.getDeclaringNation());
+		Nation n2 = TownyUtil.getNation(war.getDeclaredNation());
+
+		war.setScoreBoard(warboard);
+		WarUtil.updateWar(war);
+
+		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+			Nation nation = TownyUtil.getNation(p);
+
+			if (nation == null)
+				continue;
+
+			if (nation.equals(n1) || nation.equals(n2)) {
+				p.setScoreboard(warboard);
+			}
+		}
+	}
+
+
 	public static void showBoard(Player p) {
 		Nation n = TownyUtil.getNation(p);
 

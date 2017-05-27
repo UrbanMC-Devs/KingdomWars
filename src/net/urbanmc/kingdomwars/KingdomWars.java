@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import net.urbanmc.kingdomwars.listener.NationListener;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -61,6 +62,7 @@ public class KingdomWars extends JavaPlugin {
 
 		getCommand("townywar").setExecutor(new BaseCommand());
 		getServer().getPluginManager().registerEvents(new WarListener(), this);
+		getServer().getPluginManager().registerEvents(new NationListener(), this);
 	}
 
 	private void loadConfig() {
