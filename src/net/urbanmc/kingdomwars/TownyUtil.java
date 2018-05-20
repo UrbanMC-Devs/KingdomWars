@@ -127,6 +127,7 @@ public class TownyUtil {
 
 	public static void deleteNation(Nation nation) {
 		TownyUniverse.getDataSource().removeNation(nation);
+		WarUtil.leaderBoardNationDelete(nation.getName());
 	}
 
 	public static List<Player> getOnlineInNation(Nation nation, String permission) {

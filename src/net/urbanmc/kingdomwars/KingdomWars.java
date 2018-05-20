@@ -59,6 +59,7 @@ public class KingdomWars extends JavaPlugin {
 		}
 
 		loadConfig();
+		WarUtil.filterLeaderboard();
 
 		getCommand("townywar").setExecutor(new BaseCommand());
 		getServer().getPluginManager().registerEvents(new WarListener(), this);

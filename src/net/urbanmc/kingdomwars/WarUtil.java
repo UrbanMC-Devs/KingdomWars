@@ -123,6 +123,15 @@ public class WarUtil {
 
 	}
 
+	public static void filterLeaderboard() {
+		Nation n;
+		for (int i = 0; i < leaderboardList.size(); i++) {
+			n = TownyUtil.getNation(leaderboardList.get(i).getNation());
+
+			if(n == null) leaderboardList.remove(leaderboardList.get(i));
+		}
+	}
+
 	private static void reloadLast() {
 		long millis = System.currentTimeMillis();
 
