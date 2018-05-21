@@ -1,17 +1,15 @@
 package net.urbanmc.kingdomwars.command.subs;
 
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import com.palmergames.bukkit.towny.object.Nation;
-
 import net.urbanmc.kingdomwars.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarEndEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
+import java.util.logging.Level;
 
 public class End {
 
@@ -35,7 +33,15 @@ public class End {
 
 		War war = WarUtil.getWar(nation1);
 
-		if (!war.getDeclaringNation().equalsIgnoreCase(nation1.getName())) {
+		String nationName = nation1.getName();
+
+		int declaringPoints = war.getDeclaringPoints(), declaredPoints = war.getDeclaredPoints();
+
+		if (war.isDeclaringNation(nationName) && declaredPoints > declaringPoints ||
+				!war.isDeclaringNation(nationName) && declaringPoints > declaredPoints) {
+			p.sendMessage(ChatColor.RED + "Your nation cannot end the war because your nation is losing!");
+			return;
+		} else if (declaringPoints == declaredPoints && !war.isDeclaringNation(nationName)) {
 			p.sendMessage(ChatColor.RED + "Your nation cannot end the war because your nation did not start it!");
 			return;
 		}
@@ -51,8 +57,8 @@ public class End {
 		Nation nation2 = war.getOtherNation(nation1);
 
 		if (nation2 == null) {
-			Bukkit.getLogger().log(Level.WARNING,
-					"[KingdomWars] Error while getting nation " + war.getDeclaredNation());
+			Bukkit.getLogger()
+					.log(Level.WARNING, "[KingdomWars] Error while getting nation " + war.getDeclaredNation());
 			return;
 		}
 

@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.data.last.LastWar;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -14,150 +15,167 @@ import net.urbanmc.kingdomwars.event.WarStartEvent;
 
 public class Start {
 
-	public Start(Player p, String[] args) {
-		if (!p.hasPermission("kingdomwars.start")) {
-			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
-			return;
-		}
+    public Start(Player p, String[] args) {
+        if (!p.hasPermission("kingdomwars.start")) {
+            p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
+            return;
+        }
 
-		Nation nation1 = TownyUtil.getNation(p);
+        Nation nation1 = TownyUtil.getNation(p);
 
-		if (nation1 == null) {
-			p.sendMessage(ChatColor.RED + "You are not in a nation!");
-			return;
-		}
+        if (nation1 == null) {
+            p.sendMessage(ChatColor.RED + "You are not in a nation!");
+            return;
+        }
 
-		if (args.length == 1) {
-			p.sendMessage(ChatColor.RED + "Please specify a nation to declare war against.");
-			return;
-		}
+        if (args.length == 1) {
+            p.sendMessage(ChatColor.RED + "Please specify a nation to declare war against.");
+            return;
+        }
 
-		Nation nation2 = TownyUtil.getNation(args[1]);
+        Nation nation2 = TownyUtil.getNation(args[1]);
 
-		if (nation2 == null) {
-			p.sendMessage(ChatColor.RED + "You have not specified a valid nation.");
-			return;
-		}
+        if (nation2 == null) {
+            p.sendMessage(ChatColor.RED + "You have not specified a valid nation.");
+            return;
+        }
 
-		if (WarUtil.inWar(nation1)) {
-			p.sendMessage(ChatColor.RED + "You are already in a war!");
-			return;
-		}
+        if (WarUtil.inWar(nation1)) {
+            p.sendMessage(ChatColor.RED + "You are already in a war!");
+            return;
+        }
 
-		if (WarUtil.inWar(nation2)) {
-			p.sendMessage(ChatColor.RED + "That nation is already in a war!");
-			return;
-		}
+        if (WarUtil.inWar(nation2)) {
+            p.sendMessage(ChatColor.RED + "That nation is already in a war!");
+            return;
+        }
 
-		if (nation1.isNeutral()) {
-			p.sendMessage(ChatColor.RED + "Your nation is neutral!");
-			return;
-		}
+        if (nation1.isNeutral()) {
+            p.sendMessage(ChatColor.RED + "Your nation is neutral!");
+            return;
+        }
 
-		if (nation2.isNeutral()) {
-			p.sendMessage(ChatColor.RED + "That nation is neutral!");
-			return;
-		}
+        if (nation1.getName().equals(nation2.getName())) {
+            p.sendMessage(ChatColor.RED + "This plug-in does not support civil wars!");
+            return;
+        }
 
-		if (nation1.getName().equals(nation2.getName())) {
-			p.sendMessage(ChatColor.RED + "This plug-in does not support civil wars!");
-			return;
-		}
+        if (nation1.hasAlly(nation2)) {
+            p.sendMessage(ChatColor.RED + "You cannot have a war with your ally!");
+            return;
+        }
 
-		if (nation1.hasAlly(nation2)) {
-			p.sendMessage(ChatColor.RED + "You cannot have a war with your ally!");
-			return;
-		}
+        boolean revenge = false;
 
-		if (WarUtil.hasLast(nation1.getName(), nation2.getName())) {
-			p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast(nation1)
-					+ " seconds from now!");
-			return;
-		}
+        if (WarUtil.hasLast(nation1.getName(), nation2.getName())) {
+            if (WarUtil.canRevenge(nation1, nation2)) {
+                revenge = true;
+            } else {
+                p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast
+                        (nation1, nation2)
+                        + " seconds from now!");
+                return;
+            }
+        }
 
-		if (TownyUtil.getNationBalance(nation1) < KingdomWars.getStartAmount()) {
-			p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
-					+ ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")");
-			return;
-		}
+        if (!revenge && nation2.isNeutral()) {
+            p.sendMessage(ChatColor.RED + "That nation is neutral!");
+            return;
+        }
 
-		War war = new War(nation1.getName(), nation2.getName());
+        if (TownyUtil.getNationBalance(nation1) < KingdomWars.getStartAmount()) {
+            p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
+                    + ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")");
+            return;
+        }
 
-		WarStartEvent event = new WarStartEvent(war);
-		Bukkit.getPluginManager().callEvent(event);
+        War war = new War(nation1.getName(), nation2.getName());
 
-		if (event.isCancelled())
-			return;
+        WarStartEvent event = new WarStartEvent(war);
+        Bukkit.getPluginManager().callEvent(event);
 
-		WarUtil.startWar(war);
+        if (event.isCancelled())
+            return;
 
-		TownyUtil.sendNationMessage(nation1, "Your nation has declared war against " + nation2.getName() + "!");
-		TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation!");
-	}
+        WarUtil.startWar(war);
 
-	private String getLast(Nation nation) {
-		long time = WarUtil.getLast(nation).getMillis() - System.currentTimeMillis();
+        TownyUtil.sendNationMessage(nation1, "Your nation has declared war against " + nation2.getName() + "!");
+        TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation!");
+    }
 
-		return formatTime(time / 1000);
-	}
+    private String getLast(Nation nation1, Nation nation2) {
+        LastWar last = WarUtil.getLast(nation1, nation2);
 
-	public static String formatTime(long time) {
-		int days = 0, hours = 0, minutes = 0, seconds = 0;
+        long time;
 
-		while (time >= 86400) {
-			days++;
-			time -= 86400;
-		}
+        if (last.isLosingNation(nation1.getName())) {
+            time = last.getRevengeMillis();
+        } else {
+            time = last.getMillis();
+        }
 
-		while (time >= 3600) {
-			hours++;
-			time -= 3600;
-		}
+        time -= System.currentTimeMillis();
 
-		while (time >= 60) {
-			minutes++;
-			time -= 60;
-		}
+        return formatTime(time / 1000);
+    }
 
-		seconds = Long.valueOf(time).intValue();
+    public static String formatTime(long time) {
+        int days = 0, hours = 0, minutes = 0, seconds = 0;
 
-		if (seconds == 60) {
-			minutes++;
-			seconds = 0;
-		}
+        while (time >= 86400) {
+            days++;
+            time -= 86400;
+        }
 
-		String output = "";
+        while (time >= 3600) {
+            hours++;
+            time -= 3600;
+        }
 
-		if (days > 1) {
-			output += days + " days, ";
-		} else {
-			output += days + " day, ";
-		}
+        while (time >= 60) {
+            minutes++;
+            time -= 60;
+        }
 
-		if (hours > 1) {
-			output += hours + " hours, ";
-		} else if (hours == 1) {
-			output += hours + " hour, ";
-		}
+        seconds = Long.valueOf(time).intValue();
 
-		if (minutes > 1) {
-			output += minutes + " minutes, ";
-		} else if (minutes == 1) {
-			output += minutes + " minute, ";
-		}
+        if (seconds == 60) {
+            minutes++;
+            seconds = 0;
+        }
 
-		if (seconds > 1) {
-			output += seconds + " seconds";
-		} else if (seconds == 1) {
-			output += seconds + " second";
-		}
+        String output = "";
 
-		output = output.trim();
+        if (days > 1) {
+            output += days + " days, ";
+        } else {
+            output += days + " day, ";
+        }
 
-		if (output.endsWith(",")) {
-			output = output.substring(0, output.length() - 1);
-		}
+        if (hours > 1) {
+            output += hours + " hours, ";
+        } else if (hours == 1) {
+            output += hours + " hour, ";
+        }
 
-		return output;
-	}
+        if (minutes > 1) {
+            output += minutes + " minutes, ";
+        } else if (minutes == 1) {
+            output += minutes + " minute, ";
+        }
+
+        if (seconds > 1) {
+            output += seconds + " seconds";
+        } else if (seconds == 1) {
+            output += seconds + " second";
+        }
+
+        output = output.trim();
+
+        if (output.endsWith(",")) {
+            output = output.substring(0, output.length() - 1);
+        }
+
+        return output;
+    }
 }

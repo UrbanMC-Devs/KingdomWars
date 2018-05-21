@@ -2,37 +2,66 @@ package net.urbanmc.kingdomwars.data.last;
 
 public class LastWar {
 
-	private String nation1;
-	private String nation2;
-	private long millis;
+    private String declaringNation;
+    private String declaredNation;
+    private boolean isDeclaringWinner;
+    private boolean truce;
+    private long millis, revengeMillis;
 
-	public LastWar(String nation1, String nation2, long millis) {
-		this.nation1 = nation1;
-		this.nation2 = nation2;
-		this.millis = millis;
-	}
+    public LastWar(String declaringNation, String declaredNation, boolean isDeclaringWinner, boolean truce,
+                   long millis, long revengeMillis) {
+        this.declaringNation = declaringNation;
+        this.declaredNation = declaredNation;
+        this.isDeclaringWinner = isDeclaringWinner;
+        this.truce = truce;
+        this.millis = millis;
+        this.revengeMillis = revengeMillis;
+    }
 
-	public String getDeclaringNation() {
-		return this.nation1;
-	}
+    public String getDeclaringNation() {
+        return declaringNation;
+    }
 
-	public String getDeclaredNation() {
-		return this.nation2;
-	}
+    public void setDeclaringNation(String nation) {
+        declaringNation = nation;
+    }
 
-	public long getMillis() {
-		return this.millis;
-	}
+    public String getDeclaredNation() {
+        return declaredNation;
+    }
 
-	public boolean isDeclaringNation(String nation) {
-		return this.nation1.equals(nation);
-	}
+    public void setDeclaredNation(String nation) {
+        declaredNation = nation;
+    }
 
-	public void setDeclaringNation(String nation) {
-		this.nation1 = nation;
-	}
+    private String getLoser() {
+        if (isDeclaringWinner)
+            return declaredNation;
+        else
+            return declaringNation;
+    }
 
-	public void setDeclaredNation(String nation) {
-		this.nation2 = nation;
-	}
+    private boolean wasTruce() {
+        return truce;
+    }
+
+    public long getMillis() {
+        return millis;
+    }
+
+    public long getRevengeMillis() {
+        return revengeMillis;
+    }
+
+    public boolean isDeclaringNation(String nation) {
+        return declaringNation.equals(nation);
+    }
+
+    public boolean isDeclaringWinner() {
+        return isDeclaringWinner;
+    }
+
+    public boolean isLosingNation(String nation) {
+        return getLoser().equals(nation);
+    }
 }

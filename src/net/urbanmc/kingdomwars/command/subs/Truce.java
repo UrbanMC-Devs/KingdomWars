@@ -34,13 +34,23 @@ public class Truce {
 
 		War war = WarUtil.getWar(nation);
 
-		if (!war.getDeclaredNation().equals(nation.getName())) {
+		String nationName = nation.getName();
+
+		int declaringPoints = war.getDeclaringPoints(), declaredPoints = war.getDeclaredPoints();
+
+		if (war.isDeclaringNation(nationName) && declaringPoints > declaredPoints ||
+				!war.isDeclaringNation(nationName) && declaredPoints > declaringPoints) {
 			p.sendMessage(
-					ChatColor.RED + "You are the nation that started the war! You must do /" + label + " end instead.");
+					ChatColor.RED + "Your nation is winning the war! You must do /" + label + " end instead" + ".");
+			return;
+		} else if (declaringPoints == declaredPoints && war.isDeclaringNation(nationName)) {
+			p.sendMessage(
+					ChatColor.RED + "You are the nation that started the war! You must do /" + label + " end instead" +
+							".");
 			return;
 		}
 
-		Nation receivingNation = TownyUtil.getNation(war.getDeclaringNation());
+		Nation receivingNation = war.getOtherNation(nation);
 
 		WarTruceEvent event = new WarTruceEvent(war);
 		Bukkit.getPluginManager().callEvent(event);
@@ -48,7 +58,8 @@ public class Truce {
 		if (event.isCancelled())
 			return;
 
-		TownyMessaging.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName());
+		TownyMessaging.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName
+				());
 		TownyUtil.truceQuestion(receivingNation, nation);
 	}
 }

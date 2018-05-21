@@ -1,19 +1,12 @@
 package net.urbanmc.kingdomwars.command;
 
+import net.urbanmc.kingdomwars.KingdomWars;
+import net.urbanmc.kingdomwars.command.subs.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.command.subs.End;
-import net.urbanmc.kingdomwars.command.subs.ForceEnd;
-import net.urbanmc.kingdomwars.command.subs.LeaderboardSub;
-import net.urbanmc.kingdomwars.command.subs.Start;
-import net.urbanmc.kingdomwars.command.subs.Status;
-import net.urbanmc.kingdomwars.command.subs.Truce;
-import net.urbanmc.kingdomwars.command.subs.Wars;
 
 public class BaseCommand implements CommandExecutor {
 
@@ -34,27 +27,27 @@ public class BaseCommand implements CommandExecutor {
 		String sub = args[0].toLowerCase();
 
 		switch (sub) {
-		case "start":
-			new Start(p, args);
-			return true;
-		case "end":
-			new End(p, args);
-			return true;
-		case "truce":
-			new Truce(p, label, args);
-			return true;
-		case "status":
-			new Status(p, args);
-			return true;
-		case "forceend":
-			new ForceEnd(p, args);
-			return true;
-		case "wars":
-			new Wars(p, args);
-			return true;
-		case "leaderboard":
-			new LeaderboardSub(p, args);
-			return true;
+			case "start":
+				new Start(p, args);
+				return true;
+			case "end":
+				new End(p, args);
+				return true;
+			case "truce":
+				new Truce(p, label, args);
+				return true;
+			case "status":
+				new Status(p, args);
+				return true;
+			case "forceend":
+				new ForceEnd(p, args);
+				return true;
+			case "wars":
+				new Wars(p, args);
+				return true;
+			case "leaderboard":
+				new LeaderboardSub(p, args);
+				return true;
 		}
 
 		infoMessage(p, label);
@@ -66,15 +59,15 @@ public class BaseCommand implements CommandExecutor {
 		StringBuilder message = new StringBuilder();
 
 		message.append(ChatColor.AQUA + "=== Kingdom Wars ===\n");
-		message.append("/" + label + " start (nation)" + ChatColor.WHITE + ": Start a war with another nation! "
-				+ ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")\n");
+		message.append("/" + label + " start (nation)" + ChatColor.WHITE + ": Start a war with another nation! " +
+				               ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")\n");
 		message.append(ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE + ": End a war you started!\n");
-		message.append(ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE
-				+ ": Declare a truce with the nation who started a battle!\n");
+		message.append(ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE +
+				               ": Declare a truce with the nation who started a battle!\n");
 		message.append(ChatColor.AQUA + "/" + label + " status" + ChatColor.WHITE + ": Toggle the war scoreboard\n");
 		message.append(ChatColor.AQUA + "/" + label + " wars" + ChatColor.WHITE + ": View the current wars!\n");
-		message.append(ChatColor.AQUA + "/" + label + " leaderboard" + ChatColor.WHITE
-				+ ": Check out which nation has the most wins!");
+		message.append(ChatColor.AQUA + "/" + label + " leaderboard" + ChatColor.WHITE +
+				               ": Check out which nation has the most wins!");
 
 		p.sendMessage(message.toString());
 	}

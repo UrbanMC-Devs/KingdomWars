@@ -1,6 +1,7 @@
 package net.urbanmc.kingdomwars;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -9,7 +10,6 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.md_5.bungee.api.ChatColor;
 import net.urbanmc.kingdomwars.data.war.War;
 
 public class WarBoard {
