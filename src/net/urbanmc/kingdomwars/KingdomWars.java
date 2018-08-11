@@ -3,12 +3,14 @@ package net.urbanmc.kingdomwars;
 import ca.xshade.bukkit.questioner.Questioner;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
+import me.Silverwolfg11.TownOutlaw.Main;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,6 +23,7 @@ public class KingdomWars extends JavaPlugin {
 	private static Towny towny;
 	private static Questioner questioner;
 	private static Essentials essentials;
+	private static Main townOutlaw;
 
 	private static double startAmount, finishAmount, truceAmount;
 	private static int winningKills;
@@ -70,6 +73,12 @@ public class KingdomWars extends JavaPlugin {
 		return endTime;
 	}
 
+	public static boolean playerIsJailed(Player p) {
+		if (townOutlaw == null) return false;
+
+		return townOutlaw.getJailedPlayer(p.getUniqueId()) != null;
+	}
+
 	@Override
 	public void onEnable() {
 		if (!getServer().getPluginManager().isPluginEnabled("Towny")) {
@@ -88,6 +97,10 @@ public class KingdomWars extends JavaPlugin {
 			essentials = getPlugin(Essentials.class);
 		}
 
+		if (getServer().getPluginManager().isPluginEnabled("TownOutlaw")) {
+			townOutlaw = (Main) getServer().getPluginManager().getPlugin("TownOutlaw");
+		}
+
 		towny = getPlugin(Towny.class);
 		questioner = getPlugin(Questioner.class);
 
@@ -98,6 +111,7 @@ public class KingdomWars extends JavaPlugin {
 		}
 
 		loadConfig();
+		WarUtil.filterLeaderboard();
 
 		getCommand("townywar").setExecutor(new BaseCommand());
 

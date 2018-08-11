@@ -116,7 +116,7 @@ public class WarUtil {
 
             leaderboardList = gson.fromJson(scanner.nextLine(), LeaderboardList.class).getLeaderboards();
             if (leaderboardList == null)
-                System.out.println("Loading LList = null");
+                System.out.println("[KingdomWars] Loading Leaderboard List = null");
             scanner.close();
         } catch (Exception ignored) {
         }
@@ -125,11 +125,15 @@ public class WarUtil {
 
     public static void filterLeaderboard() {
         Nation n;
-        for (int i = 0; i < leaderboardList.size(); i++) {
-            n = TownyUtil.getNation(leaderboardList.get(i).getNation());
+        List<Leaderboard> newLeaderBoardList = new ArrayList<>();
+        for (Leaderboard leaderboard : leaderboardList) {
+            n = TownyUtil.getNation(leaderboard.getNation());
 
-            if (n == null) leaderboardList.remove(leaderboardList.get(i));
+            if (n != null) newLeaderBoardList.add(leaderboard);
         }
+
+        leaderboardList = newLeaderBoardList;
+        saveLeaderboard();
     }
 
     private static void reloadLast() {

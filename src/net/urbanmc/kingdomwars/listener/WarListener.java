@@ -109,6 +109,9 @@ public class WarListener implements Listener {
 		if (WarUtil.checkForceEnd(war))
 			return;
 
+		if (KingdomWars.playerIsJailed(p))
+			return;
+
 		WarPointAddEvent event = new WarPointAddEvent(war, nation2, 1);
 		Bukkit.getPluginManager().callEvent(event);
 
