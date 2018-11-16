@@ -1,12 +1,14 @@
 package net.urbanmc.kingdomwars;
 
 import ca.xshade.bukkit.questioner.Questioner;
+import ca.xshade.questionmanager.Question;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 import me.Silverwolfg11.TownOutlaw.Main;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
+import net.urbanmc.kingdomwars.util.QuestionUtil;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,7 +23,7 @@ import java.util.logging.Level;
 public class KingdomWars extends JavaPlugin {
 
 	private static Towny towny;
-	private static Questioner questioner;
+	private static QuestionUtil questionUtil;
 	private static Essentials essentials;
 	private static Main townOutlaw;
 
@@ -33,9 +35,7 @@ public class KingdomWars extends JavaPlugin {
 		return towny;
 	}
 
-	public static Questioner getQuestioner() {
-		return questioner;
-	}
+	public static QuestionUtil getQuestionUtil() { return questionUtil; }
 
 	public static boolean hasEssentials() {
 		return essentials != null;
@@ -87,12 +87,6 @@ public class KingdomWars extends JavaPlugin {
 			return;
 		}
 
-		if (!getServer().getPluginManager().isPluginEnabled("Questioner")) {
-			getLogger().log(Level.SEVERE, "Questioner plugin was not found! Disabling..");
-			setEnabled(false);
-			return;
-		}
-
 		if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
 			essentials = getPlugin(Essentials.class);
 		}
@@ -102,7 +96,7 @@ public class KingdomWars extends JavaPlugin {
 		}
 
 		towny = getPlugin(Towny.class);
-		questioner = getPlugin(Questioner.class);
+		questionUtil = new QuestionUtil(this);
 
 		if (towny.isError()) {
 			getLogger().log(Level.SEVERE, "There was an error while enabling Towny. Disabling..");

@@ -23,8 +23,8 @@ public class WarListSerializer implements JsonSerializer<WarList>, JsonDeseriali
 		Gson gson = new GsonBuilder().registerTypeAdapter(War.class, new WarSerializer()).create();
 
 		for (War war : list.getWars()) {
-			array.add(gson.toJsonTree(war));;
-		}
+			array.add(gson.toJsonTree(war));
+        }
 
 		return array;
 	}
@@ -32,7 +32,7 @@ public class WarListSerializer implements JsonSerializer<WarList>, JsonDeseriali
 	@Override
 	public WarList deserialize(JsonElement element, Type type, JsonDeserializationContext context)
 			throws JsonParseException {
-		List<War> wars = new ArrayList<War>();
+		List<War> wars = new ArrayList<>();
 
 		Gson gson = new GsonBuilder().registerTypeAdapter(War.class, new WarSerializer()).create();
 

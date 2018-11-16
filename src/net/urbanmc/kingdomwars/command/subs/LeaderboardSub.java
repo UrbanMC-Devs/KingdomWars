@@ -40,7 +40,6 @@ public class LeaderboardSub {
 		}
 
 		p.sendMessage(message);
-		return;
 	}
 
 	private List<Leaderboard> sortLeaderBoardList(List<Leaderboard> list) {

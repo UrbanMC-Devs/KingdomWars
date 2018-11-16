@@ -1,7 +1,7 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
-import net.urbanmc.kingdomwars.TownyUtil;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarEndEvent;

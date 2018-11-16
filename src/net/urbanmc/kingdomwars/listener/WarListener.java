@@ -13,7 +13,7 @@ import com.palmergames.bukkit.towny.event.DisallowedPVPEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.TownyUtil;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;

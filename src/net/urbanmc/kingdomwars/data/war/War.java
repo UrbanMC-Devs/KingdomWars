@@ -8,7 +8,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.TownyUtil;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 
 public class War {
 
@@ -87,7 +87,6 @@ public class War {
 
 	public void setScoreBoard(Scoreboard board) {
 		this.board = board;
-		return;
 	}
 
 	public Scoreboard getScoreBoard() {
@@ -103,7 +102,7 @@ public class War {
 
 	public void setDisabled(UUID id, boolean disable) {
 		if (this.disabled == null) {
-			this.disabled = new ArrayList<UUID>();
+			this.disabled = new ArrayList<>();
 		}
 
 		if (disable) {

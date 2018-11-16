@@ -48,6 +48,11 @@ public class BaseCommand implements CommandExecutor {
 			case "leaderboard":
 				new LeaderboardSub(p, args);
 				return true;
+
+			case "accept":
+			case "deny":
+				new AcceptDenySub(p, args[0]);
+				return true;
 		}
 
 		infoMessage(p, label);
@@ -59,15 +64,15 @@ public class BaseCommand implements CommandExecutor {
 		StringBuilder message = new StringBuilder();
 
 		message.append(ChatColor.AQUA + "=== Kingdom Wars ===\n");
-		message.append("/" + label + " start (nation)" + ChatColor.WHITE + ": Start a war with another nation! " +
-				               ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")\n");
-		message.append(ChatColor.AQUA + "/" + label + " end" + ChatColor.WHITE + ": End a war you started!\n");
-		message.append(ChatColor.AQUA + "/" + label + " truce" + ChatColor.WHITE +
-				               ": Declare a truce with the nation who started a battle!\n");
-		message.append(ChatColor.AQUA + "/" + label + " status" + ChatColor.WHITE + ": Toggle the war scoreboard\n");
-		message.append(ChatColor.AQUA + "/" + label + " wars" + ChatColor.WHITE + ": View the current wars!\n");
-		message.append(ChatColor.AQUA + "/" + label + " leaderboard" + ChatColor.WHITE +
-				               ": Check out which nation has the most wins!");
+
+		message.append("/").append(label).append(" start (nation)").append(ChatColor.WHITE).append(": Start a war with another nation! ")
+				.append(ChatColor.GREEN).append("($").append(KingdomWars.getStartAmount()).append(")\n");
+
+		message.append(ChatColor.AQUA + "/").append(label).append(" end").append(ChatColor.WHITE).append(": End a war you started!\n");
+		message.append(ChatColor.AQUA + "/").append(label).append(" truce").append(ChatColor.WHITE).append(": Declare a truce with the nation who started a battle!\n");
+		message.append(ChatColor.AQUA + "/").append(label).append(" status").append(ChatColor.WHITE).append(": Toggle the war scoreboard\n");
+		message.append(ChatColor.AQUA + "/").append(label).append(" wars").append(ChatColor.WHITE).append(": View the current wars!\n");
+		message.append(ChatColor.AQUA + "/").append(label).append(" leaderboard").append(ChatColor.WHITE).append(": Check out which nation has the most wins!");
 
 		p.sendMessage(message.toString());
 	}

@@ -1,8 +1,11 @@
-package net.urbanmc.kingdomwars;
+package net.urbanmc.kingdomwars.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import net.urbanmc.kingdomwars.KingdomWars;
+import net.urbanmc.kingdomwars.WarUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
@@ -41,7 +44,6 @@ public class TownyUtil {
 		try {
 			nation = TownyUniverse.getDataSource().getNation(name);
 		} catch (NotRegisteredException ex) {
-			;
 		}
 
 		if (nation == null) {
@@ -83,46 +85,20 @@ public class TownyUtil {
 	}
 
 	public static void truceQuestion(Nation receivingNation, Nation otherNation) {
-		List<Option> options = new ArrayList<Option>();
+		if (!receivingNation.hasValidUUID())
+				receivingNation.setUuid(UUID.randomUUID());
 
-		options.add(new Option("accept", new QuestionTask() {
-			public void run() {
-				WarUtil.win(receivingNation, otherNation, KingdomWars.getTruceAmount());
-			}
-		}));
-
-		options.add(new Option("deny", new QuestionTask() {
-			public void run() {
-				sendNationMessage(receivingNation,
-						"Your nation has declined the request to truce with " + otherNation.getName() + ".");
-				sendNationMessage(otherNation, receivingNation.getName() + " has declined your request to truce.");
-			}
-		}));
-
-		List<String> targets = new ArrayList<String>();
-
-		for (Player p : getOnlineInNation(receivingNation, "kingdomwars.nationstaff")) {
-			targets.add(p.getName());
-		}
-
-		LinkedQuestion question = new LinkedQuestion(QuestionManager.getNextQuestionId(), targets,
-				"Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
-						+ KingdomWars.getTruceAmount() + " from their nation bank.",
-				options);
-
-		try {
-			KingdomWars.getQuestioner().getQuestionManager().appendLinkedQuestion(question);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		for (String name : targets) {
-			Player p = Bukkit.getPlayer(name);
-
-			for (String line : KingdomWars.getQuestioner().formatQuestion(question, "New Question")) {
-				p.sendMessage(line);
-			}
-		}
+		KingdomWars.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
+				+ KingdomWars.getTruceAmount() + " from their nation bank.",
+				receivingNation.getUuid(),
+				() -> { WarUtil.win(receivingNation, otherNation, KingdomWars.getTruceAmount()); },
+				() -> {
+					sendNationMessage(receivingNation,
+							"Your nation has declined the request to truce with " + otherNation.getName() + ".");
+					sendNationMessage(otherNation, receivingNation.getName() + " has declined your request to truce.");
+				},
+				getOnlineInNation(receivingNation, "kingdomwars.nationstaff")
+				);
 	}
 
 	public static void deleteNation(Nation nation) {
@@ -131,8 +107,8 @@ public class TownyUtil {
 	}
 
 	public static List<Player> getOnlineInNation(Nation nation, String permission) {
-		List<Player> players = new ArrayList<Player>();
-		List<String> residents = new ArrayList<String>();
+		List<Player> players = new ArrayList<>();
+		List<String> residents = new ArrayList<>();
 
 		for (Resident res : nation.getResidents()) {
 			residents.add(res.getName());
