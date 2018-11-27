@@ -1,6 +1,7 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import net.urbanmc.kingdomwars.data.last.LastWar;
+import net.urbanmc.kingdomwars.event.WarDeclareEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -89,18 +90,18 @@ public class Start {
             return;
         }
 
-        War war = new War(nation1.getName(), nation2.getName());
+        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5); //5 minutes is default time. Can be modified through event.
+        Bukkit.getPluginManager().callEvent(declareEvent);
 
-        WarStartEvent event = new WarStartEvent(war);
-        Bukkit.getPluginManager().callEvent(event);
-
-        if (event.isCancelled())
+        if (declareEvent.isCancelled())
             return;
 
-        WarUtil.startWar(war);
+        TownyUtil.sendNationMessage(nation1, "Your nation has will be at war against " + nation2.getName() + " in " + declareEvent.getTimeTillWar() + " minutes!");
+        TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation! The war will begin in " + declareEvent.getTimeTillWar() + " minutes!");
 
-        TownyUtil.sendNationMessage(nation1, "Your nation has declared war against " + nation2.getName() + "!");
-        TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation!");
+        Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () ->
+                startWar(nation1, nation2)
+                , 20* 60 * declareEvent.getTimeTillWar()); //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
     }
 
     private String getLast(Nation nation1, Nation nation2) {
@@ -119,8 +120,8 @@ public class Start {
         return formatTime(time / 1000);
     }
 
-    public static String formatTime(long time) {
-        int days = 0, hours = 0, minutes = 0, seconds = 0;
+    private static String formatTime(long time) {
+        int days = 0, hours = 0, minutes = 0, seconds;
 
         while (time >= 86400) {
             days++;
@@ -177,5 +178,20 @@ public class Start {
         }
 
         return output;
+    }
+
+    private void startWar(Nation nation1, Nation nation2) {
+        War war = new War(nation1.getName(), nation2.getName());
+
+        WarStartEvent event = new WarStartEvent(war);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled())
+            return;
+
+        WarUtil.startWar(war);
+
+        TownyUtil.sendNationMessage(nation1, "Your nation has started a war against " + nation2.getName() + "!");
+        TownyUtil.sendNationMessage(nation2, nation1.getName() + " has began a war against your nation!");
     }
 }

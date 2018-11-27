@@ -10,6 +10,7 @@ import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
 import org.apache.commons.io.IOUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -26,6 +27,7 @@ public class KingdomWars extends JavaPlugin {
 	private static QuestionUtil questionUtil;
 	private static Essentials essentials;
 	private static Main townOutlaw;
+	private static KingdomWars instance;
 
 	private static double startAmount, finishAmount, truceAmount;
 	private static int winningKills;
@@ -73,6 +75,8 @@ public class KingdomWars extends JavaPlugin {
 		return endTime;
 	}
 
+	public static KingdomWars getInstance() { return instance; }
+
 	public static boolean playerIsJailed(Player p) {
 		if (townOutlaw == null) return false;
 
@@ -86,6 +90,8 @@ public class KingdomWars extends JavaPlugin {
 			setEnabled(false);
 			return;
 		}
+
+		instance = this;
 
 		if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
 			essentials = getPlugin(Essentials.class);

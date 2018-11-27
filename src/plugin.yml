@@ -4,7 +4,7 @@ version: 1.0
 authors: [Elian, Silverwolfg11]
 api-version: 1.13
 description: Allows for individual wars between nations
-softdepend: [Essentials, Towny, Questioner, Vault]
+softdepend: [Essentials, Towny, Vault]
 
 commands:
   townywar:
