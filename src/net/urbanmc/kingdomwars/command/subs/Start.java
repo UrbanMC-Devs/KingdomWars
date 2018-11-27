@@ -14,7 +14,12 @@ import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Start {
+
+    private List<String> preNationTimers = new ArrayList<>();
 
     public Start(Player p, String[] args) {
         if (!p.hasPermission("kingdomwars.start")) {
@@ -26,6 +31,11 @@ public class Start {
 
         if (nation1 == null) {
             p.sendMessage(ChatColor.RED + "You are not in a nation!");
+            return;
+        }
+
+        if (preNationTimers.contains(nation1.getName())) {
+            p.sendMessage(ChatColor.RED + "You are starting a war soon!");
             return;
         }
 
@@ -48,6 +58,11 @@ public class Start {
 
         if (WarUtil.inWar(nation2)) {
             p.sendMessage(ChatColor.RED + "That nation is already in a war!");
+            return;
+        }
+
+        if (preNationTimers.contains(nation2.getName())) {
+            p.sendMessage(ChatColor.RED + "That nation is already planning to go to war!");
             return;
         }
 
@@ -99,9 +114,16 @@ public class Start {
         TownyUtil.sendNationMessage(nation1, "Your nation has will be at war against " + nation2.getName() + " in " + declareEvent.getTimeTillWar() + " minutes!");
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation! The war will begin in " + declareEvent.getTimeTillWar() + " minutes!");
 
-        Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () ->
-                startWar(nation1, nation2)
-                , 20* 60 * declareEvent.getTimeTillWar()); //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
+        preNationTimers.add(nation1.getName());
+        preNationTimers.add(nation2.getName());
+
+        Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () -> {
+                    preNationTimers.remove(nation1.getName());
+                    preNationTimers.remove(nation2.getName());
+                    startWar(nation1, nation2);
+                }
+                , 20* 60 * declareEvent.getTimeTillWar());  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
+
     }
 
     private String getLast(Nation nation1, Nation nation2) {
