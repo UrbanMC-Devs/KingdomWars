@@ -142,7 +142,7 @@ public class Start {
         return formatTime(time / 1000);
     }
 
-    private static String formatTime(long time) {
+    private String formatTime(long time) {
         int days = 0, hours = 0, minutes = 0, seconds;
 
         while (time >= 86400) {

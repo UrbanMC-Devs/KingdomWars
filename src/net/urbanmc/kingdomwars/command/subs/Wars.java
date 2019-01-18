@@ -1,10 +1,11 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.data.war.War;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import net.urbanmc.kingdomwars.WarUtil;
-import net.urbanmc.kingdomwars.data.war.War;
+import java.util.ArrayList;
 
 public class Wars {
 
@@ -19,7 +20,7 @@ public class Wars {
 		p.sendMessage(ChatColor.GREEN + " === Current Wars ===");
 
 		if (!WarUtil.getWarList().isEmpty()) {
-			for (War war : WarUtil.getWarList()) {
+			for (War war : new ArrayList<>(WarUtil.getWarList())) {
 				p.sendMessage(ChatColor.BOLD + war.getDeclaringNation() + ChatColor.RESET + ChatColor.ITALIC + " vs "
 						+ ChatColor.RESET + ChatColor.BOLD + war.getDeclaredNation());
 			}

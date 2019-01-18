@@ -48,6 +48,9 @@ public class BaseCommand implements CommandExecutor {
 			case "leaderboard":
 				new LeaderboardSub(p, args);
 				return true;
+			case "last":
+				new LastSub(p, args);
+				return true;
 
 			case "accept":
 			case "deny":

@@ -41,7 +41,7 @@ public class LastWar {
             return declaringNation;
     }
 
-    private boolean wasTruce() {
+    public boolean wasTruce() {
         return truce;
     }
 

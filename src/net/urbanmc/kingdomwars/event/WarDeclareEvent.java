@@ -5,7 +5,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class WarDeclareEvent extends Event implements Cancellable {
-    private final HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
     private boolean cancelled = false;
     private String declared, declaring;
     private int timeTillWar;
@@ -18,6 +18,10 @@ public class WarDeclareEvent extends Event implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 

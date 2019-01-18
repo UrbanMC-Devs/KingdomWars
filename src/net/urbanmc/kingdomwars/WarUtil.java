@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class WarUtil {
 
@@ -183,7 +180,7 @@ public class WarUtil {
     }
 
     public static boolean inWar(String nation) {
-        for (War war : wars) {
+        for (War war : copyWarList()) {
             if (war.getDeclaringNation().equals(nation))
                 return true;
             if (war.getDeclaredNation().equals(nation))
@@ -224,7 +221,8 @@ public class WarUtil {
     }
 
     public synchronized static void checkForceEndAll() {
-        for (War war : wars) {
+        for (War war : copyWarList()) {
+            if (war == null) continue;
             checkForceEnd(war);
         }
     }
@@ -383,6 +381,29 @@ public class WarUtil {
         return null;
     }
 
+    public static LastWar getLastWar(Nation nation1) {
+        reloadLast();
+
+        List<LastWar> lastWars = new ArrayList<>(last);
+
+        lastWars.removeIf((lw) -> !(lw.getDeclaredNation().equalsIgnoreCase(nation1.getName()) || lw.getDeclaringNation().equalsIgnoreCase(nation1.getName())));
+
+        if (lastWars.isEmpty()) return null;
+
+        if (lastWars.size() == 1) return lastWars.get(0);
+
+        //Bigger millis means more recent. This sorts the list by the most recent lastwar.
+        Collections.sort(lastWars, (o1, o2) -> {
+            if (o1.getMillis() > o2.getMillis()) return 1;
+
+            if (o1.getMillis() == o2.getMillis()) return 0;
+
+            return -1;
+        });
+
+        return lastWars.get(0);
+    }
+
     public static void removeAllLast(String nation) {
         List<LastWar> remove = new ArrayList<>();
 
@@ -393,6 +414,11 @@ public class WarUtil {
         }
 
         last.removeAll(remove);
+    }
+
+    public static void removeLast(LastWar lastWar) {
+        last.remove(lastWar);
+        saveLast();
     }
 
     private static void saveWars() {
@@ -544,5 +570,11 @@ public class WarUtil {
         }
 
         return null;
+    }
+
+
+    //This method is to avoid concurrent modification of the main war list
+    private static List<War> copyWarList() {
+        return new ArrayList<>(wars);
     }
 }
