@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
 import org.bukkit.Bukkit;
@@ -14,12 +15,9 @@ import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Start {
 
-    private List<String> preNationTimers = new ArrayList<>();
+
 
     public Start(Player p, String[] args) {
         if (!p.hasPermission("kingdomwars.start")) {
@@ -34,7 +32,7 @@ public class Start {
             return;
         }
 
-        if (preNationTimers.contains(nation1.getName())) {
+        if (WarUtil.alreadyScheduledForWar(nation1.getName())) {
             p.sendMessage(ChatColor.RED + "You are starting a war soon!");
             return;
         }
@@ -61,7 +59,7 @@ public class Start {
             return;
         }
 
-        if (preNationTimers.contains(nation2.getName())) {
+        if (WarUtil.alreadyScheduledForWar(nation2.getName())) {
             p.sendMessage(ChatColor.RED + "That nation is already planning to go to war!");
             return;
         }
@@ -114,28 +112,21 @@ public class Start {
         TownyUtil.sendNationMessage(nation1, "Your nation has will be at war against " + nation2.getName() + " in " + declareEvent.getTimeTillWar() + " minutes!");
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation! The war will begin in " + declareEvent.getTimeTillWar() + " minutes!");
 
-        preNationTimers.add(nation1.getName());
-        preNationTimers.add(nation2.getName());
+        PreWar preWar = new PreWar(nation1.getName(), nation2.getName());
+        WarUtil.addPreWar(preWar);
 
-        Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () -> {
-                    preNationTimers.remove(nation1.getName());
-                    preNationTimers.remove(nation2.getName());
+        preWar.setTask(Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () -> {
+                    WarUtil.removePreWar(preWar);
                     startWar(nation1, nation2);
                 }
-                , 20* 60 * declareEvent.getTimeTillWar());  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
+                , 20* 60 * declareEvent.getTimeTillWar()));  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
 
     }
 
     private String getLast(Nation nation1, Nation nation2) {
         LastWar last = WarUtil.getLast(nation1, nation2);
 
-        long time;
-
-        if (last.isLosingNation(nation1.getName())) {
-            time = last.getRevengeMillis();
-        } else {
-            time = last.getMillis();
-        }
+        long time = last.isLosingNation(nation1.getName()) ? last.getRevengeMillis() : last.getMillis();
 
         time -= System.currentTimeMillis();
 
@@ -169,37 +160,17 @@ public class Start {
 
         String output = "";
 
-        if (days > 1) {
-            output += days + " days, ";
-        } else {
-            output += days + " day, ";
-        }
+        output += days + " day"+ (days > 1 ? "s" : "") + ", ";
 
-        if (hours > 1) {
-            output += hours + " hours, ";
-        } else if (hours == 1) {
-            output += hours + " hour, ";
-        }
+        output += hours + " hour"+ (hours > 1 ? "s" : "") + ", ";
 
-        if (minutes > 1) {
-            output += minutes + " minutes, ";
-        } else if (minutes == 1) {
-            output += minutes + " minute, ";
-        }
+        output += minutes + " minute"+ (minutes > 1 ? "s" : "") + ", ";
 
-        if (seconds > 1) {
-            output += seconds + " seconds";
-        } else if (seconds == 1) {
-            output += seconds + " second";
-        }
+        output += seconds + " second"+ (seconds > 1 ? "s" : "") + ", ";
 
         output = output.trim();
 
-        if (output.endsWith(",")) {
-            output = output.substring(0, output.length() - 1);
-        }
-
-        return output;
+        return output.endsWith(",") ? output.substring(0, output.length() - 1) : output;
     }
 
     private void startWar(Nation nation1, Nation nation2) {

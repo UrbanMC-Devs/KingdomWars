@@ -1,5 +1,9 @@
 package net.urbanmc.kingdomwars.listener;
 
+import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.data.PreWar;
+import net.urbanmc.kingdomwars.data.war.War;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -15,7 +19,20 @@ public class NationListener implements Listener {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
 
 		if (WarUtil.inWar(oldName)) {
-			WarUtil.warNationRename(oldName, newName);
+			War war = WarUtil.getWar(oldName);
+
+			int ally = war.isDeclaringAlly(oldName);
+
+			if (ally != -1)
+				war.renameAlly(oldName, newName, ally == 1);
+
+			else WarUtil.warNationRename(oldName, newName);
+		}
+
+		if (WarUtil.alreadyScheduledForWar(oldName)) {
+			PreWar preWar = WarUtil.getPreWar(oldName);
+
+			preWar.renameNation(oldName, newName);
 		}
 
 		WarUtil.lastNationRename(oldName, newName);
@@ -27,7 +44,30 @@ public class NationListener implements Listener {
 		String nation = e.getNationName();
 
 		if (WarUtil.inWar(nation)) {
-			WarUtil.endWar(WarUtil.getWar(nation));
+			War war = WarUtil.getWar(nation);
+
+			int ally = war.isDeclaringAlly(nation);
+
+			if (ally != -1)
+				war.removeAlly(nation, ally == 1);
+
+			else WarUtil.endWar(WarUtil.getWar(nation));
+		}
+
+		if (WarUtil.alreadyScheduledForWar(nation)) {
+			PreWar preWar = WarUtil.getPreWar(nation);
+
+			if (preWar.isMainNation(nation)) {
+				Nation otherNation = TownyUtil.getNation(preWar.getOtherNation(nation));
+
+				if (otherNation != null)
+					TownyUtil.sendNationMessage(otherNation, "The war against " + nation + " has been cancelled because they were disbanded!");
+
+				preWar.cancelTask();
+
+				WarUtil.removePreWar(preWar);
+			}
+
 		}
 
 		WarUtil.removeAllLast(nation);

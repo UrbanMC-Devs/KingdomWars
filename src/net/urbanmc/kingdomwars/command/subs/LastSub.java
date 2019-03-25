@@ -27,7 +27,7 @@ public class LastSub {
             return;
         }
 
-        Nation targetNation = TownyUtil.getNation(args[1]);
+        Nation targetNation = TownyUtil.getNation(args[2]);
 
         if (targetNation == null) {
             p.sendMessage(ChatColor.RED + "You have not specified a valid nation.");
@@ -59,7 +59,7 @@ public class LastSub {
     }
 
     private void viewLast(Player p, LastWar lastWar, String nationName) {
-        String time = formatTime(System.currentTimeMillis() - lastWar.getMillis());
+        String time = formatTime((System.currentTimeMillis() - lastWar.getMillis()) / 1000);
 
         sendColor(p,
                 "&2--- &cRecent War for &f" + nationName + " &2---\n" +

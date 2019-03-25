@@ -27,7 +27,7 @@ public class AcceptDenySub {
             return;
         }
 
-        KingdomWars.getQuestionUtil().runRunnable(nation.getUuid(), arg.equalsIgnoreCase("accept") ? true : false);
+        KingdomWars.getQuestionUtil().runRunnable(nation.getUuid(), arg.equalsIgnoreCase("accept"));
 
     }
 

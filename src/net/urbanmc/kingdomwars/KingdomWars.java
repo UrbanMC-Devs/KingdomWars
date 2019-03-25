@@ -1,7 +1,5 @@
 package net.urbanmc.kingdomwars;
 
-import ca.xshade.bukkit.questioner.Questioner;
-import ca.xshade.questionmanager.Question;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 import me.Silverwolfg11.TownOutlaw.Main;
@@ -10,7 +8,6 @@ import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
 import org.apache.commons.io.IOUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -30,7 +27,7 @@ public class KingdomWars extends JavaPlugin {
 	private static KingdomWars instance;
 
 	private static double startAmount, finishAmount, truceAmount;
-	private static int winningKills;
+	private static int winningKills, allyKills;
 	private static long lastTime, lastTimeRevenge, endTime;
 
 	public static Towny getTowny() {
@@ -63,6 +60,8 @@ public class KingdomWars extends JavaPlugin {
 		return winningKills;
 	}
 
+	public static int getAllyKills() { return allyKills; }
+
 	public static long getLastTime() {
 		return lastTime;
 	}
@@ -78,6 +77,9 @@ public class KingdomWars extends JavaPlugin {
 	public static KingdomWars getInstance() { return instance; }
 
 	public static boolean playerIsJailed(Player p) {
+		if (p.hasMetadata("townyoutlawjailed"))
+			return true;
+
 		if (townOutlaw == null) return false;
 
 		return townOutlaw.getJailedPlayer(p.getUniqueId()) != null;
@@ -147,5 +149,7 @@ public class KingdomWars extends JavaPlugin {
 		lastTime = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
 		lastTimeRevenge = TimeUnit.HOURS.toMillis(data.getInt("hours-between-revenge"));
 		endTime = TimeUnit.HOURS.toMillis(data.getInt("hours-end"));
+		allyKills = data.getInt("ally-bonus-kills", 5);
 	}
+
 }

@@ -2,6 +2,7 @@ package net.urbanmc.kingdomwars.command.subs;
 
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
+import net.urbanmc.kingdomwars.util.JSONMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -21,8 +22,10 @@ public class Wars {
 
 		if (!WarUtil.getWarList().isEmpty()) {
 			for (War war : new ArrayList<>(WarUtil.getWarList())) {
-				p.sendMessage(ChatColor.BOLD + war.getDeclaringNation() + ChatColor.RESET + ChatColor.ITALIC + " vs "
-						+ ChatColor.RESET + ChatColor.BOLD + war.getDeclaredNation());
+				JSONMessage.create(war.getDeclaringNation()).style(ChatColor.BOLD).tooltip(""+ war.getDeclaringPoints())
+						.then(" vs ").style(ChatColor.ITALIC)
+						.then(war.getDeclaredNation()).style(ChatColor.BOLD).tooltip("" + war.getDeclaredPoints())
+						.send(p);
 			}
 		} else {
 			p.sendMessage(ChatColor.ITALIC + "No Current Wars!");

@@ -16,6 +16,8 @@ permissions:
     children:
       kingdomwars.nationstaff: true
       kingdomwars.forceend: true
+      kingdomwars.forcestart: true
+      kingdomwars.last: true
   kingdomwars.nationstaff:
     default: false
     children:
@@ -23,6 +25,9 @@ permissions:
       kingdomwars.start: true
       kingdomwars.end: true
       kingdomwars.truce: true
+      kingdomwars.joinwar: true
+      kingdomwars.callallies: true
+
   kingdomwars.nationres:
     default: false
     children:
@@ -42,4 +47,8 @@ permissions:
   kingdomwars.wars:
     default: false
   kingdomwars.leaderboard:
+    default: false
+  kingdomwars.joinwar:
+    default: false
+  kingdomwars.callallies:
     default: false

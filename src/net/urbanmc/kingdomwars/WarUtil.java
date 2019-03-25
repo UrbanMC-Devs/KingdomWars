@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.data.last.LastWarList;
 import net.urbanmc.kingdomwars.data.leaderboard.Leaderboard;
@@ -28,6 +29,7 @@ public class WarUtil {
     private static Gson gson;
 
     private static List<War> wars;
+    private static List<PreWar> scheduledWars = new ArrayList<>();
     private static List<LastWar> last;
     private static List<Leaderboard> leaderboardList;
 
@@ -147,6 +149,8 @@ public class WarUtil {
     }
 
     public static void startWar(War war) {
+        generateKillsToWin(war);
+
         war.setStarted();
         wars.add(war);
         saveWars();
@@ -181,10 +185,11 @@ public class WarUtil {
 
     public static boolean inWar(String nation) {
         for (War war : copyWarList()) {
-            if (war.getDeclaringNation().equals(nation))
+
+            if (war.getDeclaringNation().equals(nation) || war.getDeclaredNation().equals(nation))
                 return true;
-            if (war.getDeclaredNation().equals(nation))
-                return true;
+
+            if (war.hasAllies() && war.isAllied(nation)) return true;
         }
 
         return false;
@@ -200,10 +205,10 @@ public class WarUtil {
 
     public static War getWar(String nation) {
         for (War war : wars) {
-            if (war.getDeclaringNation().equals(nation))
+            if (war.getDeclaringNation().equals(nation) || war.getDeclaredNation().equals(nation))
                 return war;
-            if (war.getDeclaredNation().equals(nation))
-                return war;
+
+            if (war.hasAllies() && war.isAllied(nation)) return war;
         }
 
         return null;
@@ -215,9 +220,8 @@ public class WarUtil {
         if (millis >= KingdomWars.getEndTime()) {
             endWar(war);
             return true;
-        } else {
+        } else
             return false;
-        }
     }
 
     public synchronized static void checkForceEndAll() {
@@ -230,10 +234,10 @@ public class WarUtil {
     public synchronized static void checkWin(War war) {
         Nation winner = null, loser = null;
 
-        if (war.getDeclaringPoints() == KingdomWars.getWinningKills()) {
+        if (war.getDeclaringPoints() >= war.getKillsToWin()) {
             winner = TownyUtil.getNation(war.getDeclaringNation());
             loser = TownyUtil.getNation(war.getDeclaredNation());
-        } else if (war.getDeclaredPoints() == KingdomWars.getWinningKills()) {
+        } else if (war.getDeclaredPoints() >= war.getKillsToWin()) {
             winner = TownyUtil.getNation(war.getDeclaredNation());
             loser = TownyUtil.getNation(war.getDeclaringNation());
         }
@@ -393,13 +397,7 @@ public class WarUtil {
         if (lastWars.size() == 1) return lastWars.get(0);
 
         //Bigger millis means more recent. This sorts the list by the most recent lastwar.
-        Collections.sort(lastWars, (o1, o2) -> {
-            if (o1.getMillis() > o2.getMillis()) return 1;
-
-            if (o1.getMillis() == o2.getMillis()) return 0;
-
-            return -1;
-        });
+        lastWars.sort(Comparator.comparingLong(LastWar::getMillis));
 
         return lastWars.get(0);
     }
@@ -572,9 +570,48 @@ public class WarUtil {
         return null;
     }
 
+    private static void generateKillsToWin(War war) {
+        int kills = KingdomWars.getWinningKills();
+
+        kills += war.getAllies(true).size() * KingdomWars.getAllyKills();
+        kills += war.getAllies(false).size() * KingdomWars.getAllyKills();
+
+        war.setKills(kills);
+
+
+    }
+
+    public static boolean alreadyScheduledForWar( String nation) {
+        for (PreWar preWar : copyPreWars()) {
+            if (preWar.alreadyDeclared(nation)) return true;
+        }
+
+        return false;
+    }
+
+    public static PreWar getPreWar( String nation) {
+        for (PreWar preWar : scheduledWars) {
+            if (preWar.alreadyDeclared(nation)) return preWar;
+        }
+
+        return null;
+    }
+
+    public static void addPreWar(PreWar preWar) {
+        scheduledWars.add(preWar);
+    }
+
+    public static void removePreWar(PreWar preWar) {
+        scheduledWars.remove(preWar);
+    }
+
 
     //This method is to avoid concurrent modification of the main war list
     private static List<War> copyWarList() {
         return new ArrayList<>(wars);
+    }
+
+    private static List<PreWar> copyPreWars() {
+        return new ArrayList<>(scheduledWars);
     }
 }

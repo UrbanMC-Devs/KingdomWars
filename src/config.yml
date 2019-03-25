@@ -21,3 +21,6 @@ hours-between-revenge: 72
 
 # Hours before a war must end
 hours-end: 168
+
+#The amount of more kills needed for every ally that joins a war
+ally-bonus-kills: 5

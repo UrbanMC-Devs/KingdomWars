@@ -43,12 +43,7 @@ public class LeaderboardSub {
 	}
 
 	private List<Leaderboard> sortLeaderBoardList(List<Leaderboard> list) {
-		Collections.sort(list, new Comparator<Leaderboard>() {
-			@Override
-			public int compare(Leaderboard o1, Leaderboard o2) {
-				return o1.getWins() - o2.getWins();
-			}
-		});
+		list.sort(Comparator.comparingInt(Leaderboard::getWins));
 
 		Collections.reverse(list);
 		return list;

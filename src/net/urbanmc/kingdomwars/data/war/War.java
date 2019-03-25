@@ -13,7 +13,8 @@ import net.urbanmc.kingdomwars.util.TownyUtil;
 public class War {
 
 	private String nation1, nation2;
-	private int points1 = 0, points2 = 0;
+	private List<String> nation1Allies = new ArrayList<>(), nation2Allies = new ArrayList<>();
+	private int points1 = 0, points2 = 0, killsToWin;
 	private Scoreboard board;
 	private List<UUID> disabled;
 	private long started;
@@ -69,11 +70,11 @@ public class War {
 		return this.nation1.equals(nation);
 	}
 
-	public void setDeclaringPoints(int points) {
+	void setDeclaringPoints(int points) {
 		points1 = points;
 	}
 
-	public void setDeclaredPoints(int points) {
+	void setDeclaredPoints(int points) {
 		points2 = points;
 	}
 
@@ -119,4 +120,79 @@ public class War {
 	public long getStarted() {
 		return this.started;
 	}
+
+	public boolean hasAllies() {
+		return !(nation1Allies.isEmpty() && nation2Allies.isEmpty());
+	}
+
+	public List<String> getAllies(boolean declaring) {
+		return declaring ? nation1Allies : nation2Allies;
+	}
+
+	public void addNation1Ally(String ally) {
+			nation1Allies.add(ally);
+	}
+
+	public void addNation2Ally(String ally) {
+			nation2Allies.add(ally);
+	}
+
+	public boolean isAllied(String nation) {
+		return nation1Allies.contains(nation) || nation2Allies.contains(nation);
+	}
+
+	//1 = true; 0 = false; -1 = Not an ally
+	public int isDeclaringAlly(String nation) {
+		if (nation1Allies.contains(nation)) return 1;
+
+		if (nation2Allies.contains(nation)) return 0;
+
+		return -1;
+	}
+
+	public void renameAlly(String oldName, String newName, boolean declaring) {
+		List<String> ally = declaring ? nation1Allies : nation2Allies;
+
+		ally.set(ally.indexOf(oldName), newName);
+	}
+
+	public void removeAlly(String allyName, boolean declaring) {
+		List<String> ally = declaring ? nation1Allies : nation2Allies;
+
+		ally.remove(allyName);
+	}
+
+	//1 = true; 0 = false; -1 = One nation is not in the same war
+	public int onSameSide(String nation1, String nation2) {
+		int nation1DeclaringSide = isDeclaringSide(nation1);
+
+		int nation2DeclaringSide = isDeclaringSide(nation2);
+
+		if (nation1DeclaringSide == -1 || nation2DeclaringSide == -1) return -1;
+
+		if (nation1DeclaringSide == nation2DeclaringSide) return 1;
+
+		return 0;
+	}
+
+	//1 = true; 0 = false; -1 = One nation is not in the same war
+	public int isDeclaringSide(String nation) {
+		if (isDeclaringNation(nation)) return 1;
+
+		int declaringAllyNation = isDeclaringAlly(nation);
+
+		if (declaringAllyNation == 1) return 1;
+
+		if (this.nation2.equalsIgnoreCase(nation) || declaringAllyNation == 0) return 0;
+
+		return -1;
+	}
+
+	public void setKills(int killsToWin) {
+		this.killsToWin = killsToWin;
+	}
+
+	public int getKillsToWin() { return killsToWin; }
+
+
 }

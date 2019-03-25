@@ -19,32 +19,48 @@ public class WarBoard {
 		Scoreboard warboard = Bukkit.getScoreboardManager().getNewScoreboard();
 		Objective obj = warboard.registerNewObjective("test", "dummy");
 		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-		obj.setDisplayName(ChatColor.RED + "WarBoard");
+		obj.setDisplayName(ChatColor.RED + "" + ChatColor.BOLD +  "WarBoard");
 
-		Score sc = obj.getScore(ChatColor.BLUE + "" + ChatColor.BOLD + war.getDeclaringNation());
+		Score sc = obj.getScore(ChatColor.GOLD + "" + ChatColor.BOLD + war.getDeclaringNation());
 		sc.setScore(10);
 
-		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(0));
+		Score s1 = obj.getScore(ChatColor.GOLD + "Kills: 0");
 		s1.setScore(9);
+
 
 		Score s6 = obj.getScore("");
 		s6.setScore(8);
 
-		Score s2 = obj.getScore(ChatColor.AQUA + "" + ChatColor.BOLD + war.getDeclaredNation());
+		Score s2 = obj.getScore(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + war.getDeclaredNation());
 		s2.setScore(7);
 
-		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(0));
+		Score s3 = obj.getScore(ChatColor.DARK_AQUA + "Kills: 0");
 		s3.setScore(6);
 
 		Score s7 = obj.getScore(" ");
 		s7.setScore(5);
 
-		Score s4 = obj.getScore(
-				ChatColor.ITALIC + String.valueOf(KingdomWars.getWinningKills()) + ChatColor.ITALIC + " kills");
-		s4.setScore(4);
+		int counter = 4;
 
-		Score s5 = obj.getScore(ChatColor.ITALIC + "to win");
-		s5.setScore(3);
+		if (war.hasAllies()) {
+			obj.getScore(translateColor("&b◯ Allies:")).setScore(counter);
+			counter--;
+
+			for (String nation1Ally : war.getAllies(true)) {
+				obj.getScore(translateColor("   &6" + nation1Ally)).setScore(counter);
+				counter--;
+			}
+
+			for (String nation2Ally : war.getAllies(false)) {
+				obj.getScore(translateColor("   &3" + nation2Ally)).setScore(counter);
+				counter--;
+			}
+
+			counter--;
+		}
+
+		Score s5 = obj.getScore(translateColor("&o" + war.getKillsToWin() + " kills to win!"));
+		s5.setScore(counter);
 
 		war.setScoreBoard(warboard);
 		WarUtil.updateWar(war);
@@ -60,13 +76,15 @@ public class WarBoard {
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
-		warboard.resetScores(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints() - 1));
-		warboard.resetScores(ChatColor.AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints() - 1));
 
-		Score s1 = obj.getScore(ChatColor.BLUE + "Kills: " + String.valueOf(war.getDeclaringPoints()));
+		warboard.resetScores(ChatColor.GOLD + "Kills: " + String.valueOf(war.getDeclaringPoints() - 1));
+		warboard.resetScores(ChatColor.DARK_AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints() - 1));
+
+
+		Score s1 = obj.getScore(ChatColor.GOLD + "Kills: " + String.valueOf(war.getDeclaringPoints()));
 		s1.setScore(9);
 
-		Score s3 = obj.getScore(ChatColor.AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints()));
+		Score s3 = obj.getScore(ChatColor.DARK_AQUA + "Kills: " + String.valueOf(war.getDeclaredPoints()));
 		s3.setScore(6);
 
 		Nation n1 = TownyUtil.getNation(war.getDeclaringNation());
@@ -95,7 +113,7 @@ public class WarBoard {
 		Scoreboard warboard = war.getScoreBoard();
 		Objective obj = warboard.getObjective(DisplaySlot.SIDEBAR);
 
-		ChatColor color = (isDeclaring) ? ChatColor.BLUE : ChatColor.AQUA;
+		ChatColor color = (isDeclaring) ? ChatColor.GOLD : ChatColor.DARK_AQUA;
 		String newNationName = (isDeclaring) ? war.getDeclaringNation() : war.getDeclaredNation();
 
 		warboard.resetScores(color + "" + ChatColor.BOLD + oldName);
@@ -139,5 +157,9 @@ public class WarBoard {
 		}
 
 		p.setScoreboard(war.getScoreBoard());
+	}
+
+	private static String translateColor(String message) {
+		return ChatColor.translateAlternateColorCodes('&', message);
 	}
 }

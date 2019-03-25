@@ -35,15 +35,15 @@ public class WarListener implements Listener {
 		if (nation1 == null || nation2 == null)
 			return;
 
+		if (nation1.getName().equals(nation2.getName()))
+			return;
+
 		War war = WarUtil.getWar(nation1);
 
 		if (war == null)
 			return;
 
-		if (!war.getDeclaringNation().equals(nation2.getName()) && !war.getDeclaredNation().equals(nation2.getName()))
-			return;
-
-		if (nation1.getName().equals(nation2.getName()))
+		if (war.onSameSide(nation1.getName(), nation2.getName()) != 0)
 			return;
 
 		if (WarUtil.checkForceEnd(war))
@@ -98,13 +98,10 @@ public class WarListener implements Listener {
 		if (nation2 == null || !WarUtil.inWar(nation2))
 			return;
 
-		War war = WarUtil.getWar(nation1);
-
-		if (!war.getDeclaringNation().equals(nation2.getName()) && !war.getDeclaredNation().equals(nation2.getName()))
-			return;
-
 		if (nation1.getName().equals(nation2.getName()))
 			return;
+
+		War war = WarUtil.getWar(nation1);
 
 		if (WarUtil.checkForceEnd(war))
 			return;
@@ -112,18 +109,29 @@ public class WarListener implements Listener {
 		if (KingdomWars.playerIsJailed(p))
 			return;
 
-		WarPointAddEvent event = new WarPointAddEvent(war, nation2, 1);
+		int nation1DeclaringSide = war.isDeclaringSide(nation1.getName()),
+				nation2DeclaringSide = war.isDeclaringSide(nation2.getName());
+
+		if (nation1DeclaringSide == -1 || nation2DeclaringSide == -1) return;
+
+		if (nation1DeclaringSide == nation2DeclaringSide) return;
+
+		String nationPointName = nation2DeclaringSide  == 1 ? war.getDeclaringNation() : war.getDeclaredNation();
+
+		Nation recievingNation = nationPointName.equalsIgnoreCase(nation2.getName()) ? nation2 : TownyUtil.getNation(nationPointName);
+
+		WarPointAddEvent event = new WarPointAddEvent(war, recievingNation, 1);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if (event.isCancelled())
 			return;
 
-		if (TownyUtil.isNationKing(p)) {
-			WarUtil.win(nation2, nation1, KingdomWars.getFinishAmount());
-			return;
+		if (TownyUtil.isNationKing(p) && !war.isAllied(nation1.getName())) {
+				WarUtil.win(recievingNation, nation1, KingdomWars.getFinishAmount());
+				return;
 		}
 
-		war.addPoints(nation2, 1);
+		war.addPoints(recievingNation, 1);
 		WarUtil.updateWar(war);
 		WarBoard.updateBoard(war);
 		WarUtil.checkWin(war);

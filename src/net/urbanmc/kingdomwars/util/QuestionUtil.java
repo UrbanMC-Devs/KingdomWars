@@ -38,7 +38,7 @@ public class QuestionUtil {
 
         nationQuestionMap.put(nationUUID, runnables);
 
-        message.send(targets.toArray(new Player[targets.size()]));
+        message.send(targets.toArray(new Player[0]));
 
         scheduleRemoval(nationUUID);
     }

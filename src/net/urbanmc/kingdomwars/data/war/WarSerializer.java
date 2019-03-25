@@ -2,13 +2,7 @@ package net.urbanmc.kingdomwars.data.war;
 
 import java.lang.reflect.Type;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 
 public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War> {
 
@@ -21,6 +15,18 @@ public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War>
 
 		obj.addProperty("points1", war.getDeclaringPoints());
 		obj.addProperty("points2", war.getDeclaredPoints());
+
+		if (war.hasAllies()) {
+			JsonArray nation1Allies = new JsonArray(), nation2Allies = new JsonArray();
+
+			war.getAllies(true).forEach(nation1Allies::add);
+			war.getAllies(false).forEach(nation2Allies::add);
+
+			obj.add("nation1Allies", nation1Allies);
+			obj.add("nation2Allies", nation2Allies);
+		}
+
+		obj.addProperty("killsToWin", war.getKillsToWin());
 
 		return obj;
 	}
@@ -39,6 +45,20 @@ public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War>
 
 		war.setDeclaringPoints(points1);
 		war.setDeclaredPoints(points2);
+
+		if (obj.has("nation1Allies")) {
+			for (JsonElement el : obj.getAsJsonArray("nation1Allies")) {
+				war.addNation1Ally(el.getAsString());
+			}
+		}
+
+		if (obj.has("nation2Allies")) {
+			for (JsonElement el : obj.getAsJsonArray("nation2Allies")) {
+				war.addNation2Ally(el.getAsString());
+			}
+		}
+
+		war.setKills(obj.get("killsToWin").getAsInt());
 
 		return war;
 	}

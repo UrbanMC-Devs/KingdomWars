@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.data.PreWar;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -26,6 +27,30 @@ public class ForceEnd {
 
 		if (nation == null) {
 			p.sendMessage(ChatColor.RED + "You have not specified a valid nation.");
+			return;
+		}
+
+		if (WarUtil.alreadyScheduledForWar(nation.getName())) {
+			PreWar preWar = WarUtil.getPreWar(nation.getName());
+
+			if (preWar.isMainNation(nation.getName())) {
+				p.sendMessage(ChatColor.RED + "This nation is scheduled to be an ally to another nation in a war!");
+				return;
+			}
+
+			p.sendMessage(ChatColor.GOLD + "You have cancelled the scheduled war.");
+
+			preWar.cancelTask();
+
+			Nation otherNation = TownyUtil.getNation(preWar.getOtherNation(nation.getName()));
+
+			if (otherNation != null)
+			TownyUtil.sendNationMessage(nation,
+					"Your war against " + otherNation.getName() + " has been cancelled by an admin.");
+
+			TownyUtil.sendNationMessage(otherNation,
+					"Your war against " + nation.getName() + " has been cancelled by an admin.");
+
 			return;
 		}
 

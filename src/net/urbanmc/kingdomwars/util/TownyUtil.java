@@ -19,11 +19,6 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.palmergames.bukkit.towny.utils.CombatUtil;
 
-import ca.xshade.questionmanager.LinkedQuestion;
-import ca.xshade.questionmanager.Option;
-import ca.xshade.questionmanager.QuestionManager;
-import ca.xshade.questionmanager.QuestionTask;
-
 public class TownyUtil {
 
 	public static void sendNationMessage(Nation nation, String message) {

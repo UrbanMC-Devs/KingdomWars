@@ -42,6 +42,9 @@ public class BaseCommand implements CommandExecutor {
 			case "forceend":
 				new ForceEnd(p, args);
 				return true;
+			case "forcestart":
+				new ForceStart(p, args);
+				return true;
 			case "wars":
 				new Wars(p, args);
 				return true;
@@ -51,7 +54,12 @@ public class BaseCommand implements CommandExecutor {
 			case "last":
 				new LastSub(p, args);
 				return true;
-
+			case "callallies":
+				new CallAlliesSub(p);
+				return true;
+			case "joinwar":
+				new JoinWar(p, args);
+				return true;
 			case "accept":
 			case "deny":
 				new AcceptDenySub(p, args[0]);
