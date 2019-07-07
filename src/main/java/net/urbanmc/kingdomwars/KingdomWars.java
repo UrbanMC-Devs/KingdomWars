@@ -2,19 +2,21 @@ package net.urbanmc.kingdomwars;
 
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
-import me.Silverwolfg11.TownOutlaw.Main;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
-import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -23,7 +25,6 @@ public class KingdomWars extends JavaPlugin {
 	private static Towny towny;
 	private static QuestionUtil questionUtil;
 	private static Essentials essentials;
-	private static Main townOutlaw;
 	private static KingdomWars instance;
 
 	private static double startAmount, finishAmount, truceAmount;
@@ -77,12 +78,7 @@ public class KingdomWars extends JavaPlugin {
 	public static KingdomWars getInstance() { return instance; }
 
 	public static boolean playerIsJailed(Player p) {
-		if (p.hasMetadata("townyoutlawjailed"))
-			return true;
-
-		if (townOutlaw == null) return false;
-
-		return townOutlaw.getJailedPlayer(p.getUniqueId()) != null;
+		return (p.hasMetadata("townyoutlawjailed"));
 	}
 
 	@Override
@@ -97,10 +93,6 @@ public class KingdomWars extends JavaPlugin {
 
 		if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
 			essentials = getPlugin(Essentials.class);
-		}
-
-		if (getServer().getPluginManager().isPluginEnabled("TownOutlaw")) {
-			townOutlaw = (Main) getServer().getPluginManager().getPlugin("TownOutlaw");
 		}
 
 		towny = getPlugin(Towny.class);
@@ -132,9 +124,8 @@ public class KingdomWars extends JavaPlugin {
 		if (!file.exists()) {
 			try {
 				InputStream input = getClass().getClassLoader().getResourceAsStream("config.yml");
-				OutputStream output = new FileOutputStream(file);
 
-				IOUtils.copy(input, output);
+				Files.copy(input, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
