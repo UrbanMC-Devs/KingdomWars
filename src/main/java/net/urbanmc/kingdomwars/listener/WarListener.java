@@ -46,7 +46,7 @@ public class WarListener implements Listener {
 		if (war.onSameSide(nation1.getName(), nation2.getName()) != 0)
 			return;
 
-		if (WarUtil.checkForceEnd(war))
+		if (WarUtil.checkForceEnd(war, e.isAsynchronous()))
 			return;
 
 		if (KingdomWars.hasEssentials()) {
@@ -103,7 +103,7 @@ public class WarListener implements Listener {
 
 		War war = WarUtil.getWar(nation1);
 
-		if (WarUtil.checkForceEnd(war))
+		if (WarUtil.checkForceEnd(war, e.isAsynchronous()))
 			return;
 
 		if (KingdomWars.playerIsJailed(p))

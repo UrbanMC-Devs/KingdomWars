@@ -46,13 +46,14 @@ public class End {
 			return;
 		}
 
-		WarEndEvent event = new WarEndEvent(war);
+		WarEndEvent event = new WarEndEvent(war, false);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if (event.isCancelled())
 			return;
 
-		WarUtil.endWar(war);
+		//Shouldn't theoretically be async
+		WarUtil.endWar(war, false);
 
 		Nation nation2 = war.getOtherNation(nation1);
 

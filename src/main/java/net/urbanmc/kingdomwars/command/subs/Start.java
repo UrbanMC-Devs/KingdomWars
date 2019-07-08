@@ -103,7 +103,8 @@ public class Start {
             return;
         }
 
-        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5); //5 minutes is default time. Can be modified through event.
+        //TODO CHANGE BACK TO 5
+        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 2); //5 minutes is default time. Can be modified through event.
         Bukkit.getPluginManager().callEvent(declareEvent);
 
         if (declareEvent.isCancelled())

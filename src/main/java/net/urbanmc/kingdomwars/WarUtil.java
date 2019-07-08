@@ -162,10 +162,10 @@ public class WarUtil {
                 "War start with " + war.getDeclaredNation());
     }
 
-    public static void endWar(War war) {
+    public static void endWar(War war, boolean async) {
         wars.remove(war);
         saveWars();
-        end(war);
+        end(war, async);
     }
 
     public static void updateWar(War war) {
@@ -214,11 +214,11 @@ public class WarUtil {
         return null;
     }
 
-    public synchronized static boolean checkForceEnd(War war) {
+    public synchronized static boolean checkForceEnd(War war, boolean async) {
         long millis = System.currentTimeMillis() - war.getStarted();
 
         if (millis >= KingdomWars.getEndTime()) {
-            endWar(war);
+            endWar(war, async);
             return true;
         } else
             return false;
@@ -227,7 +227,8 @@ public class WarUtil {
     public synchronized static void checkForceEndAll() {
         for (War war : copyWarList()) {
             if (war == null) continue;
-            checkForceEnd(war);
+            //Theoretically it shouldn't be async
+            checkForceEnd(war, false);
         }
     }
 
@@ -250,7 +251,7 @@ public class WarUtil {
     public synchronized static void win(Nation winner, Nation loser, double amount) {
         War war = getWar(winner);
 
-        WarEndEvent event = new WarEndEvent(war);
+        WarEndEvent event = new WarEndEvent(war, Bukkit.isPrimaryThread());
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled())
@@ -318,11 +319,12 @@ public class WarUtil {
         updateWarInfoInLeaderboard(winner.getName(), loser.getName());
     }
 
-    public static void end(War war) {
+    public static void end(War war, boolean async) {
         Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
         Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
 
-        WarEndEvent event = new WarEndEvent(war);
+        //isPrimaryThread doesn't neccesarily mean that it's async but it's one of the better options
+        WarEndEvent event = new WarEndEvent(war, async);
         Bukkit.getPluginManager().callEvent(event);
 
         wars.remove(war);
@@ -344,8 +346,11 @@ public class WarUtil {
             }
         }
 
-        LastWar lastWar = new LastWar(nation1.getName(),
-                nation2.getName(),
+        String nation1Name = nation1 == null ? "null" : nation1.getName(),
+                nation2Name = nation2 == null ? "null" : nation2.getName();
+
+        LastWar lastWar = new LastWar(nation1Name,
+                nation2Name,
                 true,
                 false,
                 System.currentTimeMillis() + KingdomWars.getLastTime(),

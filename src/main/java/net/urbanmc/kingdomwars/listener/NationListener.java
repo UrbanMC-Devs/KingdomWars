@@ -51,7 +51,7 @@ public class NationListener implements Listener {
 			if (ally != -1)
 				war.removeAlly(nation, ally == 1);
 
-			else WarUtil.endWar(WarUtil.getWar(nation));
+			else WarUtil.endWar(WarUtil.getWar(nation), e.isAsynchronous());
 		}
 
 		if (WarUtil.alreadyScheduledForWar(nation)) {
