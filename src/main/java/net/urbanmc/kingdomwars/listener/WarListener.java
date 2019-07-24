@@ -1,5 +1,8 @@
 package net.urbanmc.kingdomwars.listener;
 
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.TownBlock;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,6 +51,17 @@ public class WarListener implements Listener {
 
 		if (WarUtil.checkForceEnd(war, e.isAsynchronous()))
 			return;
+
+		TownBlock tB = TownyUniverse.getTownBlock(e.getAttacker().getLocation());
+		if (tB != null && tB.hasTown()) {
+			try {
+				if (tB.getTown().getMayor().isNPC()) {
+					return;
+				}
+			} catch (NotRegisteredException __) {
+
+			}
+		}
 
 		if (KingdomWars.hasEssentials()) {
 			User attackerUser = KingdomWars.getEssentials().getUser(attacker);
