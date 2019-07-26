@@ -60,7 +60,6 @@ public class CallAlliesSub {
         Nation declaringNation = nation1.getName().equalsIgnoreCase(preWar.getDeclaringNation()) ? nation1 : TownyUtil.getNation(preWar.getDeclaringNation());
         Nation declaredNation = declaringNation.getName().equalsIgnoreCase(nation1.getName()) ? TownyUtil.getNation(preWar.getDeclaredNation()) : nation1;
 
-
         TownyUtil.sendNationMessage(nation1, "Your nation has called for allies in the war against " + (nation1.equals(declaringNation) ? declaredNation : declaringNation).getName() + ". The war will now begin in 10 minutes!");
         TownyUtil.sendNationMessage(nation1.equals(declaringNation) ? declaredNation : declaringNation, nation1.getName() + " has called for allies in the war against your nation. Allies may join you as well! The war will now begin in 10 minutes!");
 
@@ -70,7 +69,7 @@ public class CallAlliesSub {
                     WarUtil.removePreWar(preWar);
                     startWar(preWar, declaringNation, declaredNation);
                 }
-                , 20* 60 * 10));  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
+                , 20* 60 * event.getPreparationTime()));  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
     }
 
     private void startWar(PreWar preWar, Nation nation1, Nation nation2) {

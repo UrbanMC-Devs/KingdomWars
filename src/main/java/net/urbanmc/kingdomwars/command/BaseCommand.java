@@ -76,15 +76,18 @@ public class BaseCommand implements CommandExecutor {
 
 		message.append(ChatColor.AQUA + "=== Kingdom Wars ===\n");
 
-		message.append("/").append(label).append(" start (nation)").append(ChatColor.WHITE).append(": Start a war with another nation! ")
+		label = ChatColor.AQUA + "/" + label + " ";
+
+		message.append(label).append("start (nation)").append(ChatColor.WHITE).append(": Start a war with another nation! ")
 				.append(ChatColor.GREEN).append("($").append(KingdomWars.getStartAmount()).append(")\n");
 
-		message.append(ChatColor.AQUA + "/").append(label).append(" end").append(ChatColor.WHITE).append(": End a war you started!\n");
-		message.append(ChatColor.AQUA + "/").append(label).append(" truce").append(ChatColor.WHITE).append(": Declare a truce with the nation who started a battle!\n");
-		message.append(ChatColor.AQUA + "/").append(label).append(" status").append(ChatColor.WHITE).append(": Toggle the war scoreboard\n");
-		message.append(ChatColor.AQUA + "/").append(label).append(" wars").append(ChatColor.WHITE).append(": View the current wars!\n");
-		message.append(ChatColor.AQUA + "/").append(label).append(" leaderboard").append(ChatColor.WHITE).append(": Check out which nation has the most wins!");
-
+		message.append(label).append("end").append(ChatColor.WHITE).append(": End a war you started!\n");
+		message.append(label).append("truce").append(ChatColor.WHITE).append(": Declare a truce with the nation who started a battle!\n");
+		message.append(label).append("status").append(ChatColor.WHITE).append(": Toggle the war scoreboard\n");
+		message.append(label).append("wars").append(ChatColor.WHITE).append(": View the current wars!\n");
+		message.append(label).append("leaderboard").append(ChatColor.WHITE).append(": Check out which nation has the most wins!");
+		message.append(label).append("callallies").append(ChatColor.WHITE).append(": Call for allies in a war. Must be before the war starts during the preparation period!!");
+		message.append(label).append("joinwar (nation)").append(ChatColor.WHITE).append(": Join an ally's war if they have called for you!");
 		p.sendMessage(message.toString());
 	}
 }

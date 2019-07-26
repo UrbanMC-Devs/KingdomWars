@@ -8,6 +8,7 @@ import org.bukkit.event.HandlerList;
 public class WarRequestAlliesEvent extends Event implements Cancellable {
 
     private PreWar preWar;
+    private int newPrepTime; //In minutes
     private boolean cancelled;
 
     private final static HandlerList handlers = new HandlerList();
@@ -37,5 +38,11 @@ public class WarRequestAlliesEvent extends Event implements Cancellable {
 
     public PreWar getPreWar() {
         return preWar;
+    }
+
+    public int getPreparationTime() { return newPrepTime; }
+
+    public void setPreparationTime(int time) {
+        this.newPrepTime = time;
     }
 }
