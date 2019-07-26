@@ -36,6 +36,10 @@ public class WarUtil {
     static {
         gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListSerializer()).create();
         createFiles();
+    }
+
+    //Prevent it from loading if there is a towny error
+    static void loadWarData() {
         loadWars();
         loadLast();
         loadLeaderboard();

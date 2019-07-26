@@ -104,6 +104,8 @@ public class KingdomWars extends JavaPlugin {
 			return;
 		}
 
+		WarUtil.loadWarData();
+
 		loadConfig();
 		WarUtil.filterLeaderboard();
 
