@@ -14,6 +14,7 @@ import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.data.war.WarList;
 import net.urbanmc.kingdomwars.data.war.WarListSerializer;
 import net.urbanmc.kingdomwars.event.WarEndEvent;
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -164,7 +165,7 @@ public class WarUtil {
 
         Nation declaring = TownyUtil.getNation(war.getDeclaringNation());
         TownyUtil.setNationBalance(declaring,
-                TownyUtil.getNationBalance(declaring) - KingdomWars.getStartAmount(),
+                TownyUtil.getNationBalance(declaring) - ConfigManager.getStartAmount(),
                 "War start with " + war.getDeclaredNation());
     }
 
@@ -223,7 +224,7 @@ public class WarUtil {
     public synchronized static boolean checkForceEnd(War war) {
         long millis = System.currentTimeMillis() - war.getStarted();
 
-        if (millis >= KingdomWars.getEndTime()) {
+        if (millis >= ConfigManager.getEndTime()) {
             endWar(war);
             return true;
         } else
@@ -249,7 +250,7 @@ public class WarUtil {
         }
 
         if (winner != null && loser != null) {
-            win(winner, loser, KingdomWars.getFinishAmount());
+            win(winner, loser, ConfigManager.getFinishAmount());
         }
     }
 
@@ -283,16 +284,16 @@ public class WarUtil {
 
         LastWar lastWar =
                 new LastWar(winner.getName(), loser.getName(), war.isDeclaringNation(winner.getName()),
-                        amount == KingdomWars.getTruceAmount(),
-                        System.currentTimeMillis() + KingdomWars.getLastTime(),
-                        System.currentTimeMillis() + KingdomWars.getLastTimeRevenge());
+                        amount == ConfigManager.getTruceAmount(),
+                        System.currentTimeMillis() + ConfigManager.getLastTime(),
+                        System.currentTimeMillis() + ConfigManager.getLastTimeRevenge());
         addLast(lastWar);
 
         try {
             double balance = winner.getHoldingBalance() + amount;
 
             if (war.getDeclaringNation().equals(winner.getName())) {
-                balance += KingdomWars.getStartAmount();
+                balance += ConfigManager.getStartAmount();
             }
 
             winner.setBalance(balance, "War win against " + loser.getName());
@@ -358,8 +359,8 @@ public class WarUtil {
                 nation2Name,
                 true,
                 false,
-                System.currentTimeMillis() + KingdomWars.getLastTime(),
-                System.currentTimeMillis() + KingdomWars.getLastTimeRevenge());
+                System.currentTimeMillis() + ConfigManager.getLastTime(),
+                System.currentTimeMillis() + ConfigManager.getLastTimeRevenge());
         addLast(lastWar);
     }
 
@@ -406,7 +407,7 @@ public class WarUtil {
 
         if (lastWars.size() == 1) return lastWars.get(0);
 
-        //Bigger millis means more recent. This sorts the list by the most recent lastwar.
+        // Bigger millis means more recent. This sorts the list by the most recent lastwar.
         lastWars.sort(Comparator.comparingLong(LastWar::getMillis));
 
         return lastWars.get(0);
@@ -481,7 +482,7 @@ public class WarUtil {
 
     public static List<Leaderboard> getLeaderboards() {
         if (leaderboardList == null)
-            System.out.println("Returning LList = Null");
+            System.out.println("Returning List = Null");
         return leaderboardList;
     }
 
@@ -581,10 +582,10 @@ public class WarUtil {
     }
 
     private static void generateKillsToWin(War war) {
-        int kills = KingdomWars.getWinningKills();
+        int kills = ConfigManager.getWinningKills();
 
-        kills += war.getAllies(true).size() * KingdomWars.getAllyKills();
-        kills += war.getAllies(false).size() * KingdomWars.getAllyKills();
+        kills += war.getAllies(true).size() * ConfigManager.getAllyKills();
+        kills += war.getAllies(false).size() * ConfigManager.getAllyKills();
 
         war.setKills(kills);
 

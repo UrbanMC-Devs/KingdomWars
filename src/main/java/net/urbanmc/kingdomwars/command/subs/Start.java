@@ -3,6 +3,7 @@ package net.urbanmc.kingdomwars.command.subs;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -16,8 +17,6 @@ import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
 
 public class Start {
-
-
 
     public Start(Player p, String[] args) {
         if (!p.hasPermission("kingdomwars.start")) {
@@ -102,14 +101,13 @@ public class Start {
             return;
         }
 
-        if (TownyUtil.getNationBalance(nation1) < KingdomWars.getStartAmount()) {
+        if (TownyUtil.getNationBalance(nation1) < ConfigManager.getStartAmount()) {
             p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
-                    + ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")");
+                    + ChatColor.GREEN + "($" + ConfigManager.getStartAmount() + ")");
             return;
         }
 
-        //TODO CHANGE BACK TO 5
-        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5); //5 minutes is default time. Can be modified through event.
+        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5);
         Bukkit.getPluginManager().callEvent(declareEvent);
 
         if (declareEvent.isCancelled())
@@ -136,47 +134,7 @@ public class Start {
 
         time -= System.currentTimeMillis();
 
-        return formatTime(time / 1000);
-    }
-
-    private String formatTime(long time) {
-        int days = 0, hours = 0, minutes = 0, seconds;
-
-        while (time >= 86400) {
-            days++;
-            time -= 86400;
-        }
-
-        while (time >= 3600) {
-            hours++;
-            time -= 3600;
-        }
-
-        while (time >= 60) {
-            minutes++;
-            time -= 60;
-        }
-
-        seconds = Long.valueOf(time).intValue();
-
-        if (seconds == 60) {
-            minutes++;
-            seconds = 0;
-        }
-
-        String output = "";
-
-        output += days + " day"+ (days > 1 ? "s" : "") + ", ";
-
-        output += hours + " hour"+ (hours > 1 ? "s" : "") + ", ";
-
-        output += minutes + " minute"+ (minutes > 1 ? "s" : "") + ", ";
-
-        output += seconds + " second"+ (seconds > 1 ? "s" : "") + ", ";
-
-        output = output.trim();
-
-        return output.endsWith(",") ? output.substring(0, output.length() - 1) : output;
+        return ConfigManager.formatTime(time / 1000);
     }
 
     private void startWar(Nation nation1, Nation nation2) {

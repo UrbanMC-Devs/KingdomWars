@@ -8,6 +8,7 @@ import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -98,9 +99,9 @@ public class ForceStart {
                 return;
             }
 
-            if (TownyUtil.getNationBalance(nation1) < KingdomWars.getStartAmount()) {
+            if (TownyUtil.getNationBalance(nation1) < ConfigManager.getStartAmount()) {
                 p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
-                        + ChatColor.GREEN + "($" + KingdomWars.getStartAmount() + ")");
+                        + ChatColor.GREEN + "($" + ConfigManager.getStartAmount() + ")");
                 return;
             }
 

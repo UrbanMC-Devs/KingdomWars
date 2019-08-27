@@ -4,7 +4,6 @@ public class GraceNation {
 
     private String nationName;
 
-
     public GraceNation(String nationName) {
         this.nationName = nationName;
     }

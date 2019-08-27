@@ -3,6 +3,7 @@ package net.urbanmc.kingdomwars.listener;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -141,7 +142,7 @@ public class WarListener implements Listener {
 			return;
 
 		if (TownyUtil.isNationKing(p) && !war.isAllied(nation1.getName())) {
-				WarUtil.win(recievingNation, nation1, KingdomWars.getFinishAmount());
+				WarUtil.win(recievingNation, nation1, ConfigManager.getFinishAmount());
 				return;
 		}
 

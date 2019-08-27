@@ -1,7 +1,9 @@
 package net.urbanmc.kingdomwars.data.war;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.scoreboard.Scoreboard;
@@ -13,10 +15,10 @@ import net.urbanmc.kingdomwars.util.TownyUtil;
 public class War {
 
 	private String nation1, nation2;
-	private List<String> nation1Allies = new ArrayList<>(), nation2Allies = new ArrayList<>();
+	private Set<String> nation1Allies = new HashSet<>(), nation2Allies = new HashSet<>();
 	private int points1 = 0, points2 = 0, killsToWin;
 	private Scoreboard board;
-	private List<UUID> disabled;
+	private Set<UUID> disabled;
 	private long started;
 
 	public War(String nation1, String nation2) {
@@ -103,7 +105,7 @@ public class War {
 
 	public void setDisabled(UUID id, boolean disable) {
 		if (this.disabled == null) {
-			this.disabled = new ArrayList<>();
+			this.disabled = new HashSet<UUID>();
 		}
 
 		if (disable) {
@@ -125,7 +127,7 @@ public class War {
 		return !(nation1Allies.isEmpty() && nation2Allies.isEmpty());
 	}
 
-	public List<String> getAllies(boolean declaring) {
+	public Set<String> getAllies(boolean declaring) {
 		return declaring ? nation1Allies : nation2Allies;
 	}
 
@@ -151,13 +153,14 @@ public class War {
 	}
 
 	public void renameAlly(String oldName, String newName, boolean declaring) {
-		List<String> ally = declaring ? nation1Allies : nation2Allies;
+		Set<String> ally = declaring ? nation1Allies : nation2Allies;
 
-		ally.set(ally.indexOf(oldName), newName);
+		ally.remove(oldName);
+		ally.add(newName);
 	}
 
 	public void removeAlly(String allyName, boolean declaring) {
-		List<String> ally = declaring ? nation1Allies : nation2Allies;
+		Set<String> ally = declaring ? nation1Allies : nation2Allies;
 
 		ally.remove(allyName);
 	}

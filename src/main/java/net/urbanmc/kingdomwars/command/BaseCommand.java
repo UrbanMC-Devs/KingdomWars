@@ -2,6 +2,7 @@ package net.urbanmc.kingdomwars.command;
 
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.command.subs.*;
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -79,7 +80,7 @@ public class BaseCommand implements CommandExecutor {
 		label = ChatColor.AQUA + "/" + label + " ";
 
 		message.append(label).append("start (nation)").append(ChatColor.WHITE).append(": Start a war with another nation! ")
-				.append(ChatColor.GREEN).append("($").append(KingdomWars.getStartAmount()).append(")\n");
+				.append(ChatColor.GREEN).append("($").append(ConfigManager.getStartAmount()).append(")\n");
 
 		message.append(label).append("end").append(ChatColor.WHITE).append(": End a war you started!\n");
 		message.append(label).append("truce").append(ChatColor.WHITE).append(": Declare a truce with the nation who started a battle!\n");

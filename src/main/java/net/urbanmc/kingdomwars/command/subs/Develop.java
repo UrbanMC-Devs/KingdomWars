@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.util.ConfigManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -40,7 +41,7 @@ public class Develop {
 		War war = WarUtil.getWar(nation);
 		Nation loser = (nation.getName().equalsIgnoreCase(war.getDeclaredNation()))
 				? TownyUtil.getNation(war.getDeclaringNation()) : TownyUtil.getNation(war.getDeclaredNation());
-		WarUtil.win(nation, loser, KingdomWars.getFinishAmount());
+		WarUtil.win(nation, loser, ConfigManager.getFinishAmount());
 		WarUtil.removeAllLast(nation.getName());
 	}
 }

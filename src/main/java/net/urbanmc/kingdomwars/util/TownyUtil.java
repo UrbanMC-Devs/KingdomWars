@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.palmergames.bukkit.towny.TownyAPI;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarUtil;
 import org.bukkit.Bukkit;
@@ -27,7 +28,7 @@ public class TownyUtil {
 
 	public static Nation getNation(Player p) {
 		try {
-			return TownyUniverse.getDataSource().getResident(p.getName()).getTown().getNation();
+			return TownyAPI.getInstance().getDataSource().getResident(p.getName()).getTown().getNation();
 		} catch (NotRegisteredException ex) {
 			return null;
 		}
@@ -37,7 +38,7 @@ public class TownyUtil {
 		Nation nation = null;
 
 		try {
-			nation = TownyUniverse.getDataSource().getNation(name);
+			nation = TownyAPI.getInstance().getDataSource().getNation(name);
 		} catch (NotRegisteredException ex) {
 		}
 
@@ -84,9 +85,9 @@ public class TownyUtil {
 				receivingNation.setUuid(UUID.randomUUID());
 
 		KingdomWars.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
-				+ KingdomWars.getTruceAmount() + " from their nation bank.",
+				+ ConfigManager.getTruceAmount() + " from their nation bank.",
 				receivingNation.getUuid(),
-				() -> { WarUtil.win(receivingNation, otherNation, KingdomWars.getTruceAmount()); },
+				() -> { WarUtil.win(receivingNation, otherNation, ConfigManager.getTruceAmount()); },
 				() -> {
 					sendNationMessage(receivingNation,
 							"Your nation has declined the request to truce with " + otherNation.getName() + ".");
