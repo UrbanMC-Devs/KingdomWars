@@ -49,7 +49,7 @@ public class WarListener implements Listener {
 		if (war.onSameSide(nation1.getName(), nation2.getName()) != 0)
 			return;
 
-		if (WarUtil.checkForceEnd(war, e.isAsynchronous()))
+		if (WarUtil.checkForceEnd(war))
 			return;
 
 		TownBlock tB = TownyUniverse.getTownBlock(e.getAttacker().getLocation());
@@ -117,7 +117,7 @@ public class WarListener implements Listener {
 
 		War war = WarUtil.getWar(nation1);
 
-		if (WarUtil.checkForceEnd(war, e.isAsynchronous()))
+		if (WarUtil.checkForceEnd(war))
 			return;
 
 		if (KingdomWars.playerIsJailed(p))

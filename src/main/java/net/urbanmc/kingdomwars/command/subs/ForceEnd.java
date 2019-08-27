@@ -62,7 +62,7 @@ public class ForceEnd {
 		War war = WarUtil.getWar(nation);
 
 		//Shouldn't theoretically be async
-		WarUtil.end(war, false);
+		WarUtil.end(war);
 		p.sendMessage(ChatColor.GOLD + "Ended war.");
 
 		Nation otherNation = war.getOtherNation(nation);

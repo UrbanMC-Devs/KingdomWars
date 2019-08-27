@@ -64,6 +64,11 @@ public class Start {
             return;
         }
 
+        if (WarUtil.isGraceNation(nation2.getName())) {
+            p.sendMessage(ChatColor.RED + "That nation cannot be attacked right now!");
+            return;
+        }
+
         if (nation1.isNeutral()) {
             p.sendMessage(ChatColor.RED + "Your nation is neutral!");
             return;
@@ -104,7 +109,7 @@ public class Start {
         }
 
         //TODO CHANGE BACK TO 5
-        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 2); //5 minutes is default time. Can be modified through event.
+        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5); //5 minutes is default time. Can be modified through event.
         Bukkit.getPluginManager().callEvent(declareEvent);
 
         if (declareEvent.isCancelled())

@@ -14,8 +14,7 @@ public class WarEndEvent extends Event implements Cancellable {
 
 	private static final HandlerList handlers = new HandlerList();
 
-	public WarEndEvent(War war, boolean async) {
-		super(async);
+	public WarEndEvent(War war) {
 		this.war = war;
 	}
 

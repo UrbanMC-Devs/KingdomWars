@@ -112,7 +112,7 @@ public class KingdomWars extends JavaPlugin {
 		getCommand("townywar").setExecutor(new BaseCommand());
 
 		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvents(new NationListener(), this);
+		pm.registerEvents(new NationListener(this), this);
 		pm.registerEvents(new WarListener(), this);
 	}
 

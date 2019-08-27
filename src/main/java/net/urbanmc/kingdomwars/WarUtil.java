@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.data.GraceNation;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.data.last.LastWarList;
@@ -32,6 +33,7 @@ public class WarUtil {
     private static List<PreWar> scheduledWars = new ArrayList<>();
     private static List<LastWar> last;
     private static List<Leaderboard> leaderboardList;
+    private static List<GraceNation> gracePeriodNations = new ArrayList<>();
 
     static {
         gson = new GsonBuilder().registerTypeAdapter(WarList.class, new WarListSerializer()).create();
@@ -166,10 +168,10 @@ public class WarUtil {
                 "War start with " + war.getDeclaredNation());
     }
 
-    public static void endWar(War war, boolean async) {
+    public static void endWar(War war) {
         wars.remove(war);
         saveWars();
-        end(war, async);
+        end(war);
     }
 
     public static void updateWar(War war) {
@@ -218,11 +220,11 @@ public class WarUtil {
         return null;
     }
 
-    public synchronized static boolean checkForceEnd(War war, boolean async) {
+    public synchronized static boolean checkForceEnd(War war) {
         long millis = System.currentTimeMillis() - war.getStarted();
 
         if (millis >= KingdomWars.getEndTime()) {
-            endWar(war, async);
+            endWar(war);
             return true;
         } else
             return false;
@@ -231,8 +233,7 @@ public class WarUtil {
     public synchronized static void checkForceEndAll() {
         for (War war : copyWarList()) {
             if (war == null) continue;
-            //Theoretically it shouldn't be async
-            checkForceEnd(war, false);
+            checkForceEnd(war);
         }
     }
 
@@ -255,7 +256,7 @@ public class WarUtil {
     public synchronized static void win(Nation winner, Nation loser, double amount) {
         War war = getWar(winner);
 
-        WarEndEvent event = new WarEndEvent(war, Bukkit.isPrimaryThread());
+        WarEndEvent event = new WarEndEvent(war);
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled())
@@ -323,12 +324,12 @@ public class WarUtil {
         updateWarInfoInLeaderboard(winner.getName(), loser.getName());
     }
 
-    public static void end(War war, boolean async) {
+    public static void end(War war) {
         Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
         Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
 
         //isPrimaryThread doesn't neccesarily mean that it's async but it's one of the better options
-        WarEndEvent event = new WarEndEvent(war, async);
+        WarEndEvent event = new WarEndEvent(war);
         Bukkit.getPluginManager().callEvent(event);
 
         wars.remove(war);
@@ -622,5 +623,33 @@ public class WarUtil {
 
     private static List<PreWar> copyPreWars() {
         return new ArrayList<>(scheduledWars);
+    }
+
+    public static void createNation(String nationName) {
+        if (isGraceNation(nationName)) return;
+
+        GraceNation graceNation = new GraceNation(nationName);
+
+        Bukkit.getScheduler().runTaskLaterAsynchronously(KingdomWars.getInstance(), () ->
+                gracePeriodNations.remove(graceNation), 20 * 60 * 10);
+    }
+
+    public static boolean isGraceNation(String nationName) {
+        if (!gracePeriodNations.isEmpty()) {
+            for (GraceNation grace : gracePeriodNations) {
+                if (grace.getNationName().equalsIgnoreCase(nationName)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static void renameGraceNation(String oldName, String newName) {
+        if (!gracePeriodNations.isEmpty()) {
+            for (GraceNation grace : gracePeriodNations) {
+                if (grace.getNationName().equalsIgnoreCase(oldName))
+                    grace.setNationName(newName);
+            }
+        }
     }
 }

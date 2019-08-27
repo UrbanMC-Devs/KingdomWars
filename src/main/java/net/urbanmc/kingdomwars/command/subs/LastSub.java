@@ -1,6 +1,7 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.util.TownyUtil;
@@ -59,7 +60,7 @@ public class LastSub {
     }
 
     private void viewLast(Player p, LastWar lastWar, String nationName) {
-        String time = formatTime((System.currentTimeMillis() - lastWar.getMillis()) / 1000);
+        String time = formatTime((System.currentTimeMillis() - (lastWar.getMillis() - KingdomWars.getLastTime())) / 1000);
 
         sendColor(p,
                 "&2--- &cRecent War for &f" + nationName + " &2---\n" +
@@ -83,6 +84,7 @@ public class LastSub {
         p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 
+    // TIme is in seconds
     private String formatTime(long time) {
         int days = 0, hours = 0, minutes = 0, seconds;
 

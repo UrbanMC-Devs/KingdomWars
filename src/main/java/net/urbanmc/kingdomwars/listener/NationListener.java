@@ -1,10 +1,15 @@
 package net.urbanmc.kingdomwars.listener;
 
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.event.NewNationEvent;
 import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.util.TownyUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.palmergames.bukkit.towny.event.DeleteNationEvent;
@@ -14,9 +19,23 @@ import net.urbanmc.kingdomwars.WarUtil;
 
 public class NationListener implements Listener {
 
+	private KingdomWars plugin;
+
+	public NationListener(KingdomWars plugin) {
+		this.plugin = plugin;
+	}
+
+	@EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onNationCreate(NewNationEvent event) {
+		WarUtil.createNation(event.getNation().getName());
+	}
+
+
 	@EventHandler
 	public void renameNation(RenameNationEvent e) {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
+
+		WarUtil.renameGraceNation(oldName, newName);
 
 		if (WarUtil.inWar(oldName)) {
 			War war = WarUtil.getWar(oldName);
@@ -51,7 +70,11 @@ public class NationListener implements Listener {
 			if (ally != -1)
 				war.removeAlly(nation, ally == 1);
 
-			else WarUtil.endWar(WarUtil.getWar(nation), e.isAsynchronous());
+			else {
+				Bukkit.getScheduler().runTask(plugin, () -> {
+					WarUtil.endWar(WarUtil.getWar(nation));
+				});
+			}
 		}
 
 		if (WarUtil.alreadyScheduledForWar(nation)) {

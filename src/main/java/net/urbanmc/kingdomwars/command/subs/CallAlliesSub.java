@@ -49,7 +49,7 @@ public class CallAlliesSub {
             return;
         }
 
-        WarRequestAlliesEvent event = new WarRequestAlliesEvent(preWar);
+        WarRequestAlliesEvent event = new WarRequestAlliesEvent(preWar, 10);
 
         Bukkit.getPluginManager().callEvent(event);
 
