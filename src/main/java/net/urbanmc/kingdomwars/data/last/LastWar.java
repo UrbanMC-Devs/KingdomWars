@@ -64,4 +64,8 @@ public class LastWar {
     public boolean isLosingNation(String nation) {
         return getLoser().equals(nation);
     }
+
+    public void setRevengeMillis(long millis) {
+        this.revengeMillis = millis;
+    }
 }

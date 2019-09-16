@@ -55,6 +55,9 @@ public class BaseCommand implements CommandExecutor {
 			case "last":
 				new LastSub(p, args);
 				return true;
+			case "reload":
+				new ReloadSub(p, args);
+				return true;
 			case "callallies":
 				new CallAlliesSub(p);
 				return true;

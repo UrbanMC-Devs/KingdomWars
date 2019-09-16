@@ -25,7 +25,7 @@ public class LastSub {
         }
 
         if (args.length != 3) {
-            sendColor(p, "&cPlease enter a valid nation!");
+            sendColor(p, "&cUsage: /twars last [remove/view] [nation]");
             return;
         }
 

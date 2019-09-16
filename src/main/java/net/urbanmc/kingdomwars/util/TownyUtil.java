@@ -43,7 +43,7 @@ public class TownyUtil {
 		}
 
 		if (nation == null) {
-			for (Nation dataNation : TownyUniverse.getDataSource().getNations()) {
+			for (Nation dataNation : TownyAPI.getInstance().getDataSource().getNations()) {
 				if (dataNation.getName().equalsIgnoreCase(name)) {
 					nation = dataNation;
 					break;
@@ -73,7 +73,7 @@ public class TownyUtil {
 
 	public static boolean isNationKing(Player p) {
 		try {
-			return TownyUniverse.getDataSource().getResident(p.getName()).isKing();
+			return TownyAPI.getInstance().getDataSource().getResident(p.getName()).isKing();
 		} catch (NotRegisteredException ex) {
 			ex.printStackTrace();
 			return false;
@@ -85,20 +85,22 @@ public class TownyUtil {
 				receivingNation.setUuid(UUID.randomUUID());
 
 		KingdomWars.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
-				+ ConfigManager.getTruceAmount() + " from their nation bank.",
+						+ ConfigManager.getTruceAmount() + " from their nation bank.",
 				receivingNation.getUuid(),
-				() -> { WarUtil.win(receivingNation, otherNation, ConfigManager.getTruceAmount()); },
+				() -> {
+					WarUtil.win(receivingNation, otherNation, ConfigManager.getTruceAmount());
+				},
 				() -> {
 					sendNationMessage(receivingNation,
 							"Your nation has declined the request to truce with " + otherNation.getName() + ".");
 					sendNationMessage(otherNation, receivingNation.getName() + " has declined your request to truce.");
 				},
 				getOnlineInNation(receivingNation, "kingdomwars.nationstaff")
-				);
+		);
 	}
 
 	public static void deleteNation(Nation nation) {
-		TownyUniverse.getDataSource().removeNation(nation);
+		TownyAPI.getInstance().getDataSource().removeNation(nation);
 		WarUtil.leaderBoardNationDelete(nation.getName());
 	}
 
@@ -121,5 +123,9 @@ public class TownyUtil {
 
 	public static boolean damageCancelled(Entity attacker, Entity defender) {
 		return CombatUtil.preventDamageCall(KingdomWars.getTowny(), attacker, defender);
+	}
+
+	public static void addNationBonusBlocks(Nation nation, int blocks) {
+		nation.setExtraBlocks(nation.getExtraBlocks() + blocks);
 	}
 }

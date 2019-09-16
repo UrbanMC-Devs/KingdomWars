@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import com.palmergames.bukkit.towny.TownySettings;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.last.LastWar;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
@@ -91,7 +92,7 @@ public class Start {
             } else {
                 p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast
                         (nation1, nation2)
-                        + " seconds from now!");
+                        + " from now!");
                 return;
             }
         }
@@ -105,6 +106,10 @@ public class Start {
             p.sendMessage(ChatColor.RED + "Your nation balance does not have the required amount to start a war! "
                     + ChatColor.GREEN + "($" + ConfigManager.getStartAmount() + ")");
             return;
+        }
+
+        if (nation2.getExtraBlocks() <= ConfigManager.getNegTownBlockMin() || TownySettings.getNationBonusBlocks(nation2) < ConfigManager.getTownBlockLoss()) {
+            p.sendMessage(ChatColor.RED + "Warning: That nation has already lost a lot of town blocks. Winning a war against them will not give you any extra town blocks!");
         }
 
         WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 5);
@@ -133,6 +138,11 @@ public class Start {
         long time = last.isLosingNation(nation1.getName()) ? last.getRevengeMillis() : last.getMillis();
 
         time -= System.currentTimeMillis();
+
+        if (time < 0) {
+            time = 0;
+            last.setRevengeMillis(System.currentTimeMillis());
+        }
 
         return ConfigManager.formatTime(time / 1000);
     }

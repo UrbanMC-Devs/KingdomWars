@@ -2,6 +2,8 @@ package net.urbanmc.kingdomwars;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.data.GraceNation;
@@ -24,7 +26,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
 
 public class WarUtil {
 
@@ -320,6 +327,13 @@ public class WarUtil {
             }
         }
 
+        if (loser.getExtraBlocks() > ConfigManager.getNegTownBlockMin() && TownySettings.getNationBonusBlocks(loser) >= ConfigManager.getTownBlockLoss()) {
+            TownyUtil.addNationBonusBlocks(winner, ConfigManager.getTownBlockBonus());
+            TownyUtil.addNationBonusBlocks(loser, -1 * ConfigManager.getTownBlockLoss());
+            TownyAPI.getInstance().getDataSource().saveNation(winner);
+            TownyAPI.getInstance().getDataSource().saveNation(loser);
+        }
+
         addWinToLeaderBoard(winner.getName(), true);
         addWinToLeaderBoard(loser.getName(), false);
         updateWarInfoInLeaderboard(winner.getName(), loser.getName());
@@ -378,6 +392,11 @@ public class WarUtil {
     }
 
     private static void addLast(LastWar lastWar) {
+        // Before we add a new last war, we have to filter the list to remove previous last wars with the same two nations.
+        final List<String> names  = Arrays.asList(lastWar.getDeclaredNation(), lastWar.getDeclaringNation());
+
+        last.removeIf(war -> names.contains(war.getDeclaringNation()) && names.contains(war.getDeclaredNation()));
+
         last.add(lastWar);
         reloadLast();
     }
@@ -465,7 +484,9 @@ public class WarUtil {
         if (!(lastWar.isDeclaringWinner() && lastWar.isDeclaringNation(nation2.getName())))
             return false;
 
-        return System.currentTimeMillis() <= lastWar.getRevengeMillis();
+        System.out.println("[KingdomWars] Current Time: " + System.currentTimeMillis() + "; Revenge Time: " + lastWar.getRevengeMillis() + "; Config Revenge Time: " + ConfigManager.getLastTimeRevenge());
+
+        return System.currentTimeMillis() >= lastWar.getRevengeMillis();
     }
 
     private static void saveLeaderboard() {

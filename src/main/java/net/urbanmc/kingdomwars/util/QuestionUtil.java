@@ -18,18 +18,17 @@ public class QuestionUtil {
         this.plugin = plugin;
     }
 
-
     public void askQuestion(String question, UUID nationUUID, Runnable accept, Runnable deny, List<Player> targets) {
         if (nationQuestionMap.containsKey(nationUUID)) return;
 
-        JSONMessage message = JSONMessage.create();
+        JSONMessageBuilder builder = JSONMessageBuilder.create();
 
-        message.then("[").color(ChatColor.DARK_AQUA).then("Question").color(ChatColor.GREEN).then("]").color(ChatColor.DARK_AQUA).then(" ")
+        builder.then("[").color(ChatColor.DARK_AQUA).then("Question").color(ChatColor.GREEN).then("]").color(ChatColor.DARK_AQUA).then(" ")
                 .then(question).color(ChatColor.AQUA)
                 .then("\n")
-                .then("[Accept]").color(ChatColor.GREEN).runCommand("twars accept").tooltip(JSONMessage.create("Click to accept the truce!").color(ChatColor.YELLOW))
+                .then("[Accept]").color(ChatColor.GREEN).runCommand("/twars accept").tooltip(JSONMessageBuilder.create("Click to accept the truce!").color(ChatColor.YELLOW))
                 .then(" ")
-                .then("[Deny]").color(ChatColor.RED).runCommand("twars deny").tooltip(JSONMessage.create("Click to deny the truce!").color(ChatColor.RED));
+                .then("[Deny]").color(ChatColor.RED).runCommand("/twars deny").tooltip(JSONMessageBuilder.create("Click to deny the truce!").color(ChatColor.RED));
 
         Runnable[] runnables = new Runnable[2];
 
@@ -38,7 +37,7 @@ public class QuestionUtil {
 
         nationQuestionMap.put(nationUUID, runnables);
 
-        message.send(targets.toArray(new Player[0]));
+        builder.send(targets);
 
         scheduleRemoval(nationUUID);
     }

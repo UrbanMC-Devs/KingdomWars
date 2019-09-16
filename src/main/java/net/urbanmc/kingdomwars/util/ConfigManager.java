@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class ConfigManager {
 
     private static double startAmount, finishAmount, truceAmount;
-    private static int winningKills, allyKills;
+    private static int winningKills, allyKills, townBlockBonus, townBlockLoss, townBlockMin;
     private static long lastTime, lastTimeRevenge, endTime;
 
     public ConfigManager() {
@@ -39,14 +39,17 @@ public class ConfigManager {
 
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
-        startAmount = data.getDouble("start-amount");
-        finishAmount = data.getDouble("finish-amount");
-        truceAmount = data.getDouble("truce-amount");
-        winningKills = data.getInt("winning-kills");
-        lastTime = TimeUnit.HOURS.toMillis(data.getInt("hours-between"));
-        lastTimeRevenge = TimeUnit.HOURS.toMillis(data.getInt("hours-between-revenge"));
-        endTime = TimeUnit.HOURS.toMillis(data.getInt("hours-end"));
+        startAmount = data.getDouble("start-amount", 25000);
+        finishAmount = data.getDouble("finish-amount", 100000);
+        truceAmount = data.getDouble("truce-amount", 50000);
+        winningKills = data.getInt("winning-kills", 25);
+        lastTime = TimeUnit.HOURS.toMillis(data.getInt("hours-between", 168));
+        lastTimeRevenge = TimeUnit.HOURS.toMillis(data.getInt("hours-between-revenge", 72));
+        endTime = TimeUnit.HOURS.toMillis(data.getInt("hours-end", 168));
         allyKills = data.getInt("ally-bonus-kills", 5);
+        townBlockBonus = data.getInt("town-block-bonus", 10);
+        townBlockLoss = data.getInt("town-block-loss", 10);
+        townBlockMin = data.getInt("town-block-min", 40);
     }
 
     public static double getStartAmount() {
@@ -78,6 +81,12 @@ public class ConfigManager {
     public static long getEndTime() {
         return endTime;
     }
+
+    public static int getTownBlockBonus() { return townBlockBonus; }
+
+    public static int getTownBlockLoss() { return townBlockLoss; }
+
+    public static int getNegTownBlockMin() { return -1 * townBlockMin; }
 
     // Time is in seconds
     public static String formatTime(long time) {
@@ -112,12 +121,12 @@ public class ConfigManager {
         appendTime(output, minutes, "minute");
         appendTime(output, seconds, "second");
 
-        return output.toString();
+        return output.toString().trim();
     }
 
     private static void appendTime(StringBuilder builder, int time, String unit) {
         if (time > 0)
-            builder.append(time).append(" ").append(unit).append(time > 1 ? "s" : "");
+            builder.append(time).append(" ").append(unit).append(time > 1 ? "s " : " ");
     }
 
 }

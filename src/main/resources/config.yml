@@ -24,3 +24,12 @@ hours-end: 168
 
 #The amount of more kills needed for every ally that joins a war
 ally-bonus-kills: 5
+
+# Town block bonus for winning
+town-block-bonus: 10
+
+# How many town blocks should the losing nation lose?
+town-block-loss: 10
+
+# What's the minimum number of town blocks a nation can lose?
+town-block-min: 40
