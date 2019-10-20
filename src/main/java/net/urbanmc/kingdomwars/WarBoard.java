@@ -43,16 +43,16 @@ public class WarBoard {
 		int counter = 4;
 
 		if (war.hasAllies()) {
-			obj.getScore(translateColor("&b◯ Allies:")).setScore(counter);
+			obj.getScore(translateColor("&b\u25EF Allies:")).setScore(counter);
 			counter--;
 
 			for (String nation1Ally : war.getAllies(true)) {
-				obj.getScore(translateColor("   &6" + nation1Ally)).setScore(counter);
+				obj.getScore(translateColor("\t&6" + nation1Ally)).setScore(counter);
 				counter--;
 			}
 
 			for (String nation2Ally : war.getAllies(false)) {
-				obj.getScore(translateColor("   &3" + nation2Ally)).setScore(counter);
+				obj.getScore(translateColor("\t&3" + nation2Ally)).setScore(counter);
 				counter--;
 			}
 
