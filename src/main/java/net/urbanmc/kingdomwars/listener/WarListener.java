@@ -26,6 +26,10 @@ public class WarListener implements Listener {
 
 	private KingdomWars plugin;
 
+	public WarListener(KingdomWars plugin) {
+		this.plugin = plugin;
+	}
+
 	@EventHandler
 	public void onDisallowedPVP(DisallowedPVPEvent e) {
 		Player attacker = e.getAttacker();

@@ -76,7 +76,7 @@ public class KingdomWars extends JavaPlugin {
 		PluginManager pm = getServer().getPluginManager();
 
 		pm.registerEvents(new NationListener(this), this);
-		pm.registerEvents(new WarListener(), this);
+		pm.registerEvents(new WarListener(this), this);
 	}
 
 	public Towny getTowny() {
