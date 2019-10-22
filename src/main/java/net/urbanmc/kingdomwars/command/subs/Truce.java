@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -8,13 +9,12 @@ import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.util.TownyUtil;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarTruceEvent;
 
 public class Truce {
 
-	public Truce(Player p, String label, String[] args) {
+	public Truce(Player p, String label, final KingdomWars plugin) {
 		if (!p.hasPermission("kingdomwars.truce")) {
 			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
 			return;
@@ -27,12 +27,12 @@ public class Truce {
 			return;
 		}
 
-		if (!WarUtil.inWar(nation)) {
+		if (!plugin.getWarManager().inWar(nation)) {
 			p.sendMessage(ChatColor.RED + "You are not in a war!");
 			return;
 		}
 
-		War war = WarUtil.getWar(nation);
+		War war = plugin.getWarManager().getWar(nation);
 
 		String nationName = nation.getName();
 
@@ -60,6 +60,6 @@ public class Truce {
 
 		TownyMessaging.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName
 				());
-		TownyUtil.truceQuestion(receivingNation, nation);
+		TownyUtil.truceQuestion(plugin, receivingNation, nation);
 	}
 }

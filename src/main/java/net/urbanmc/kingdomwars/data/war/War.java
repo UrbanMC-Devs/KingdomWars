@@ -1,16 +1,12 @@
 package net.urbanmc.kingdomwars.data.war;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
+import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.scoreboard.Scoreboard;
 
-import com.palmergames.bukkit.towny.object.Nation;
-
-import net.urbanmc.kingdomwars.util.TownyUtil;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class War {
 
@@ -115,8 +111,14 @@ public class War {
 		}
 	}
 
+	public Set<UUID> getDisabled() { return disabled; }
+
 	public void setStarted() {
 		this.started = System.currentTimeMillis();
+	}
+
+	public void setStarted(long started) {
+		this.started = started;
 	}
 
 	public long getStarted() {
@@ -196,6 +198,20 @@ public class War {
 	}
 
 	public int getKillsToWin() { return killsToWin; }
+
+	public boolean isInWar(String nation) {
+		return nation1.equals(nation) || nation2.equals(nation) || (hasAllies() && isAllied(nation));
+	}
+
+	public Set<String> getAllNationNames() {
+		final Set<String> nationNames = new HashSet<>();
+		nationNames.add(nation1);
+		nationNames.add(nation2);
+		nationNames.addAll(nation1Allies);
+		nationNames.addAll(nation2Allies);
+
+		return nationNames;
+	}
 
 
 }

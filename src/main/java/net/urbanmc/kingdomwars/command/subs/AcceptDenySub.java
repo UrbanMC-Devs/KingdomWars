@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 public class AcceptDenySub {
 
-    public AcceptDenySub(Player p, String arg) {
+    public AcceptDenySub(Player p, String arg, final KingdomWars plugin) {
         arg = arg.toLowerCase();
         if (!p.hasPermission("twars." + arg)) {
             p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
@@ -22,12 +22,12 @@ public class AcceptDenySub {
             return;
         }
 
-        if (!KingdomWars.getQuestionUtil().hasTruceRequest(nation.getUuid())) {
+        if (!plugin.getQuestionUtil().hasTruceRequest(nation.getUuid())) {
             p.sendMessage(ChatColor.RED + "Your nation does not have a truce request!");
             return;
         }
 
-        KingdomWars.getQuestionUtil().runRunnable(nation.getUuid(), arg.equalsIgnoreCase("accept"));
+        plugin.getQuestionUtil().runRunnable(nation.getUuid(), arg.equalsIgnoreCase("accept"));
 
     }
 

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.palmergames.bukkit.towny.TownyAPI;
 import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
@@ -17,7 +17,6 @@ import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 public class TownyUtil {
@@ -80,15 +79,15 @@ public class TownyUtil {
 		}
 	}
 
-	public static void truceQuestion(Nation receivingNation, Nation otherNation) {
+	public static void truceQuestion(KingdomWars plugin, Nation receivingNation, Nation otherNation) {
 		if (!receivingNation.hasValidUUID())
 				receivingNation.setUuid(UUID.randomUUID());
 
-		KingdomWars.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
+		plugin.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
 						+ ConfigManager.getTruceAmount() + " from their nation bank.",
 				receivingNation.getUuid(),
 				() -> {
-					WarUtil.win(receivingNation, otherNation, ConfigManager.getTruceAmount());
+					plugin.getWarManager().win(receivingNation, otherNation, ConfigManager.getTruceAmount());
 				},
 				() -> {
 					sendNationMessage(receivingNation,
@@ -101,7 +100,6 @@ public class TownyUtil {
 
 	public static void deleteNation(Nation nation) {
 		TownyAPI.getInstance().getDataSource().removeNation(nation);
-		WarUtil.leaderBoardNationDelete(nation.getName());
 	}
 
 	public static List<Player> getOnlineInNation(Nation nation, String permission) {
@@ -121,8 +119,8 @@ public class TownyUtil {
 		return players;
 	}
 
-	public static boolean damageCancelled(Entity attacker, Entity defender) {
-		return CombatUtil.preventDamageCall(KingdomWars.getTowny(), attacker, defender);
+	public static boolean damageCancelled(KingdomWars plugin, Entity attacker, Entity defender) {
+		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender);
 	}
 
 	public static void addNationBonusBlocks(Nation nation, int blocks) {

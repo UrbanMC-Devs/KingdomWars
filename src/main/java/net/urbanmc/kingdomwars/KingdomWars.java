@@ -5,7 +5,10 @@ import com.palmergames.bukkit.towny.Towny;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
-import net.urbanmc.kingdomwars.util.ConfigManager;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
+import net.urbanmc.kingdomwars.manager.LastWarManager;
+import net.urbanmc.kingdomwars.manager.LeaderboardManager;
+import net.urbanmc.kingdomwars.manager.WarManager;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -15,12 +18,13 @@ import java.util.logging.Level;
 
 public class KingdomWars extends JavaPlugin {
 
-	private static Towny towny;
-	private static QuestionUtil questionUtil;
-	private static Essentials essentials;
-	private static KingdomWars instance;
+	private Towny towny;
+	private QuestionUtil questionUtil;
+	private Essentials essentials;
 
-	public static KingdomWars getInstance() { return instance; }
+	private WarManager warManager;
+	private LeaderboardManager lbManager;
+	private LastWarManager lastWarManager;
 
 	@Override
 	public void onEnable() {
@@ -40,9 +44,6 @@ public class KingdomWars extends JavaPlugin {
 			return;
 		}
 
-		// Set static instance
-		instance = this;
-
 		// Check for soft depend essentials (EssentialsX)
 		if (getServer().getPluginManager().isPluginEnabled("Essentials")) {
 			essentials = getPlugin(Essentials.class);
@@ -50,16 +51,26 @@ public class KingdomWars extends JavaPlugin {
 
 		questionUtil = new QuestionUtil(this);
 
+		warManager = new WarManager(this);
+		lbManager = new LeaderboardManager();
+		lastWarManager = new LastWarManager();
+
 		// Load current war data
-		WarUtil.loadWarData();
+		warManager.loadCurrentWars();
+
+		// Load leaderboard
+		lbManager.loadLeaderboard();
+
+		// Load last war
+		lastWarManager.loadLastWars();
 
 		// Load config options
 		new ConfigManager();
 
-		WarUtil.filterLeaderboard();
+		lbManager.filterLeaderboard();
 
 		// Register command
-		getCommand("townywar").setExecutor(new BaseCommand());
+		getCommand("townywar").setExecutor(new BaseCommand(this));
 
 		// Register events
 		PluginManager pm = getServer().getPluginManager();
@@ -68,22 +79,28 @@ public class KingdomWars extends JavaPlugin {
 		pm.registerEvents(new WarListener(), this);
 	}
 
-	public static Towny getTowny() {
+	public Towny getTowny() {
 		return towny;
 	}
 
-	public static QuestionUtil getQuestionUtil() { return questionUtil; }
+	public QuestionUtil getQuestionUtil() { return questionUtil; }
 
-	public static boolean hasEssentials() {
+	public boolean hasEssentials() {
 		return essentials != null;
 	}
 
-	public static Essentials getEssentials() {
+	public Essentials getEssentials() {
 		return essentials;
 	}
 
 	public static boolean playerIsJailed(Player p) {
 		return (p.hasMetadata("townyoutlawjailed"));
 	}
+
+	public WarManager getWarManager() { return warManager; }
+
+	public LeaderboardManager getLeaderboard() { return lbManager; }
+
+	public LastWarManager getLastWarManager() { return lastWarManager; }
 
 }

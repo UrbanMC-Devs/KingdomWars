@@ -3,7 +3,7 @@ package net.urbanmc.kingdomwars.listener;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-import net.urbanmc.kingdomwars.util.ConfigManager;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,11 +19,12 @@ import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import net.urbanmc.kingdomwars.WarBoard;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarPointAddEvent;
 
 public class WarListener implements Listener {
+
+	private KingdomWars plugin;
 
 	@EventHandler
 	public void onDisallowedPVP(DisallowedPVPEvent e) {
@@ -42,7 +43,7 @@ public class WarListener implements Listener {
 		if (nation1.getName().equals(nation2.getName()))
 			return;
 
-		War war = WarUtil.getWar(nation1);
+		War war = plugin.getWarManager().getWar(nation1);
 
 		if (war == null)
 			return;
@@ -50,7 +51,7 @@ public class WarListener implements Listener {
 		if (war.onSameSide(nation1.getName(), nation2.getName()) != 0)
 			return;
 
-		if (WarUtil.checkForceEnd(war))
+		if (plugin.getWarManager().checkForceEnd(war))
 			return;
 
 		TownBlock tB = TownyUniverse.getTownBlock(e.getAttacker().getLocation());
@@ -64,9 +65,9 @@ public class WarListener implements Listener {
 			}
 		}
 
-		if (KingdomWars.hasEssentials()) {
-			User attackerUser = KingdomWars.getEssentials().getUser(attacker);
-			User defenderUser = KingdomWars.getEssentials().getUser(defender);
+		if (plugin.hasEssentials()) {
+			User attackerUser = plugin.getEssentials().getUser(attacker);
+			User defenderUser = plugin.getEssentials().getUser(defender);
 
 			if (attackerUser.isGodModeEnabled()) {
 				attackerUser.setGodModeEnabled(false);
@@ -92,7 +93,7 @@ public class WarListener implements Listener {
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageByEntityEvent e) {
-		TownyUtil.damageCancelled(e.getDamager(), e.getEntity());
+		TownyUtil.damageCancelled(plugin, e.getDamager(), e.getEntity());
 	}
 
 	@EventHandler
@@ -105,20 +106,20 @@ public class WarListener implements Listener {
 
 		Nation nation1 = TownyUtil.getNation(p);
 
-		if (nation1 == null || !WarUtil.inWar(nation1))
+		if (nation1 == null || !plugin.getWarManager().inWar(nation1))
 			return;
 
 		Nation nation2 = TownyUtil.getNation(killer);
 
-		if (nation2 == null || !WarUtil.inWar(nation2))
+		if (nation2 == null || !plugin.getWarManager().inWar(nation2))
 			return;
 
 		if (nation1.getName().equals(nation2.getName()))
 			return;
 
-		War war = WarUtil.getWar(nation1);
+		War war = plugin.getWarManager().getWar(nation1);
 
-		if (WarUtil.checkForceEnd(war))
+		if (plugin.getWarManager().checkForceEnd(war))
 			return;
 
 		if (KingdomWars.playerIsJailed(p))
@@ -138,22 +139,21 @@ public class WarListener implements Listener {
 		WarPointAddEvent event = new WarPointAddEvent(war, recievingNation, 1);
 		Bukkit.getPluginManager().callEvent(event);
 
-		if (event.isCancelled())
-			return;
+		if (event.isCancelled()) return;
 
 		if (TownyUtil.isNationKing(p) && !war.isAllied(nation1.getName())) {
-				WarUtil.win(recievingNation, nation1, ConfigManager.getFinishAmount());
-				return;
+			plugin.getWarManager().win(recievingNation, nation1, ConfigManager.getFinishAmount());
+			return;
 		}
 
 		war.addPoints(recievingNation, 1);
-		WarUtil.updateWar(war);
+
 		WarBoard.updateBoard(war);
-		WarUtil.checkWin(war);
+		plugin.getWarManager().checkWin(war);
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		WarBoard.showBoard(e.getPlayer());
+		WarBoard.showBoard(plugin, e.getPlayer());
 	}
 }

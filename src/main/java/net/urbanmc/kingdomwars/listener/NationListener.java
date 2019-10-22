@@ -1,9 +1,9 @@
 package net.urbanmc.kingdomwars.listener;
 
-import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.event.NewNationEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
+import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.util.TownyUtil;
@@ -15,8 +15,6 @@ import org.bukkit.event.Listener;
 import com.palmergames.bukkit.towny.event.DeleteNationEvent;
 import com.palmergames.bukkit.towny.event.RenameNationEvent;
 
-import net.urbanmc.kingdomwars.WarUtil;
-
 public class NationListener implements Listener {
 
 	private KingdomWars plugin;
@@ -27,7 +25,7 @@ public class NationListener implements Listener {
 
 	@EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onNationCreate(NewNationEvent event) {
-		WarUtil.createNation(event.getNation().getName());
+		plugin.getWarManager().createNation(event.getNation().getName());
 	}
 
 
@@ -35,50 +33,57 @@ public class NationListener implements Listener {
 	public void renameNation(RenameNationEvent e) {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
 
-		WarUtil.renameGraceNation(oldName, newName);
+		plugin.getWarManager().renameGraceNation(oldName, newName);
 
-		if (WarUtil.inWar(oldName)) {
-			War war = WarUtil.getWar(oldName);
+		if (plugin.getWarManager().inWar(oldName)) {
+			War war = plugin.getWarManager().getWar(oldName);
 
 			int ally = war.isDeclaringAlly(oldName);
 
 			if (ally != -1)
 				war.renameAlly(oldName, newName, ally == 1);
 
-			else WarUtil.warNationRename(oldName, newName);
+			else plugin.getWarManager().renameWarNation(oldName, newName);
 		}
 
-		if (WarUtil.alreadyScheduledForWar(oldName)) {
-			PreWar preWar = WarUtil.getPreWar(oldName);
+		if (plugin.getWarManager().alreadyScheduledForWar(oldName)) {
+			PreWar preWar = plugin.getWarManager().getPreWar(oldName);
 
 			preWar.renameNation(oldName, newName);
 		}
 
-		WarUtil.lastNationRename(oldName, newName);
-		WarUtil.leaderBoardNationRename(oldName, newName);
+		plugin.getLastWarManager().lastNationRename(oldName, newName);
+
+		plugin.getLeaderboard().renameNation(oldName, newName);
+
 	}
 
 	@EventHandler
 	public void deleteNation(DeleteNationEvent e) {
 		String nation = e.getNationName();
 
-		if (WarUtil.inWar(nation)) {
-			War war = WarUtil.getWar(nation);
+		if (plugin.getWarManager().inWar(nation)) {
+			War war = plugin.getWarManager().getWar(nation);
 
 			int ally = war.isDeclaringAlly(nation);
 
-			if (ally != -1)
+			if (ally != -1) {
 				war.removeAlly(nation, ally == 1);
+				WarBoard.removeAllyFromBoard(war, nation, ally == 1);
+				plugin.getWarManager().saveCurrentWars();
+			}
 
 			else {
 				Bukkit.getScheduler().runTask(plugin, () -> {
-					WarUtil.endWar(WarUtil.getWar(nation));
+					plugin.getWarManager().end(
+							plugin.getWarManager().getWar(nation)
+					);
 				});
 			}
 		}
 
-		if (WarUtil.alreadyScheduledForWar(nation)) {
-			PreWar preWar = WarUtil.getPreWar(nation);
+		if (plugin.getWarManager().alreadyScheduledForWar(nation)) {
+			PreWar preWar = plugin.getWarManager().getPreWar(nation);
 
 			if (preWar.isMainNation(nation)) {
 				Nation otherNation = TownyUtil.getNation(preWar.getOtherNation(nation));
@@ -88,13 +93,13 @@ public class NationListener implements Listener {
 
 				preWar.cancelTask();
 
-				WarUtil.removePreWar(preWar);
+				plugin.getWarManager().removePreWar(preWar);
 			}
 
 		}
 
-		WarUtil.removeAllLast(nation);
+		plugin.getLastWarManager().removeAllLastWars(nation);
 
-		WarUtil.leaderBoardNationDelete(nation);
+		plugin.getLeaderboard().deleteNationFromLeaderboard(nation);
 	}
 }

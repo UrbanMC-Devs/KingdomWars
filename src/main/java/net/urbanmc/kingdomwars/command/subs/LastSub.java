@@ -2,9 +2,8 @@ package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.WarUtil;
-import net.urbanmc.kingdomwars.data.last.LastWar;
-import net.urbanmc.kingdomwars.util.ConfigManager;
+import net.urbanmc.kingdomwars.data.LastWar;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -13,7 +12,7 @@ public class LastSub {
 
     //Admin command for viewing/modifying war cooldowns
 
-    public LastSub(Player p, String[] args) {
+    public LastSub(Player p, String[] args, final KingdomWars plugin) {
         if (!p.hasPermission("kingdomwars.last")) {
             p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
             return;
@@ -36,7 +35,7 @@ public class LastSub {
             return;
         }
 
-        LastWar lastWar = WarUtil.getLastWar(targetNation);
+        LastWar lastWar = plugin.getLastWarManager().getLastWar(targetNation);
 
         if (lastWar == null) {
             sendColor(p, "&4No last war for this nation found!");
@@ -48,7 +47,7 @@ public class LastSub {
                 viewLast(p, lastWar, targetNation.getName());
                 break;
             case "remove":
-                removeLast(p, lastWar);
+                removeLast(plugin, p, lastWar);
                 break;
             default:
                 sendColor(p, "&cPlease enter a valid argument: &bview&f, &bremove");
@@ -57,7 +56,7 @@ public class LastSub {
     }
 
     private void viewLast(Player p, LastWar lastWar, String nationName) {
-        String time = ConfigManager.formatTime((System.currentTimeMillis() - (lastWar.getMillis() - ConfigManager.getLastTime())) / 1000);
+        String time = ConfigManager.formatTime((System.currentTimeMillis() - (lastWar.getMillisTillNextWar() - ConfigManager.getLastTime())) / 1000);
 
         sendColor(p,
                 "&2--- &cRecent War for &f" + nationName + " &2---\n" +
@@ -65,13 +64,12 @@ public class LastSub {
                         "\n&a-- Was Declaring Nation: &6" + lastWar.getDeclaringNation().equalsIgnoreCase(nationName) +
                         "\n&a-- Won? &6" + !lastWar.isLosingNation(nationName) +
                                 "\n&a-- Truce? &f" + lastWar.wasTruce() +
-                                "\n&a-- Fought: &d" + time
+                                "\n&a-- Fought: &d" + time + " ago!"
         );
     }
 
-    private void removeLast(Player p, LastWar lastWar) {
-        WarUtil.removeLast(lastWar);
-
+    private void removeLast(KingdomWars plugin, Player p, LastWar lastWar) {
+        plugin.getLastWarManager().removeLast(lastWar);
         sendColor(p, "&aThe most recent last war data for that nation was removed!");
     }
 

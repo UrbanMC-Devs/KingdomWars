@@ -2,13 +2,12 @@ package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.PreWar;
-import net.urbanmc.kingdomwars.data.last.LastWar;
+import net.urbanmc.kingdomwars.data.LastWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
 import net.urbanmc.kingdomwars.event.WarStartEvent;
-import net.urbanmc.kingdomwars.util.ConfigManager;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +15,7 @@ import org.bukkit.entity.Player;
 
 public class ForceStart {
 
-    public ForceStart(Player p, String[] args) {
+    public ForceStart(Player p, String[] args, final KingdomWars plugin) {
             if (!p.hasPermission("kingdomwars.forcestart")) {
                 p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
                 return;
@@ -37,7 +36,7 @@ public class ForceStart {
 
             String nation1Name = nation1.getName();
 
-            if (WarUtil.alreadyScheduledForWar(nation1.getName())) {
+            if (plugin.getWarManager().alreadyScheduledForWar(nation1.getName())) {
                 p.sendMessage(ChatColor.RED + "You are starting a war soon!");
                 return;
             }
@@ -51,17 +50,17 @@ public class ForceStart {
 
             String nation2Name = nation2.getName();
 
-            if (WarUtil.inWar(nation1)) {
+            if (plugin.getWarManager().inWar(nation1)) {
                 p.sendMessage(ChatColor.RED + nation1Name + " is already in a war!");
                 return;
             }
 
-            if (WarUtil.inWar(nation2)) {
+            if (plugin.getWarManager().inWar(nation2)) {
                 p.sendMessage(ChatColor.RED + nation2Name + " is already in a war!");
                 return;
             }
 
-            if (WarUtil.alreadyScheduledForWar( nation2.getName())) {
+            if (plugin.getWarManager().alreadyScheduledForWar(nation2Name)) {
                 p.sendMessage(ChatColor.RED + nation2Name + " is already planning to go to war!");
                 return;
             }
@@ -83,12 +82,12 @@ public class ForceStart {
 
             boolean revenge = false;
 
-            if (WarUtil.hasLast(nation1.getName(), nation2.getName())) {
-                if (WarUtil.canRevenge(nation1, nation2)) {
+
+            if (plugin.getLastWarManager().hasLast(nation1Name, nation2Name)) {
+                if (plugin.getLastWarManager().canRevenge(nation1, nation2)) {
                     revenge = true;
                 } else {
-                    p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast
-                            (nation1, nation2)
+                    p.sendMessage(ChatColor.RED + "You cannot have another war with this nation until " + getLast(plugin, nation1, nation2)
                             + " seconds from now!");
                     return;
                 }
@@ -116,21 +115,21 @@ public class ForceStart {
 
             PreWar preWar = new PreWar(nation1Name, nation2Name);
 
-            WarUtil.addPreWar(preWar);
+            plugin.getWarManager().addPreWar(preWar);
 
-            preWar.setTask(Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () -> {
-                        WarUtil.removePreWar(preWar);
-                        startWar(nation1, nation2);
+            preWar.setTask(Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getWarManager().removePreWar(preWar);
+                        startWar(plugin, nation1, nation2);
                     }
                     , 20* 60 * declareEvent.getTimeTillWar()));  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
 
 
         }
 
-    private String getLast(Nation nation1, Nation nation2) {
-        LastWar last = WarUtil.getLast(nation1, nation2);
+    private String getLast(KingdomWars plugin, Nation nation1, Nation nation2) {
+        LastWar last = plugin.getLastWarManager().getLast(nation1, nation2);
 
-        long time = last.isLosingNation(nation1.getName()) ? last.getRevengeMillis() : last.getMillis();
+        long time = last.isLosingNation(nation1.getName()) ? last.getRevengeMillis() : last.getMillisTillNextWar();
 
         time -= System.currentTimeMillis();
 
@@ -178,7 +177,7 @@ public class ForceStart {
     }
 
 
-    private void startWar(Nation nation1, Nation nation2) {
+    private void startWar(KingdomWars plugin, Nation nation1, Nation nation2) {
         War war = new War(nation1.getName(), nation2.getName());
 
         WarStartEvent event = new WarStartEvent(war);
@@ -187,7 +186,7 @@ public class ForceStart {
         if (event.isCancelled())
             return;
 
-        WarUtil.startWar(war);
+        plugin.getWarManager().startWar(war);
 
         TownyUtil.sendNationMessage(nation1, "Your nation has started a war against " + nation2.getName() + "!");
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has began a war against your nation!");

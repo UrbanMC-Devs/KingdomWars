@@ -2,7 +2,7 @@ package net.urbanmc.kingdomwars.command;
 
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.command.subs.*;
-import net.urbanmc.kingdomwars.util.ConfigManager;
+import net.urbanmc.kingdomwars.manager.ConfigManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,6 +10,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class BaseCommand implements CommandExecutor {
+
+	private KingdomWars plugin;
+
+	public BaseCommand(KingdomWars plugin) {
+		this.plugin = plugin;
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -29,44 +35,47 @@ public class BaseCommand implements CommandExecutor {
 
 		switch (sub) {
 			case "start":
-				new Start(p, args);
+				new Start(p, args, plugin);
 				return true;
 			case "end":
-				new End(p, args);
+				new End(p, plugin);
 				return true;
 			case "truce":
-				new Truce(p, label, args);
+				new Truce(p, label, plugin);
 				return true;
 			case "status":
-				new Status(p, args);
+				new Status(p, plugin);
 				return true;
 			case "forceend":
-				new ForceEnd(p, args);
+				new ForceEnd(p, args, plugin);
 				return true;
 			case "forcestart":
-				new ForceStart(p, args);
+				new ForceStart(p, args, plugin);
 				return true;
 			case "wars":
-				new Wars(p, args);
+				new Wars(p, plugin);
 				return true;
 			case "leaderboard":
-				new LeaderboardSub(p, args);
+				new LeaderboardSub(p, plugin);
 				return true;
 			case "last":
-				new LastSub(p, args);
+				new LastSub(p, args, plugin);
 				return true;
 			case "reload":
-				new ReloadSub(p, args);
+				new ReloadSub(p, plugin);
+				return true;
+			case "save":
+				new SaveSub(p, plugin);
 				return true;
 			case "callallies":
-				new CallAlliesSub(p);
+				new CallAlliesSub(p, plugin);
 				return true;
 			case "joinwar":
-				new JoinWar(p, args);
+				new JoinWar(p, args, plugin);
 				return true;
 			case "accept":
 			case "deny":
-				new AcceptDenySub(p, args[0]);
+				new AcceptDenySub(p, args[0], plugin);
 				return true;
 		}
 

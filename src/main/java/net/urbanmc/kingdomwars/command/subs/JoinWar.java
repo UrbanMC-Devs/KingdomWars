@@ -1,7 +1,7 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
-import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.ChatColor;
@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class JoinWar {
 
-    public JoinWar(Player p, String[] args) {
+    public JoinWar(Player p, String[] args, final KingdomWars plugin) {
         if (!p.hasPermission("kingdomwars.joinwar")) {
             p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
             return;
@@ -22,7 +22,7 @@ public class JoinWar {
             return;
         }
 
-        if (WarUtil.alreadyScheduledForWar(nation1.getName())) {
+        if (plugin.getWarManager().alreadyScheduledForWar(nation1.getName())) {
             p.sendMessage(ChatColor.RED + "You are already starting a war soon!");
             return;
         }
@@ -39,17 +39,17 @@ public class JoinWar {
             return;
         }
 
-        if (WarUtil.inWar(nation1)) {
+        if (plugin.getWarManager().inWar(nation1)) {
             p.sendMessage(ChatColor.RED + "You are already in a war!");
             return;
         }
 
-        if (WarUtil.inWar(nation2)) {
+        if (plugin.getWarManager().inWar(nation2)) {
             p.sendMessage(ChatColor.RED + "That nation is already in a war! It is too late to join them!");
             return;
         }
 
-        PreWar preWar = WarUtil.getPreWar(nation2.getName());
+        PreWar preWar = plugin.getWarManager().getPreWar(nation2.getName());
 
         if (preWar == null) {
             p.sendMessage(ChatColor.RED + "That nation is not stating a war soon!");

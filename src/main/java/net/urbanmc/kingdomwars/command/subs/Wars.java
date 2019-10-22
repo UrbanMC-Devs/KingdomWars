@@ -1,7 +1,7 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import net.md_5.bungee.api.chat.TextComponent;
-import net.urbanmc.kingdomwars.WarUtil;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.util.JSONMessageBuilder;
 import org.bukkit.ChatColor;
@@ -12,17 +12,17 @@ import java.util.List;
 
 public class Wars {
 
-	public Wars(Player p, String[] args) {
+	public Wars(Player p, final KingdomWars plugin) {
 		if (!p.hasPermission("kingdomwars.wars")) {
 			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
 			return;
 		}
 
-		WarUtil.checkForceEndAll();
+		plugin.getWarManager().checkForceEndAll();
 
 		p.sendMessage(ChatColor.GREEN + " === Current Wars ===");
 
-		if (!WarUtil.getWarList().isEmpty()) {
+		if (!plugin.getWarManager().getCurrentWars().isEmpty()) {
 			JSONMessageBuilder builder = JSONMessageBuilder.create();
 
 			final TextComponent vsComp = new TextComponent(" vs ");
@@ -30,7 +30,7 @@ public class Wars {
 			vsComp.setColor(net.md_5.bungee.api.ChatColor.WHITE);
 			vsComp.setHoverEvent(null);
 
-			List<War> wars = new ArrayList<>(WarUtil.getWarList());
+			List<War> wars = new ArrayList<>(plugin.getWarManager().getCurrentWars());
 
 			int length = wars.size();
 

@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.command.subs;
 
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.PreWar;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -7,12 +8,11 @@ import org.bukkit.entity.Player;
 import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.util.TownyUtil;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
 
 public class ForceEnd {
 
-	public ForceEnd(Player p, String[] args) {
+	public ForceEnd(Player p, String[] args, final KingdomWars plugin) {
 		if (!p.hasPermission("kingdomwars.forceend")) {
 			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
 			return;
@@ -30,8 +30,8 @@ public class ForceEnd {
 			return;
 		}
 
-		if (WarUtil.alreadyScheduledForWar(nation.getName())) {
-			PreWar preWar = WarUtil.getPreWar(nation.getName());
+		if (plugin.getWarManager().alreadyScheduledForWar(nation.getName())) {
+			PreWar preWar = plugin.getWarManager().getPreWar(nation.getName());
 
 			if (preWar.isMainNation(nation.getName())) {
 				p.sendMessage(ChatColor.RED + "This nation is scheduled to be an ally to another nation in a war!");
@@ -54,15 +54,16 @@ public class ForceEnd {
 			return;
 		}
 
-		if (!WarUtil.inWar(nation)) {
+
+		if (!plugin.getWarManager().inWar(nation)) {
 			p.sendMessage(ChatColor.RED + "That nation is not in a war!");
 			return;
 		}
 
-		War war = WarUtil.getWar(nation);
+		War war = plugin.getWarManager().getWar(nation);
 
-		//Shouldn't theoretically be async
-		WarUtil.end(war);
+		plugin.getWarManager().end(war);
+
 		p.sendMessage(ChatColor.GOLD + "Ended war.");
 
 		Nation otherNation = war.getOtherNation(nation);

@@ -2,7 +2,6 @@ package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarRequestAlliesEvent;
@@ -14,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class CallAlliesSub {
 
-    public CallAlliesSub(Player p) {
+    public CallAlliesSub(Player p, final KingdomWars plugin) {
         if (!p.hasPermission("kingdomwars.callallies")) {
             p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
             return;
@@ -27,12 +26,12 @@ public class CallAlliesSub {
             return;
         }
 
-        if (WarUtil.inWar(nation1)) {
+        if (plugin.getWarManager().inWar(nation1)) {
             p.sendMessage(ChatColor.RED + "It's too late to call allies! You're already in a war!");
             return;
         }
 
-        PreWar preWar = WarUtil.getPreWar(nation1.getName());
+        PreWar preWar = plugin.getWarManager().getPreWar(nation1.getName());
 
         if (preWar == null) {
             p.sendMessage(ChatColor.RED + "You aren't in a war!");
@@ -65,14 +64,14 @@ public class CallAlliesSub {
 
         preWar.cancelTask();
 
-        preWar.setTask(Bukkit.getScheduler().runTaskLater(KingdomWars.getInstance(), () -> {
-                    WarUtil.removePreWar(preWar);
-                    startWar(preWar, declaringNation, declaredNation);
+        preWar.setTask(Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    plugin.getWarManager().removePreWar(preWar);
+                    startWar(plugin, preWar, declaringNation, declaredNation);
                 }
                 , 20* 60 * event.getPreparationTime()));  //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
     }
 
-    private void startWar(PreWar preWar, Nation nation1, Nation nation2) {
+    private void startWar(KingdomWars plugin, PreWar preWar, Nation nation1, Nation nation2) {
         War war = new War(nation1.getName(), nation2.getName());
 
         preWar.getAllies(true).forEach(war::addNation1Ally);
@@ -85,7 +84,7 @@ public class CallAlliesSub {
         if (event.isCancelled())
             return;
 
-        WarUtil.startWar(war);
+        plugin.getWarManager().startWar(war);
 
         TownyUtil.sendNationMessage(nation1, "Your nation has started a war against " + nation2.getName() + "!");
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has began a war against your nation!");

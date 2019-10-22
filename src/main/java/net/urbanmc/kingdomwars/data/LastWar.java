@@ -1,4 +1,4 @@
-package net.urbanmc.kingdomwars.data.last;
+package net.urbanmc.kingdomwars.data;
 
 public class LastWar {
 
@@ -6,7 +6,7 @@ public class LastWar {
     private String declaredNation;
     private boolean isDeclaringWinner;
     private boolean truce;
-    private long millis, revengeMillis;
+    private long millisTillNextWar, revengeMillis;
 
     public LastWar(String declaringNation, String declaredNation, boolean isDeclaringWinner, boolean truce,
                    long millis, long revengeMillis) {
@@ -14,7 +14,7 @@ public class LastWar {
         this.declaredNation = declaredNation;
         this.isDeclaringWinner = isDeclaringWinner;
         this.truce = truce;
-        this.millis = millis;
+        this.millisTillNextWar = millis;
         this.revengeMillis = revengeMillis;
     }
 
@@ -45,8 +45,8 @@ public class LastWar {
         return truce;
     }
 
-    public long getMillis() {
-        return millis;
+    public long getMillisTillNextWar() {
+        return millisTillNextWar;
     }
 
     public long getRevengeMillis() {

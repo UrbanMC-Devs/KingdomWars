@@ -1,6 +1,6 @@
-package net.urbanmc.kingdomwars.data.leaderboard;
+package net.urbanmc.kingdomwars.data;
 
-public class Leaderboard {
+public class Leaderboard implements Comparable<Leaderboard> {
 
 	private int wins, losses;
 	private String nation, lastWarInfo;
@@ -41,5 +41,13 @@ public class Leaderboard {
 
 	public void setNation(String nation) {
 		this.nation = nation;
+	}
+
+	@Override
+	public int compareTo(Leaderboard lb) {
+		if (this.wins == lb.wins) {
+			return this.losses - lb.losses;
+		}
+		return lb.wins - this.wins;
 	}
 }

@@ -1,15 +1,11 @@
 package net.urbanmc.kingdomwars.command.subs;
 
-import net.urbanmc.kingdomwars.util.ConfigManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.palmergames.bukkit.towny.object.Nation;
 
-import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.util.TownyUtil;
-import net.urbanmc.kingdomwars.WarUtil;
-import net.urbanmc.kingdomwars.data.war.War;
 
 public class Develop {
 	public Develop(Player p, String[] args) {
@@ -32,16 +28,20 @@ public class Develop {
 			return;
 		}
 
+		/*
+
 		if (!WarUtil.inWar(nation)) {
 			p.sendMessage(ChatColor.RED + "That nation is not in a war!");
 			WarUtil.removeAllLast(nation.getName());
 			return;
 		}
 
+
+
 		War war = WarUtil.getWar(nation);
 		Nation loser = (nation.getName().equalsIgnoreCase(war.getDeclaredNation()))
 				? TownyUtil.getNation(war.getDeclaringNation()) : TownyUtil.getNation(war.getDeclaredNation());
 		WarUtil.win(nation, loser, ConfigManager.getFinishAmount());
-		WarUtil.removeAllLast(nation.getName());
+		WarUtil.removeAllLast(nation.getName()); */
 	}
 }

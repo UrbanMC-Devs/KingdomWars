@@ -1,10 +1,9 @@
 package net.urbanmc.kingdomwars.command.subs;
 
 import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.util.TownyUtil;
-import net.urbanmc.kingdomwars.WarUtil;
 import net.urbanmc.kingdomwars.data.war.War;
-import net.urbanmc.kingdomwars.event.WarEndEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -13,7 +12,7 @@ import java.util.logging.Level;
 
 public class End {
 
-	public End(Player p, String[] args) {
+	public End(Player p, final KingdomWars plugin) {
 		if (!p.hasPermission("kingdomwars.end")) {
 			p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
 			return;
@@ -26,12 +25,12 @@ public class End {
 			return;
 		}
 
-		if (!WarUtil.inWar(nation1)) {
+		if (!plugin.getWarManager().inWar(nation1)) {
 			p.sendMessage(ChatColor.RED + "Your nation is not in a war!");
 			return;
 		}
 
-		War war = WarUtil.getWar(nation1);
+		War war = plugin.getWarManager().getWar(nation1);
 
 		String nationName = nation1.getName();
 
@@ -46,14 +45,7 @@ public class End {
 			return;
 		}
 
-		WarEndEvent event = new WarEndEvent(war);
-		Bukkit.getPluginManager().callEvent(event);
-
-		if (event.isCancelled())
-			return;
-
-		//Shouldn't theoretically be async
-		WarUtil.endWar(war);
+		plugin.getWarManager().end(war);
 
 		Nation nation2 = war.getOtherNation(nation1);
 

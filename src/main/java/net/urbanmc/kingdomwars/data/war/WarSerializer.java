@@ -1,13 +1,27 @@
 package net.urbanmc.kingdomwars.data.war;
 
-import java.lang.reflect.Type;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
-import com.google.gson.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War> {
+public class WarSerializer {
 
-	@Override
-	public JsonElement serialize(War war, Type type, JsonSerializationContext context) {
+	public static JsonElement serialize(List<War> wars) {
+		JsonArray array = new JsonArray();
+
+		for (War war : wars) {
+			array.add(serialize(war));
+		}
+
+		return array;
+	}
+
+	public static JsonObject serialize(War war) {
 		JsonObject obj = new JsonObject();
 
 		obj.addProperty("nation1", war.getDeclaringNation());
@@ -28,11 +42,37 @@ public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War>
 
 		obj.addProperty("killsToWin", war.getKillsToWin());
 
+		obj.addProperty("startTime", war.getStarted());
+
+		if (war.getDisabled() != null) {
+			JsonArray disabledArray = new JsonArray();
+
+			for (UUID uuid : war.getDisabled()) {
+				disabledArray.add(uuid.toString());
+			}
+
+			obj.add("scoreboardDisabled", disabledArray);
+		}
+
 		return obj;
 	}
 
-	@Override
-	public War deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException {
+	public static List<War> deserializeWars(JsonElement element) throws IllegalArgumentException {
+		if (!element.isJsonArray())
+			throw new IllegalArgumentException("JSON Element is not a json array!");
+
+		JsonArray array = element.getAsJsonArray();
+
+		List<War> wars = new ArrayList<>();
+
+		for (JsonElement warObject : array) {
+			wars.add(deserializeWar(warObject));
+		}
+
+		return wars;
+	}
+
+	public static War deserializeWar(JsonElement element) throws JsonParseException {
 		JsonObject obj = element.getAsJsonObject();
 
 		String nation1 = obj.get("nation1").getAsString();
@@ -59,6 +99,20 @@ public class WarSerializer implements JsonSerializer<War>, JsonDeserializer<War>
 		}
 
 		war.setKills(obj.get("killsToWin").getAsInt());
+
+		if (obj.has("startTime")) {
+			war.setStarted(obj.get("startTime").getAsLong());
+		} else {
+			war.setStarted();
+		}
+
+		if (obj.has("scoreboardDisabled")) {
+			JsonArray disabledArray = obj.getAsJsonArray("scoreboardDisabled");
+
+			for (JsonElement jsonElement : disabledArray) {
+				war.setDisabled(UUID.fromString(jsonElement.getAsString()),  true);
+			}
+		}
 
 		return war;
 	}

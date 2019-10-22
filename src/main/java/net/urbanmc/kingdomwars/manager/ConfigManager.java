@@ -1,4 +1,4 @@
-package net.urbanmc.kingdomwars.util;
+package net.urbanmc.kingdomwars.manager;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
