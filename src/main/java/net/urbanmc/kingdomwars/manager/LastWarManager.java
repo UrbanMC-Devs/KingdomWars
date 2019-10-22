@@ -58,7 +58,7 @@ public class LastWarManager {
     }
 
     public boolean hasLast(String nation1, String nation2) {
-        //reloadLast();
+        filterLastWars();
 
         for (LastWar lastWar : lastWars) {
             if (lastWar.getDeclaringNation().equals(nation1) && lastWar.getDeclaredNation().equals(nation2))
@@ -84,8 +84,6 @@ public class LastWarManager {
     }
 
     public LastWar getLast(Nation nation1, Nation nation2) {
-        //reloadLast();
-
         for (LastWar lastWar : lastWars) {
             if ((lastWar.getDeclaringNation().equals(nation1.getName()) && lastWar.getDeclaredNation().equals(nation2.getName())) ||
                     (lastWar.getDeclaringNation().equals(nation2.getName()) && lastWar.getDeclaredNation().equals(nation1.getName())))
@@ -96,7 +94,6 @@ public class LastWarManager {
     }
 
     public LastWar getLastWar(Nation nation1) {
-        //reloadLast();
 
         lastWars.removeIf((lw) ->
                 !(lw.getDeclaredNation().equalsIgnoreCase(nation1.getName()) || lw.getDeclaringNation().equalsIgnoreCase(nation1.getName())));
@@ -148,6 +145,11 @@ public class LastWarManager {
         }
 
         saveLastWars();
+    }
+
+    public void filterLastWars() {
+        long currentTime = System.currentTimeMillis();
+        lastWars.removeIf(lastWar -> currentTime > lastWar.getMillisTillNextWar());
     }
 
 }
