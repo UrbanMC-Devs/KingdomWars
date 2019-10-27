@@ -78,7 +78,8 @@ public class LastWarManager {
         names.add(lastWar.getDeclaringNation());
         names.add(lastWar.getDeclaredNation());
 
-        lastWars.removeIf(war -> names.contains(war.getDeclaringNation()) && names.contains(war.getDeclaredNation()));
+        lastWars.removeIf(war -> war.getDeclaringNation() != null && names.contains(war.getDeclaringNation())
+                && war.getDeclaredNation() != null && names.contains(war.getDeclaredNation()));
 
         lastWars.add(lastWar);
     }
@@ -95,17 +96,19 @@ public class LastWarManager {
 
     public LastWar getLastWar(Nation nation1) {
 
-        lastWars.removeIf((lw) ->
+        List<LastWar> copyList = new ArrayList<>(lastWars);
+
+        copyList.removeIf((lw) ->
                 !(lw.getDeclaredNation().equalsIgnoreCase(nation1.getName()) || lw.getDeclaringNation().equalsIgnoreCase(nation1.getName())));
 
-        if (lastWars.isEmpty()) return null;
+        if (copyList.isEmpty()) return null;
 
-        if (lastWars.size() == 1) return lastWars.get(0);
+        if (copyList.size() == 1) return lastWars.get(0);
 
         // Bigger millis means more recent. This sorts the list by the most recent lastwar.
-        lastWars.sort(Comparator.comparingLong(LastWar::getMillisTillNextWar));
+        copyList.sort(Comparator.comparingLong(LastWar::getMillisTillNextWar));
 
-        return lastWars.get(0);
+        return copyList.get(0);
     }
 
     public void removeAllLastWars(String nation) {
