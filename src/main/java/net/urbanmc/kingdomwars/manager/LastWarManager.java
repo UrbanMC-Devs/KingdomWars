@@ -24,7 +24,6 @@ public class LastWarManager {
         final File FILE = new File("plugins/KingdomWars/last.json");
 
         if (!FILE.exists()) {
-            lastWars = new ArrayList<>();
             try {
                 FILE.createNewFile();
             } catch (IOException ex) {
@@ -46,6 +45,8 @@ public class LastWarManager {
     }
 
     public void saveLastWars() {
+        if (lastWars == null) return; // Prevent save for empty list
+
         try (PrintWriter writer = new PrintWriter(
                 new File("plugins/KingdomWars/last.json")))
         {
@@ -57,10 +58,18 @@ public class LastWarManager {
         }
     }
 
+    // Lazy Loading method. Return empty array list if last wars is null
+    private List<LastWar> getLastWars() {
+        return lastWars == null ? new ArrayList<>() : lastWars;
+    }
+
     public boolean hasLast(String nation1, String nation2) {
         filterLastWars();
 
-        for (LastWar lastWar : lastWars) {
+        List<LastWar> scopeLastWars = getLastWars();
+
+
+        for (LastWar lastWar : scopeLastWars) {
             if (lastWar.getDeclaringNation().equals(nation1) && lastWar.getDeclaredNation().equals(nation2))
                 return true;
 
@@ -72,6 +81,8 @@ public class LastWarManager {
     }
 
     public void addLast(LastWar lastWar) {
+        if (lastWars == null) lastWars = new ArrayList<>(); // Create new array list if none there
+
         // Before we add a new last war, we have to filter the list to remove previous last wars with the same two nations.
         final Set<String> names = new HashSet<>(8 / 3);
 
@@ -85,7 +96,7 @@ public class LastWarManager {
     }
 
     public LastWar getLast(Nation nation1, Nation nation2) {
-        for (LastWar lastWar : lastWars) {
+        for (LastWar lastWar : getLastWars()) {
             if ((lastWar.getDeclaringNation().equals(nation1.getName()) && lastWar.getDeclaredNation().equals(nation2.getName())) ||
                     (lastWar.getDeclaringNation().equals(nation2.getName()) && lastWar.getDeclaredNation().equals(nation1.getName())))
                 return lastWar;
@@ -96,14 +107,14 @@ public class LastWarManager {
 
     public LastWar getLastWar(Nation nation1) {
 
-        List<LastWar> copyList = new ArrayList<>(lastWars);
+        List<LastWar> copyList = new ArrayList<>(getLastWars());
 
         copyList.removeIf((lw) ->
                 !(lw.getDeclaredNation().equalsIgnoreCase(nation1.getName()) || lw.getDeclaringNation().equalsIgnoreCase(nation1.getName())));
 
         if (copyList.isEmpty()) return null;
 
-        if (copyList.size() == 1) return lastWars.get(0);
+        if (copyList.size() == 1) return copyList.get(0);
 
         // Bigger millis means more recent. This sorts the list by the most recent lastwar.
         copyList.sort(Comparator.comparingLong(LastWar::getMillisTillNextWar));
@@ -112,11 +123,11 @@ public class LastWarManager {
     }
 
     public void removeAllLastWars(String nation) {
-        lastWars.removeIf(lastWar -> lastWar.getDeclaringNation().equals(nation) || lastWar.getDeclaredNation().equals(nation));
+        getLastWars().removeIf(lastWar -> lastWar.getDeclaringNation().equals(nation) || lastWar.getDeclaredNation().equals(nation));
     }
 
     public void removeLast(LastWar lastWar) {
-        lastWars.remove(lastWar);
+        getLastWars().remove(lastWar);
 
         saveLastWars();
     }
@@ -134,7 +145,7 @@ public class LastWarManager {
     }
 
     public void lastNationRename(String oldName, String newName) {
-        for (LastWar lastWar : lastWars) {
+        for (LastWar lastWar : getLastWars()) {
             if (!lastWar.getDeclaringNation().equals(oldName) || lastWar.getDeclaredNation().equals(oldName))
                 continue;
 
@@ -151,8 +162,12 @@ public class LastWarManager {
     }
 
     public void filterLastWars() {
+        if (lastWars == null) return; // Might be null for lazy loading
+
         long currentTime = System.currentTimeMillis();
-        lastWars.removeIf(lastWar -> currentTime > lastWar.getMillisTillNextWar());
+        lastWars.removeIf(lastWar ->
+                lastWar == null ||
+                currentTime > lastWar.getMillisTillNextWar());
     }
 
 }

@@ -59,6 +59,19 @@ public class CallAlliesSub {
         Nation declaringNation = nation1.getName().equalsIgnoreCase(preWar.getDeclaringNation()) ? nation1 : TownyUtil.getNation(preWar.getDeclaringNation());
         Nation declaredNation = declaringNation.getName().equalsIgnoreCase(nation1.getName()) ? TownyUtil.getNation(preWar.getDeclaredNation()) : nation1;
 
+        // Send message to allied nations
+        for (Nation allyNation : declaringNation.getAllies()) {
+            if (allyNation == null) continue;
+
+            TownyUtil.sendNationMessage(allyNation, declaringNation.getName() + " has called for allies! Join them in the war!");
+        }
+
+        for (Nation allyNation : declaredNation.getAllies()) {
+            if (allyNation == null) continue;
+
+            TownyUtil.sendNationMessage(allyNation, declaredNation.getName() + " is under attack! Their war allows for allies, join them!");
+        }
+
         TownyUtil.sendNationMessage(nation1, "Your nation has called for allies in the war against " + (nation1.equals(declaringNation) ? declaredNation : declaringNation).getName() + ". The war will now begin in 10 minutes!");
         TownyUtil.sendNationMessage(nation1.equals(declaringNation) ? declaredNation : declaringNation, nation1.getName() + " has called for allies in the war against your nation. Allies may join you as well! The war will now begin in 10 minutes!");
 
