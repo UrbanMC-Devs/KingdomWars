@@ -154,6 +154,7 @@ public class WarListener implements Listener {
 
 		WarBoard.updateBoard(war);
 		plugin.getWarManager().checkWin(war);
+		plugin.getWarManager().saveCurrentWars();
 	}
 
 	@EventHandler
