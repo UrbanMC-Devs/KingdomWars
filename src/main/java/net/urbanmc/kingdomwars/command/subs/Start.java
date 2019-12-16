@@ -71,7 +71,7 @@ public class Start {
         }
 
         if (nation1.isNeutral()) {
-            p.sendMessage(ChatColor.RED + "Your nation is neutral!");
+            p.sendMessage(ChatColor.RED + "Your nation is peaceful!");
             return;
         }
 
@@ -98,7 +98,7 @@ public class Start {
         }
 
         if (!revenge && nation2.isNeutral()) {
-            p.sendMessage(ChatColor.RED + "That nation is neutral!");
+            p.sendMessage(ChatColor.RED + "That nation is peaceful!");
             return;
         }
 
