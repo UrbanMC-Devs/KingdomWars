@@ -33,3 +33,6 @@ town-block-loss: 10
 
 # What's the minimum number of town blocks a nation can lose?
 town-block-min: 40
+
+# What's the maximum number of town blocks a nation can win?
+town-block-max: 90

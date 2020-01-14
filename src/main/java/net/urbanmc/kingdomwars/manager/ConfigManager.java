@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class ConfigManager {
 
     private static double startAmount, finishAmount, truceAmount;
-    private static int winningKills, allyKills, townBlockBonus, townBlockLoss, townBlockMin;
+    private static int winningKills, allyKills, townBlockBonus, townBlockLoss, townBlockMin, townBlockMax;
     private static long lastTime, lastTimeRevenge, endTime;
 
     public ConfigManager() {
@@ -42,14 +42,18 @@ public class ConfigManager {
         startAmount = data.getDouble("start-amount", 25000);
         finishAmount = data.getDouble("finish-amount", 100000);
         truceAmount = data.getDouble("truce-amount", 50000);
+
         winningKills = data.getInt("winning-kills", 25);
+        allyKills = data.getInt("ally-bonus-kills", 5);
+
         lastTime = TimeUnit.HOURS.toMillis(data.getInt("hours-between", 168));
         lastTimeRevenge = TimeUnit.HOURS.toMillis(data.getInt("hours-between-revenge", 72));
         endTime = TimeUnit.HOURS.toMillis(data.getInt("hours-end", 168));
-        allyKills = data.getInt("ally-bonus-kills", 5);
+
         townBlockBonus = data.getInt("town-block-bonus", 10);
         townBlockLoss = data.getInt("town-block-loss", 10);
         townBlockMin = data.getInt("town-block-min", 40);
+        townBlockMax = data.getInt("town-block-max", 90);
     }
 
     public static double getStartAmount() {
@@ -87,6 +91,8 @@ public class ConfigManager {
     public static int getTownBlockLoss() { return townBlockLoss; }
 
     public static int getNegTownBlockMin() { return -1 * townBlockMin; }
+
+    public static int getMaxTownBlocksWin() { return townBlockMax; }
 
     // Time is in seconds
     public static String formatTime(long time) {
