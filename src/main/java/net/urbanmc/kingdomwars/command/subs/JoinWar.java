@@ -66,6 +66,11 @@ public class JoinWar {
             return;
         }
 
+        if (!preWar.calledForAllies()) {
+            p.sendMessage(ChatColor.RED + "You can't join a war when no allies have been requested!");
+            return;
+        }
+
         preWar.addAlly(nation2.getName().equalsIgnoreCase(preWar.getDeclaringNation()), nation1.getName());
 
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has now joined your side in the upcoming war!");
