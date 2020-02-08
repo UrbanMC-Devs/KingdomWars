@@ -76,7 +76,7 @@ public class NationListener implements Listener {
 			else {
 				// We have to run a task because DeleteNation can be ran async.
 				Bukkit.getScheduler().runTask(plugin, () -> {
-					plugin.getWarManager().winByDeletation(war, nation);
+					plugin.getWarManager().winByDeletion(war, nation);
 				});
 			}
 		}

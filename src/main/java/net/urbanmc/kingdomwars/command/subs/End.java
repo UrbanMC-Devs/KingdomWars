@@ -45,7 +45,7 @@ public class End {
 			return;
 		}
 
-		plugin.getWarManager().end(war);
+		plugin.getWarManager().declaringEndWar(war);
 
 		Nation nation2 = war.getOtherNation(nation1);
 

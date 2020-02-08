@@ -87,7 +87,7 @@ public class TownyUtil {
 						+ ConfigManager.getTruceAmount() + " from their nation bank.",
 				receivingNation.getUuid(),
 				() -> {
-					plugin.getWarManager().win(receivingNation, otherNation, ConfigManager.getTruceAmount());
+					plugin.getWarManager().truceWar(receivingNation, otherNation);
 				},
 				() -> {
 					sendNationMessage(receivingNation,

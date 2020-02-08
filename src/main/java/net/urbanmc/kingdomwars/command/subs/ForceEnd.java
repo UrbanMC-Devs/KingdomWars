@@ -62,7 +62,7 @@ public class ForceEnd {
 
 		War war = plugin.getWarManager().getWar(nation);
 
-		plugin.getWarManager().end(war);
+		plugin.getWarManager().forceEnd(war);
 
 		p.sendMessage(ChatColor.GOLD + "Ended war.");
 

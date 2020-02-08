@@ -176,21 +176,56 @@ public class WarManager {
         }
     }
 
-    public void winByDeletation(War war, String nationDeleted) {
+    // Called when nation in a war gets deleted
+    public void winByDeletion(War war, String nationDeleted) {
         String winningNation = war.getDeclaringNation().equals(nationDeleted) ? war.getDeclaredNation() : war.getDeclaringNation();
 
         Nation winNation = TownyUtil.getNation(winningNation);
 
         if (winNation == null) return;
 
-        endWar(winNation, null, ConfigManager.getFinishAmount(), true, true);
+        endWar(winNation, null, ConfigManager.getFinishAmount(), true, true, true);
     }
 
+    // Normal win method when nation war wins by killing participants
     public void win(Nation winner, Nation loser, double amount) {
-        endWar(winner, loser, amount, false, true);
+        endWar(winner, loser, amount, false, true, true);
     }
 
-    public synchronized void endWar(Nation winner, Nation loser, double monetaryAmount, boolean halfReward, boolean giveReward) {
+    // Called when the war is over
+    private void wonByTime(War war) {
+        Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
+        Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+
+        if (nation1 == null || nation2 == null) return;
+
+        Nation winner = war.getDeclaringPoints() > war.getDeclaredPoints() ? nation1 : nation2;
+
+        endWar(winner, winner == nation1 ? nation2 : nation1, ConfigManager.getFinishAmount(), true, true, true);
+    }
+
+    // Called when a truce is reached
+    public void truceWar(Nation declaring, Nation declared) {
+        endWar(declaring, declared, ConfigManager.getTruceAmount(), false, false, false);
+    }
+
+    // Called when an admin force ends the war
+    public void forceEnd(War war) {
+        declaringEndWar(war);
+    }
+
+    // Called when the declaring nation ends the war
+    public void declaringEndWar(War war) {
+        Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
+        Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+
+        endWar(nation1, nation2, 0, false, false, false);
+    }
+
+    public synchronized void endWar(Nation winner, Nation loser,
+                                    double monetaryAmount,
+                                    boolean halfReward, boolean rewardTownBlocks,
+                                    boolean adjustLeaderBoard) {
         War war = getWar(winner);
 
         WarEndEvent event = new WarEndEvent(war);
@@ -239,131 +274,120 @@ public class WarManager {
             Bukkit.getLogger().warning("[KingdomWars] Error saving last war for war between " + winner.getName() + " and " + loser.getName());
         }
 
-        if (giveReward) {
-            if (halfReward) monetaryAmount /= 2;
+        if (monetaryAmount > 0)
+            rewardMoney(winner, loser, winner.getName().equals(war.getDeclaringNation()), monetaryAmount / (halfReward ? 2 : 1));
 
-            if (winner != null) {
-                try {
-                    double balance = winner.getHoldingBalance() + monetaryAmount;
+        if (rewardTownBlocks)
+            rewardTownBlocks(winner, loser, halfReward);
 
-                    if (war.getDeclaringNation().equals(winner.getName())) {
-                        balance += ConfigManager.getStartAmount();
-                    }
+        if (adjustLeaderBoard) {
+            if (winner != null)
+                plugin.getLeaderboard().addWinToLeaderBoard(winnerName);
 
-                    winner.setBalance(balance, "War win against " + loserName);
-                } catch (EconomyException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            if (loser != null)
+                plugin.getLeaderboard().addLossToLeaderBoard(loserName);
 
-            if (loser != null) {
-                double balance = 0;
+            plugin.getLeaderboard().sortLeaderboard();
+            plugin.getLeaderboard().saveLeaderboard();
+        }
+    }
 
-                try {
-                    balance = loser.getHoldingBalance();
-                } catch (EconomyException ex) {
-                    ex.printStackTrace();
-                }
+    private void rewardMoney(Nation winner, Nation loser, boolean winnerDeclared, double amount) {
+        if (winner != null) {
+            try {
+                double balance = winner.getHoldingBalance() + amount;
 
-                if (balance < monetaryAmount) {
-                    TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
-                    TownyUtil.deleteNation(loser);
-                    plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
-                } else {
-                    try {
-                        loser.setBalance(balance - monetaryAmount, "War loss");
-                    } catch (EconomyException ex) {
-                        ex.printStackTrace();
-                    }
+                if (winnerDeclared) {
+                    balance += ConfigManager.getStartAmount();
                 }
 
-                // Townblock Bonus
-                // Behavioural Restraints:
-                // If a losing nation has less than the town block minimum, then don't give the winner town blocks
-                // If a losing nation can't give all the town blocks, make the winning townblocks proportional to the ones lost
-                // Winning townblock cap, give townblocks up to the cap.
-                // Half-war rewards
-
-                int negTownBlockMin = ConfigManager.getNegTownBlockMin();
-                int townBlockLoss = ConfigManager.getTownBlockLoss();
-                int townBlockWinBonus = ConfigManager.getTownBlockBonus();
-
-                if (halfReward) {
-                    negTownBlockMin /= 2;
-                    townBlockLoss /= 2;
-                    townBlockWinBonus /= 2;
-                }
-
-                // transferTownBlock boolean checks whether we should award/take townblocks from the winning/losing nations.
-                // Check if the losing nation bonus is greater than than the minimum
-                boolean transferTownBlocks = loser.getExtraBlocks() > negTownBlockMin;
-
-                // BonusDifference is positive if losing nation cannot afford to lose any more townblocks
-                int bonusDifference = townBlockLoss - TownySettings.getNationBonusBlocks(loser);
-
-                // If the bound difference is 0 that means the nation has 0 nation bonus and we don't want to transfer townblocks.
-                transferTownBlocks &= bonusDifference != townBlockWinBonus;
-
-                // If the bonus difference is positive then that means they can't afford to give all the town blocks.
-                if (bonusDifference > 0) {
-                    // Reduce the win bonus proportionally to the ratio between the win bonus and the take amount.
-                    // 30 : 10 * x : 3
-                    // (townBlockWinBonus * bonusDifference) / townBlockLoss
-                    townBlockWinBonus = (townBlockWinBonus * bonusDifference) / townBlockLoss;
-                    townBlockLoss = bonusDifference;
-                }
-
-                if (transferTownBlocks) {
-                    if (winner != null) {
-                        int maxTownBlocks = ConfigManager.getMaxTownBlocksWin();
-
-                        if ((maxTownBlocks  - winner.getExtraBlocks()) < townBlockWinBonus) {
-                            int townBlockDifference = maxTownBlocks - winner.getExtraBlocks();
-
-                            townBlockWinBonus = Math.max(townBlockDifference, 0);
-                        }
-
-                        if (townBlockWinBonus > 0) {
-                            TownyUtil.addNationBonusBlocks(winner, townBlockWinBonus);
-                            TownyAPI.getInstance().getDataSource().saveNation(winner);
-                            TownyMessaging.sendNationMessage(winner,"The nation won " + townBlockWinBonus + " townblocks!");
-                        }
-                    }
-
-                    TownyUtil.addNationBonusBlocks(loser, -townBlockLoss);
-                    TownyAPI.getInstance().getDataSource().saveNation(loser);
-                    TownyMessaging.sendNationMessage(loser, "The nation has lost " + townBlockLoss + " townblocks!");
-                }
+                winner.setBalance(balance, "War win against " + (loser != null ? loser.getName() : "unknown!"));
+            } catch (EconomyException ex) {
+                ex.printStackTrace();
             }
         }
 
+        if (loser != null) {
+            double balance = 0;
 
-        if (winner != null)
-            plugin.getLeaderboard().addWinToLeaderBoard(winnerName);
+            try {
+                balance = loser.getHoldingBalance();
+            } catch (EconomyException ex) {
+                ex.printStackTrace();
+            }
 
-        if (loser != null)
-            plugin.getLeaderboard().addLossToLeaderBoard(loserName);
-
-        plugin.getLeaderboard().sortLeaderboard();
-        plugin.getLeaderboard().saveLeaderboard();
+            if (balance < amount) {
+                TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
+                TownyUtil.deleteNation(loser);
+                plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
+            } else {
+                try {
+                    loser.setBalance(balance - amount, "War loss");
+                } catch (EconomyException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
-    private void wonByTime(War war) {
-        Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
-        Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+    private void rewardTownBlocks(Nation winner, Nation loser, boolean halfReward) {
+        // Townblock Bonus
+        // Behavioural Restraints:
+        // If a losing nation has less than the town block minimum, then don't give the winner town blocks
+        // If a losing nation can't give all the town blocks, make the winning townblocks proportional to the ones lost
+        // Winning townblock cap, give townblocks up to the cap.
+        // Half-war rewards
 
-        if (nation1 == null || nation2 == null) return;
+        int negTownBlockMin = ConfigManager.getNegTownBlockMin();
+        int townBlockLoss = ConfigManager.getTownBlockLoss();
+        int townBlockWinBonus = ConfigManager.getTownBlockBonus();
 
-        Nation winner = war.getDeclaringPoints() > war.getDeclaredPoints() ? nation1 : nation2;
+        if (halfReward) {
+            negTownBlockMin /= 2;
+            townBlockLoss /= 2;
+            townBlockWinBonus /= 2;
+        }
 
-        endWar(winner, winner == nation1 ? nation2 : nation1, ConfigManager.getFinishAmount(), true, true);
-    }
+        // transferTownBlock boolean checks whether we should award/take townblocks from the winning/losing nations.
+        // Check if the losing nation bonus is greater than than the minimum
+        boolean transferTownBlocks = loser.getExtraBlocks() > negTownBlockMin;
 
-    public void end(War war) {
-        Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
-        Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
+        // BonusDifference is positive if losing nation cannot afford to lose any more townblocks
+        int bonusDifference = townBlockLoss - TownySettings.getNationBonusBlocks(loser);
 
-        endWar(nation1, nation2, 0, false, false);
+        // If the bound difference is 0 that means the nation has 0 nation bonus and we don't want to transfer townblocks.
+        transferTownBlocks &= bonusDifference != townBlockWinBonus;
+
+        // If the bonus difference is positive then that means they can't afford to give all the town blocks.
+        if (bonusDifference > 0) {
+            // Reduce the win bonus proportionally to the ratio between the win bonus and the take amount.
+            // 30 : 10 * x : 3
+            // (townBlockWinBonus * bonusDifference) / townBlockLoss
+            townBlockWinBonus = (townBlockWinBonus * bonusDifference) / townBlockLoss;
+            townBlockLoss = bonusDifference;
+        }
+
+        if (transferTownBlocks) {
+            if (winner != null) {
+                int maxTownBlocks = ConfigManager.getMaxTownBlocksWin();
+
+                if ((maxTownBlocks  - winner.getExtraBlocks()) < townBlockWinBonus) {
+                    int townBlockDifference = maxTownBlocks - winner.getExtraBlocks();
+
+                    townBlockWinBonus = Math.max(townBlockDifference, 0);
+                }
+
+                if (townBlockWinBonus > 0) {
+                    TownyUtil.addNationBonusBlocks(winner, townBlockWinBonus);
+                    TownyAPI.getInstance().getDataSource().saveNation(winner);
+                    TownyMessaging.sendNationMessage(winner,"The nation won " + townBlockWinBonus + " townblocks!");
+                }
+            }
+
+            TownyUtil.addNationBonusBlocks(loser, -townBlockLoss);
+            TownyAPI.getInstance().getDataSource().saveNation(loser);
+            TownyMessaging.sendNationMessage(loser, "The nation has lost " + townBlockLoss + " townblocks!");
+        }
     }
 
     public void renameWarNation(String oldName, String newName) {
