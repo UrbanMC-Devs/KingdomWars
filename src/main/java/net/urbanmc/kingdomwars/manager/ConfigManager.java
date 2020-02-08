@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfigManager {
 
-    private static double startAmount, finishAmount, truceAmount;
+    private static double startAmount, winAmount, loseAmount, truceAmount;
     private static int winningKills, allyKills, townBlockBonus, townBlockLoss, townBlockMin, townBlockMax;
     private static long lastTime, lastTimeRevenge, endTime;
 
@@ -40,7 +40,8 @@ public class ConfigManager {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
         startAmount = data.getDouble("start-amount", 25000);
-        finishAmount = data.getDouble("finish-amount", 100000);
+        winAmount = data.getDouble("win-amount", 100000);
+        loseAmount = data.getDouble("lose-amount", 10000);
         truceAmount = data.getDouble("truce-amount", 50000);
 
         winningKills = data.getInt("winning-kills", 25);
@@ -60,9 +61,11 @@ public class ConfigManager {
         return startAmount;
     }
 
-    public static double getFinishAmount() {
-        return finishAmount;
+    public static double getWinAmount() {
+        return winAmount;
     }
+
+    public static double getLoseAmount() { return loseAmount; }
 
     public static double getTruceAmount() {
         return truceAmount;

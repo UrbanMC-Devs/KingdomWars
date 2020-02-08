@@ -172,7 +172,7 @@ public class WarManager {
         }
 
         if (winner != null && loser != null) {
-            win(winner, loser, ConfigManager.getFinishAmount());
+            win(winner, loser);
         }
     }
 
@@ -184,12 +184,19 @@ public class WarManager {
 
         if (winNation == null) return;
 
-        endWar(winNation, null, ConfigManager.getFinishAmount(), true, true, true);
+        endWar(winNation, null,
+                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
+                true, true, true);
+    }
+
+    // Legacy Compat Method
+    public void win(Nation winner, Nation loser, double amount) {
+        endWar(winner, loser, amount, amount, true, true, true);
     }
 
     // Normal win method when nation war wins by killing participants
-    public void win(Nation winner, Nation loser, double amount) {
-        endWar(winner, loser, amount, false, true, true);
+    public void win(Nation winner, Nation loser) {
+        endWar(winner, loser, ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(), false, true, true);
     }
 
     // Called when the war is over
@@ -201,12 +208,16 @@ public class WarManager {
 
         Nation winner = war.getDeclaringPoints() > war.getDeclaredPoints() ? nation1 : nation2;
 
-        endWar(winner, winner == nation1 ? nation2 : nation1, ConfigManager.getFinishAmount(), true, true, true);
+        endWar(winner, winner == nation1 ? nation2 : nation1,
+                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
+                true, true, true);
     }
 
     // Called when a truce is reached
     public void truceWar(Nation declaring, Nation declared) {
-        endWar(declaring, declared, ConfigManager.getTruceAmount(), false, false, false);
+        endWar(declaring, declared,
+                ConfigManager.getTruceAmount(), ConfigManager.getTruceAmount(),
+                false, false, false);
     }
 
     // Called when an admin force ends the war
@@ -219,11 +230,13 @@ public class WarManager {
         Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
         Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
 
-        endWar(nation1, nation2, 0, false, false, false);
+        endWar(nation1, nation2,
+                0, 0,
+                false, false, false);
     }
 
     public synchronized void endWar(Nation winner, Nation loser,
-                                    double monetaryAmount,
+                                    double winAmount, double loseAmount,
                                     boolean halfReward, boolean rewardTownBlocks,
                                     boolean adjustLeaderBoard) {
         War war = getWar(winner);
@@ -248,7 +261,7 @@ public class WarManager {
             }
         }
 
-        boolean isTruce = monetaryAmount == ConfigManager.getTruceAmount();
+        boolean isTruce = winAmount == ConfigManager.getTruceAmount();
 
         String winnerName = winner != null ? winner.getName() : "an unknown nation";
         String loserName = loser != null ? loser.getName() : "an unknown nation";
@@ -274,8 +287,15 @@ public class WarManager {
             Bukkit.getLogger().warning("[KingdomWars] Error saving last war for war between " + winner.getName() + " and " + loser.getName());
         }
 
-        if (monetaryAmount > 0)
-            rewardMoney(winner, loser, winner.getName().equals(war.getDeclaringNation()), monetaryAmount / (halfReward ? 2 : 1));
+        if (halfReward) {
+            winAmount /= 2;
+            loseAmount /= 2;
+        }
+
+        if (winAmount > 0)
+            rewardMoney(winner, loser,
+                    !isTruce && winner.getName().equals(war.getDeclaringNation()),
+                    winAmount, loseAmount);
 
         if (rewardTownBlocks)
             rewardTownBlocks(winner, loser, halfReward);
@@ -292,12 +312,12 @@ public class WarManager {
         }
     }
 
-    private void rewardMoney(Nation winner, Nation loser, boolean winnerDeclared, double amount) {
+    private void rewardMoney(Nation winner, Nation loser, boolean returnStartingCost, double winAmount, double loseAmount) {
         if (winner != null) {
             try {
-                double balance = winner.getHoldingBalance() + amount;
+                double balance = winner.getHoldingBalance() + winAmount;
 
-                if (winnerDeclared) {
+                if (returnStartingCost) {
                     balance += ConfigManager.getStartAmount();
                 }
 
@@ -316,13 +336,13 @@ public class WarManager {
                 ex.printStackTrace();
             }
 
-            if (balance < amount) {
+            if (balance < loseAmount) {
                 TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
                 TownyUtil.deleteNation(loser);
                 plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
             } else {
                 try {
-                    loser.setBalance(balance - amount, "War loss");
+                    loser.setBalance(balance - loseAmount, "War loss");
                 } catch (EconomyException ex) {
                     ex.printStackTrace();
                 }

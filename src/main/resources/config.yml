@@ -4,8 +4,11 @@
 # How much money it costs to start a war
 start-amount: 25000
 
-# How much money is awarded/taken away when war ends (not with forceend) * IF STARTING NATION WINS, START AMOUNT IS RETURNED TO THEM
-finish-amount: 100000
+# How much money does the winning nation recieve?
+win-amount: 100000
+
+# How much money is lost when a nation loses?
+lose-amount: 10000
 
 # How much money is awarded/taken away when war ends by truce
 truce-amount: 50000
