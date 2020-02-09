@@ -71,10 +71,23 @@ public class JoinWar {
             return;
         }
 
-        preWar.addAlly(nation2.getName().equalsIgnoreCase(preWar.getDeclaringNation()), nation1.getName());
+        boolean isDeclaringAlly = nation2.getName().equalsIgnoreCase(preWar.getDeclaringNation());
+        preWar.addAlly(isDeclaringAlly, nation1.getName());
 
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has now joined your side in the upcoming war!");
         TownyUtil.sendNationMessage(nation1, "Your nation is now participating in the war between "  + preWar.getDeclaringNation() + " vs " + preWar.getDeclaredNation() + "!");
+
+        String oppositeSideNationName;
+        if (isDeclaringAlly) {
+            oppositeSideNationName = preWar.getDeclaredNation();
+        }
+        else {
+            oppositeSideNationName = preWar.getDeclaringNation();
+        }
+
+        Nation oppositeSide = TownyUtil.getNation(oppositeSideNationName);
+        if (oppositeSide != null)
+            TownyUtil.sendNationMessage(oppositeSide, nation1.getName() + " has joined the war in alliance with " + nation2.getName() + "!");
     }
 
 }
