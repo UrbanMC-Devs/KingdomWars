@@ -93,6 +93,8 @@ public class LastWarManager {
                 && war.getDeclaredNation() != null && names.contains(war.getDeclaredNation()));
 
         lastWars.add(lastWar);
+
+        saveLastWars();
     }
 
     public LastWar getLast(Nation nation1, Nation nation2) {
