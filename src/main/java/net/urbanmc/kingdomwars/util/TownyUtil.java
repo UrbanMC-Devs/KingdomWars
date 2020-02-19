@@ -55,7 +55,7 @@ public class TownyUtil {
 
 	public static double getNationBalance(Nation nation) {
 		try {
-			return nation.getHoldingBalance();
+			return nation.getAccount().getHoldingBalance();
 		} catch (EconomyException ex) {
 			ex.printStackTrace();
 			return 0;
@@ -64,10 +64,14 @@ public class TownyUtil {
 
 	public static void setNationBalance(Nation nation, double balance, String reason) {
 		try {
-			nation.setBalance(balance, reason);
+			nation.getAccount().setBalance(balance, reason);
 		} catch (EconomyException ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public static void saveNation(Nation nation) {
+		TownyAPI.getInstance().getDataSource().saveNation(nation);
 	}
 
 	public static boolean isNationKing(Player p) {

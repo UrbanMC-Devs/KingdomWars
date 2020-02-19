@@ -2,7 +2,6 @@ package net.urbanmc.kingdomwars.manager;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.exceptions.EconomyException;
@@ -10,8 +9,8 @@ import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.data.GraceNation;
-import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.LastWar;
+import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.data.war.WarSerializer;
 import net.urbanmc.kingdomwars.event.WarEndEvent;
@@ -314,17 +313,13 @@ public class WarManager {
 
     private void rewardMoney(Nation winner, Nation loser, boolean returnStartingCost, double winAmount, double loseAmount) {
         if (winner != null) {
-            try {
-                double balance = winner.getHoldingBalance() + winAmount;
+            double balance = TownyUtil.getNationBalance(winner) + winAmount;
 
-                if (returnStartingCost) {
-                    balance += ConfigManager.getStartAmount();
-                }
-
-                winner.setBalance(balance, "War win against " + (loser != null ? loser.getName() : "unknown!"));
-            } catch (EconomyException ex) {
-                ex.printStackTrace();
+            if (returnStartingCost) {
+                balance += ConfigManager.getStartAmount();
             }
+
+            TownyUtil.setNationBalance(winner, balance, "War win against " + (loser != null ? loser.getName() : "unknown!"));
         }
 
         if (loser != null) {
@@ -341,11 +336,7 @@ public class WarManager {
                 TownyUtil.deleteNation(loser);
                 plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
             } else {
-                try {
-                    loser.setBalance(balance - loseAmount, "War loss");
-                } catch (EconomyException ex) {
-                    ex.printStackTrace();
-                }
+                TownyUtil.setNationBalance(loser, balance - loseAmount, "War loss");
             }
         }
     }
@@ -399,13 +390,13 @@ public class WarManager {
 
                 if (townBlockWinBonus > 0) {
                     TownyUtil.addNationBonusBlocks(winner, townBlockWinBonus);
-                    TownyAPI.getInstance().getDataSource().saveNation(winner);
+                    TownyUtil.saveNation(winner);
                     TownyMessaging.sendNationMessage(winner,"The nation won " + townBlockWinBonus + " townblocks!");
                 }
             }
 
             TownyUtil.addNationBonusBlocks(loser, -townBlockLoss);
-            TownyAPI.getInstance().getDataSource().saveNation(loser);
+            TownyUtil.saveNation(loser);
             TownyMessaging.sendNationMessage(loser, "The nation has lost " + townBlockLoss + " townblocks!");
         }
     }
