@@ -16,6 +16,9 @@ truce-amount: 50000
 # How many kills a nation must receive to win the war
 winning-kills: 25
 
+# Grace Period. How much time does a new nation have before they can get warred? (in mins)
+grace-period: 10
+
 # Hours between two nations can war again
 hours-between: 168
 

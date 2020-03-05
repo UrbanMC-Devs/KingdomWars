@@ -16,5 +16,4 @@ public class GraceNation {
         this.nationName = nationName;
     }
 
-
 }

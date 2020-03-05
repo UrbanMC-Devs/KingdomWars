@@ -17,10 +17,11 @@ import java.util.Scanner;
 
 public class LeaderboardManager {
 
+    private final String FILE_PATH = "plugins/KingdomWars/leaderboard.json";
     private List<Leaderboard> leaderboardList;
 
     public void loadLeaderboard() {
-        final File FILE = new File("plugins/KingdomWars/leaderboard.json");
+        final File FILE = new File(FILE_PATH);
 
         if (!FILE.exists()) {
             leaderboardList = new ArrayList<>();
@@ -47,19 +48,17 @@ public class LeaderboardManager {
     }
 
     public void saveLeaderboard() {
-        try(PrintWriter writer = new PrintWriter(
-                new File("plugins/KingdomWars/leaderboard.json"))
-        ) {
-
+        try(PrintWriter writer =
+                    new PrintWriter(new File(FILE_PATH))) {
             writer.write(new Gson().toJson(leaderboardList));
-
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
     public void sortLeaderboard() {
-        if (!leaderboardList.isEmpty()) Collections.sort(leaderboardList);
+        if (!leaderboardList.isEmpty())
+            Collections.sort(leaderboardList);
     }
 
     public void deleteNationFromLeaderboard(String nation) {
@@ -105,7 +104,8 @@ public class LeaderboardManager {
 
     private Leaderboard getLeaderboardForNation(String nation) {
         for (Leaderboard lb : leaderboardList) {
-            if (lb.getNation().equals(nation)) return lb;
+            if (lb.getNation().equals(nation))
+                return lb;
         }
 
         return null;

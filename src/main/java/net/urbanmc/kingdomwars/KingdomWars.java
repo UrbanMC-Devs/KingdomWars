@@ -3,6 +3,7 @@ package net.urbanmc.kingdomwars;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 import net.urbanmc.kingdomwars.command.BaseCommand;
+import net.urbanmc.kingdomwars.listener.ChangeKingListener;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.manager.ConfigManager;
@@ -10,6 +11,7 @@ import net.urbanmc.kingdomwars.manager.LastWarManager;
 import net.urbanmc.kingdomwars.manager.LeaderboardManager;
 import net.urbanmc.kingdomwars.manager.WarManager;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -77,6 +79,19 @@ public class KingdomWars extends JavaPlugin {
 
 		pm.registerEvents(new NationListener(this), this);
 		pm.registerEvents(new WarListener(this), this);
+		registerChangeLeaderListener();
+	}
+
+	private void registerChangeLeaderListener() {
+		// Check if event class exists
+		try {
+			Class.forName("com.palmergames.bukkit.towny.event.NationChangeLeaderEvent");
+		} catch (ClassNotFoundException ex) {
+			getLogger().warning("Could not find NationChangeLeader Event. Skipping registering listener for that event!");
+			return;
+		}
+
+		new ChangeKingListener(this);
 	}
 
 	public Towny getTowny() {

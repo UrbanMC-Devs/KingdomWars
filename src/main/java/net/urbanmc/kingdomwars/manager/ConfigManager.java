@@ -13,7 +13,9 @@ import java.util.concurrent.TimeUnit;
 public class ConfigManager {
 
     private static double startAmount, winAmount, loseAmount, truceAmount;
-    private static int winningKills, allyKills, townBlockBonus, townBlockLoss, townBlockMin, townBlockMax;
+    private static int winningKills, allyKills,
+                       townBlockBonus, townBlockLoss, townBlockMin, townBlockMax,
+                       gracePeriod;
     private static long lastTime, lastTimeRevenge, endTime;
 
     public ConfigManager() {
@@ -38,6 +40,8 @@ public class ConfigManager {
         }
 
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+
+        gracePeriod = data.getInt("grace-period", 10);
 
         startAmount = data.getDouble("start-amount", 25000);
         winAmount = data.getDouble("win-amount", 100000);
@@ -96,6 +100,10 @@ public class ConfigManager {
     public static int getNegTownBlockMin() { return -1 * townBlockMin; }
 
     public static int getMaxTownBlocksWin() { return townBlockMax; }
+
+    public static int getGracePeriod() {
+        return gracePeriod;
+    }
 
     // Time is in seconds
     public static String formatTime(long time) {

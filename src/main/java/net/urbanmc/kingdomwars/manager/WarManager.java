@@ -447,7 +447,7 @@ public class WarManager {
         GraceNation graceNation = new GraceNation(nationName);
 
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-                graceNations.remove(graceNation), 20 * 60 * 10);
+                graceNations.remove(graceNation), 20 * 60 * ConfigManager.getGracePeriod());
     }
 
     public boolean isGraceNation(String nationName) {

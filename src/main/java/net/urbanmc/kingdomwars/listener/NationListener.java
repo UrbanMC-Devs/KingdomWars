@@ -94,7 +94,6 @@ public class NationListener implements Listener {
 
 				plugin.getWarManager().removePreWar(preWar);
 			}
-
 		}
 
 		plugin.getLastWarManager().removeAllLastWars(nation);
