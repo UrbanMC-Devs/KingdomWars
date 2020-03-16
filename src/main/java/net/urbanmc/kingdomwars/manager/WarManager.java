@@ -185,17 +185,24 @@ public class WarManager {
 
         endWar(winNation, null,
                 ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
-                true, true, true);
+                true, true,
+                true, true);
     }
 
     // Legacy Compat Method
     public void win(Nation winner, Nation loser, double amount) {
-        endWar(winner, loser, amount, amount, true, true, true);
+        endWar(winner, loser,
+                amount, amount,
+                true, true,
+                true, true);
     }
 
     // Normal win method when nation war wins by killing participants
     public void win(Nation winner, Nation loser) {
-        endWar(winner, loser, ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(), false, true, true);
+        endWar(winner, loser,
+                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
+                false, true,
+                true, true);
     }
 
     // Called when the war is over
@@ -209,14 +216,16 @@ public class WarManager {
 
         endWar(winner, winner == nation1 ? nation2 : nation1,
                 ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
-                true, true, true);
+                true, true,
+                true, true);
     }
 
     // Called when a truce is reached
     public void truceWar(Nation declaring, Nation declared) {
         endWar(declaring, declared,
                 ConfigManager.getTruceAmount(), ConfigManager.getTruceAmount(),
-                false, false, false);
+                false, false,
+                false, true);
     }
 
     // Called when an admin force ends the war
@@ -231,13 +240,14 @@ public class WarManager {
 
         endWar(nation1, nation2,
                 0, 0,
-                false, false, false);
+                false, false,
+                false, false);
     }
 
     public synchronized void endWar(Nation winner, Nation loser,
                                     double winAmount, double loseAmount,
                                     boolean halfReward, boolean rewardTownBlocks,
-                                    boolean adjustLeaderBoard) {
+                                    boolean adjustLeaderBoard, boolean sendNationMessages) {
         War war = getWar(winner);
 
         WarEndEvent event = new WarEndEvent(war);
@@ -265,13 +275,15 @@ public class WarManager {
         String winnerName = winner != null ? winner.getName() : "an unknown nation";
         String loserName = loser != null ? loser.getName() : "an unknown nation";
 
-        if (winner != null)
-        TownyUtil.sendNationMessage(winner, isTruce ? "Your nation has truced with " + loserName + "!" :
-                "Your nation has won the war against " + loserName + "!");
+        if (sendNationMessages) {
+            if (winner != null)
+                TownyUtil.sendNationMessage(winner, isTruce ? "Your nation has truced with " + loserName + "!" :
+                        "Your nation has won the war against " + loserName + "!");
 
-        if (loser != null)
-        TownyUtil.sendNationMessage(loser, isTruce ? "Your nation has truced with " + winnerName + "!" :
-                "Your nation has lost the war against " + winnerName + "!");
+            if (loser != null)
+                TownyUtil.sendNationMessage(loser, isTruce ? "Your nation has truced with " + winnerName + "!" :
+                        "Your nation has lost the war against " + winnerName + "!");
+        }
 
         LastWar lastWar =
                 new LastWar(winnerName, loserName, war.isDeclaringNation(winner.getName()),
