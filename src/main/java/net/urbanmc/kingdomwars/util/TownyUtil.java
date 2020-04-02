@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
+import com.palmergames.bukkit.towny.object.metadata.CustomDataFieldType;
+import com.palmergames.bukkit.towny.object.metadata.IntegerDataField;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.manager.ConfigManager;
 import org.bukkit.Bukkit;
@@ -127,7 +130,58 @@ public class TownyUtil {
 		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender);
 	}
 
-	public static void addNationBonusBlocks(Nation nation, int blocks) {
-		nation.setExtraBlocks(nation.getExtraBlocks() + blocks);
+	private static final String META_KEY = "kwars_bonusblocks";
+
+	// Return the number of townblocks the nation has from previous wars (can be negative)
+	public static int getNationWarBlocks(Nation nation) {
+		if (nation.hasMeta()) {
+			for (CustomDataField<?> metadata : nation.getMetadata()) {
+				if (metadata.getKey().equalsIgnoreCase(META_KEY)
+						&& metadata.getType() == CustomDataFieldType.IntegerField) {
+					return ((IntegerDataField) metadata).getValue();
+				}
+			}
+		}
+
+		return 0;
+	}
+
+
+	public static void addNationWarBlocks(Nation nation, int blocks) {
+		boolean hasMeta = false;
+		IntegerDataField removeMeta = null;
+
+		if (nation.hasMeta()) {
+			for (CustomDataField<?> metadata : nation.getMetadata()) {
+				if (metadata.getKey().equalsIgnoreCase(META_KEY)
+						&& metadata.getType() == CustomDataFieldType.IntegerField) {
+
+					IntegerDataField dataField = (IntegerDataField) metadata;
+
+					int newVal = dataField.getValue() + blocks;
+
+					if (newVal == 0) {
+						removeMeta = dataField;
+						break;
+					}
+
+					dataField.setValue(dataField.getValue() + blocks);
+					hasMeta = true;
+					break;
+				}
+			}
+		}
+
+		if (removeMeta != null)
+			nation.removeMetaData(removeMeta);
+		else if (!hasMeta) {
+			IntegerDataField metadata = new IntegerDataField(META_KEY, blocks);
+			// Adding metadata automatically saves the nation
+			nation.addMetaData(metadata);
+		}
+		else {
+			saveNation(nation);
+		}
+
 	}
 }

@@ -1,6 +1,8 @@
 package net.urbanmc.kingdomwars.listener;
 
+import com.palmergames.bukkit.towny.event.DeleteNationEvent;
 import com.palmergames.bukkit.towny.event.NewNationEvent;
+import com.palmergames.bukkit.towny.event.RenameNationEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarBoard;
@@ -11,9 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-
-import com.palmergames.bukkit.towny.event.DeleteNationEvent;
-import com.palmergames.bukkit.towny.event.RenameNationEvent;
 
 public class NationListener implements Listener {
 
@@ -27,7 +26,6 @@ public class NationListener implements Listener {
 	public void onNationCreate(NewNationEvent event) {
 		plugin.getWarManager().createNation(event.getNation().getName());
 	}
-
 
 	@EventHandler
 	public void renameNation(RenameNationEvent e) {

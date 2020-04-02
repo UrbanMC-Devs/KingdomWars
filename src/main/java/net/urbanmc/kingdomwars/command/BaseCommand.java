@@ -73,6 +73,9 @@ public class BaseCommand implements CommandExecutor {
 			case "joinwar":
 				new JoinWar(p, args, plugin);
 				return true;
+			case "warblocks":
+				new WarBlocksSub(p, args);
+				return true;
 			case "accept":
 			case "deny":
 				new AcceptDenySub(p, args[0], plugin);

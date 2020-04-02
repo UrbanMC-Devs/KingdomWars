@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.palmergames</groupId>
             <artifactId>Towny</artifactId>
-            <version>1.6</version>
+            <version>1.9</version>
         </dependency>
         <dependency>
             <groupId>net.ess3</groupId>

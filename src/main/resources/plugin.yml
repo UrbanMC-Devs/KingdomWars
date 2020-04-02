@@ -19,6 +19,7 @@ permissions:
       kingdomwars.forcestart: true
       kingdomwars.last: true
       kingdomwars.reload: true
+      kingdomwars.warblocks: true
   kingdomwars.nationstaff:
     default: false
     children:
@@ -54,4 +55,6 @@ permissions:
   kingdomwars.callallies:
     default: false
   kingdomwars.reload:
+    default: false
+  kingdomwars.warblocks:
     default: false

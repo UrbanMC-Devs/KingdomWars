@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.Towny;
 import net.urbanmc.kingdomwars.command.BaseCommand;
 import net.urbanmc.kingdomwars.listener.ChangeKingListener;
 import net.urbanmc.kingdomwars.listener.NationListener;
+import net.urbanmc.kingdomwars.listener.WarBlocksListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.manager.ConfigManager;
 import net.urbanmc.kingdomwars.manager.LastWarManager;
@@ -79,7 +80,10 @@ public class KingdomWars extends JavaPlugin {
 
 		pm.registerEvents(new NationListener(this), this);
 		pm.registerEvents(new WarListener(this), this);
+
+		// Register events that are only in the Silver version of Towny
 		registerChangeLeaderListener();
+		registerWarBlocksListener();
 	}
 
 	private void registerChangeLeaderListener() {
@@ -92,6 +96,18 @@ public class KingdomWars extends JavaPlugin {
 		}
 
 		new ChangeKingListener(this);
+	}
+
+	private void registerWarBlocksListener() {
+		// Check if event class exists
+		try {
+			Class.forName("com.palmergames.bukkit.towny.event.NationCalculateBonusBlocksEvent");
+		} catch (ClassNotFoundException ex) {
+			getLogger().warning("Could not find calculate NationCalculateBonusBlock. Skipping registering listener for that event!");
+			return;
+		}
+
+		Bukkit.getPluginManager().registerEvents(new WarBlocksListener(), this);
 	}
 
 	public Towny getTowny() {
