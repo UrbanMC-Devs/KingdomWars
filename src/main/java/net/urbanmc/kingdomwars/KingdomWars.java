@@ -101,9 +101,9 @@ public class KingdomWars extends JavaPlugin {
 	private void registerWarBlocksListener() {
 		// Check if event class exists
 		try {
-			Class.forName("com.palmergames.bukkit.towny.event.NationCalculateBonusBlocksEvent");
+			Class.forName("com.palmergames.bukkit.towny.event.NationBonusCalculationEvent");
 		} catch (ClassNotFoundException ex) {
-			getLogger().warning("Could not find calculate NationCalculateBonusBlock. Skipping registering listener for that event!");
+			getLogger().warning("Could not find calculate NationBonusCalculationEvent. Skipping registering listener for that event!");
 			return;
 		}
 
