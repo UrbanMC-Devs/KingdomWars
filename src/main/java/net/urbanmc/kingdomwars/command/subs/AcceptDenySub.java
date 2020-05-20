@@ -9,8 +9,7 @@ import org.bukkit.entity.Player;
 public class AcceptDenySub {
 
     public AcceptDenySub(Player p, String arg, final KingdomWars plugin) {
-        arg = arg.toLowerCase();
-        if (!p.hasPermission("twars." + arg)) {
+        if (!p.hasPermission("kingdomwars.truce")) {
             p.sendMessage(ChatColor.RED + "You do not have permission to do this!");
             return;
         }

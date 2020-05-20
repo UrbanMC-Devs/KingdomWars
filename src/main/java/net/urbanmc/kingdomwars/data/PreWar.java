@@ -10,7 +10,8 @@ public class PreWar {
     private String declaringNation,declaredNation;
 
     private boolean allies;
-    private List<String> nation1Allies = new ArrayList<>(), nation2Allies = new ArrayList<>();
+    private List<String> nation1Allies = new ArrayList<>(),
+                         nation2Allies = new ArrayList<>();
 
     private BukkitTask task;
 
@@ -40,11 +41,7 @@ public class PreWar {
     public String getDeclaredNation() { return declaredNation; }
 
     public String getOtherNation(String nation) {
-        if (declaredNation.equalsIgnoreCase(nation)) return declaringNation;
-
-        if (declaringNation.equalsIgnoreCase(nation)) return declaredNation;
-
-        return declaringNation;
+        return declaringNation.equalsIgnoreCase(nation) ? declaredNation : declaringNation;
     }
 
     public boolean isMainNation(String nation) {

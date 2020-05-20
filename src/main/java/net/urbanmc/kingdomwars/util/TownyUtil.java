@@ -165,7 +165,7 @@ public class TownyUtil {
 						break;
 					}
 
-					dataField.setValue(dataField.getValue() + blocks);
+					dataField.setValue(newVal);
 					hasMeta = true;
 					break;
 				}

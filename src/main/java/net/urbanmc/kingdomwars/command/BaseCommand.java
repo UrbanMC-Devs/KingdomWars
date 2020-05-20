@@ -36,53 +36,54 @@ public class BaseCommand implements CommandExecutor {
 		switch (sub) {
 			case "start":
 				new Start(p, args, plugin);
-				return true;
+				break;
 			case "end":
 				new End(p, plugin);
-				return true;
+				break;
 			case "truce":
 				new Truce(p, label, plugin);
-				return true;
+				break;
 			case "status":
 				new Status(p, plugin);
-				return true;
+				break;
 			case "forceend":
 				new ForceEnd(p, args, plugin);
-				return true;
+				break;
 			case "forcestart":
 				new ForceStart(p, args, plugin);
-				return true;
+				break;
 			case "wars":
 				new Wars(p, plugin);
-				return true;
+				break;
 			case "leaderboard":
 				new LeaderboardSub(p, plugin);
-				return true;
+				break;
 			case "last":
 				new LastSub(p, args, plugin);
-				return true;
+				break;
 			case "reload":
 				new ReloadSub(p, plugin);
-				return true;
+				break;
 			case "save":
 				new SaveSub(p, plugin);
-				return true;
+				break;
 			case "callallies":
 				new CallAlliesSub(p, plugin);
-				return true;
+				break;
 			case "joinwar":
 				new JoinWar(p, args, plugin);
-				return true;
+				break;
 			case "warblocks":
 				new WarBlocksSub(p, args);
-				return true;
+				break;
 			case "accept":
 			case "deny":
 				new AcceptDenySub(p, args[0], plugin);
-				return true;
+				break;
+			default:
+				infoMessage(p, label);
+				break;
 		}
-
-		infoMessage(p, label);
 
 		return true;
 	}
