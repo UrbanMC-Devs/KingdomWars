@@ -1,55 +1,24 @@
 package net.urbanmc.kingdomwars.data;
 
+import net.urbanmc.kingdomwars.data.war.War;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class PreWar {
-
-    private String declaringNation,declaredNation;
+public class PreWar extends WarAbstract {
 
     private boolean allies;
-    private List<String> nation1Allies = new ArrayList<>(),
-                         nation2Allies = new ArrayList<>();
 
-    private BukkitTask task;
+    private transient BukkitTask task;
 
-    public PreWar(String declaring, String declared) {
-        declaringNation = declaring;
-        declaredNation = declared;
+    public PreWar(String declaringName, String declaredName) {
+        super(declaringName, declaredName);
     }
-
-    public boolean alreadyDeclared(String nation) {
-        if (declaringNation.equalsIgnoreCase(nation) || declaredNation.equalsIgnoreCase(nation)) return true;
-
-        return isAllied(nation);
-    }
-
-    public void addAlly(boolean declaring, String ally) {
-        List<String> allies = declaring ? nation1Allies : nation2Allies;
-
-        allies.add(ally);
-    }
-
-    public boolean isAllied(String ally) {
-        return (nation1Allies.contains(ally) || nation2Allies.contains(ally));
-    }
-
-    public String getDeclaringNation() { return declaringNation; }
-
-    public String getDeclaredNation() { return declaredNation; }
 
     public String getOtherNation(String nation) {
-        return declaringNation.equalsIgnoreCase(nation) ? declaredNation : declaringNation;
+        return isDeclaringNation(nation) ? getDeclaredNation() : getDeclaringNation();
     }
 
     public boolean isMainNation(String nation) {
-        return (declaringNation.equalsIgnoreCase(nation) || declaredNation.equalsIgnoreCase(nation));
-    }
-
-    public List<String> getAllies(boolean declaring) {
-        return declaring ? nation1Allies : nation2Allies;
+        return isDeclaringNation(nation) || isDeclaredNation(nation);
     }
 
     public void setTask(BukkitTask task) {
@@ -60,7 +29,8 @@ public class PreWar {
         if (task != null) task.cancel();
     }
 
-    public boolean calledForAllies() {
+    @Override
+    public boolean hasAllies() {
         return allies;
     }
 
@@ -68,23 +38,20 @@ public class PreWar {
         allies = true;
     }
 
-    public void renameNation(String oldName, String newName) {
-        if (declaringNation.equalsIgnoreCase(oldName)) {
-            declaringNation = newName;
-            return;
-        }
-
-        if (declaredNation.equalsIgnoreCase(oldName)) {
-            declaredNation = newName;
-            return;
-        }
-
-        List<String> allies = nation1Allies.contains(oldName) ? nation1Allies : nation2Allies;
-
-        allies.set(allies.indexOf(oldName), newName);
+    @Override
+    public WarStage getWarStage() {
+        return WarStage.DECLARED;
     }
 
+    public War toFullWar() {
+        War war = new War(getDeclaringNation(), getDeclaredNation());
+        if (hasAllies()) {
+            war.declaredAllies = this.declaredAllies;
+            war.declaringAllies = this.declaringAllies;
+        }
 
+        return war;
+    }
 
 
 }

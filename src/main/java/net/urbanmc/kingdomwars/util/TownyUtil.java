@@ -1,10 +1,14 @@
 package net.urbanmc.kingdomwars.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownyUniverse;
+import com.palmergames.bukkit.towny.object.TownyObject;
 import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
 import com.palmergames.bukkit.towny.object.metadata.CustomDataFieldType;
 import com.palmergames.bukkit.towny.object.metadata.IntegerDataField;
@@ -24,6 +28,15 @@ import com.palmergames.bukkit.towny.utils.CombatUtil;
 
 public class TownyUtil {
 
+    public static Collection<String> getNationNames() {
+        return TownyUniverse.getInstance().getNationsMap().values()
+                .stream().map(TownyObject::getName).collect(Collectors.toList());
+    }
+
+	public static long getNationCreationTime(Nation nation) {
+		return nation.getRegistered();
+	}
+
 	public static void sendNationMessage(Nation nation, String message) {
 		TownyMessaging.sendNationMessage(nation, ChatColor.AQUA + message);
 	}
@@ -39,21 +52,22 @@ public class TownyUtil {
 	public static Nation getNation(String name) {
 		Nation nation = null;
 
-		try {
-			nation = TownyAPI.getInstance().getDataSource().getNation(name);
-		} catch (NotRegisteredException ex) {
-		}
-
-		if (nation == null) {
-			for (Nation dataNation : TownyAPI.getInstance().getDataSource().getNations()) {
-				if (dataNation.getName().equalsIgnoreCase(name)) {
-					nation = dataNation;
-					break;
-				}
+		if (name != null) {
+			try {
+				nation = TownyAPI.getInstance().getDataSource().getNation(name);
+			} catch (NotRegisteredException ex) {
 			}
 		}
 
 		return nation;
+	}
+
+	public static UUID getNationUUID(String nationName) {
+		Nation nat = getNation(nationName);
+		if (nat != null)
+			return nat.getUuid();
+
+		return null;
 	}
 
 	public static double getNationBalance(Nation nation) {
@@ -72,6 +86,18 @@ public class TownyUtil {
 			ex.printStackTrace();
 		}
 	}
+	public static void addMoneyToNation(Nation nation, double amount, String reason) {
+		try {
+			if (amount < 0) {
+				nation.getAccount().pay(amount, reason);
+			} else if (amount > 0) {
+				nation.getAccount().collect(amount, reason);
+			}
+		} catch (EconomyException ex) {
+			ex.printStackTrace();
+		}
+	}
+
 
 	public static void saveNation(Nation nation) {
 		TownyAPI.getInstance().getDataSource().saveNation(nation);
@@ -130,35 +156,18 @@ public class TownyUtil {
 		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender);
 	}
 
-	private static final String META_KEY = "kwars_bonusblocks";
-
-	// Return the number of townblocks the nation has from previous wars (can be negative)
-	public static int getNationWarBlocks(Nation nation) {
-		if (nation.hasMeta()) {
-			for (CustomDataField<?> metadata : nation.getMetadata()) {
-				if (metadata.getKey().equalsIgnoreCase(META_KEY)
-						&& metadata.getType() == CustomDataFieldType.IntegerField) {
-					return ((IntegerDataField) metadata).getValue();
-				}
-			}
-		}
-
-		return 0;
-	}
-
-
-	public static void addNationWarBlocks(Nation nation, int blocks) {
+	private static void addIntegerMeta(Nation nation, String key, int amount) {
 		boolean hasMeta = false;
 		IntegerDataField removeMeta = null;
 
 		if (nation.hasMeta()) {
 			for (CustomDataField<?> metadata : nation.getMetadata()) {
-				if (metadata.getKey().equalsIgnoreCase(META_KEY)
+				if (metadata.getKey().equalsIgnoreCase(key)
 						&& metadata.getType() == CustomDataFieldType.IntegerField) {
 
 					IntegerDataField dataField = (IntegerDataField) metadata;
 
-					int newVal = dataField.getValue() + blocks;
+					int newVal = dataField.getValue() + amount;
 
 					if (newVal == 0) {
 						removeMeta = dataField;
@@ -175,13 +184,41 @@ public class TownyUtil {
 		if (removeMeta != null)
 			nation.removeMetaData(removeMeta);
 		else if (!hasMeta) {
-			IntegerDataField metadata = new IntegerDataField(META_KEY, blocks);
+			IntegerDataField metadata = new IntegerDataField(key, amount);
 			// Adding metadata automatically saves the nation
 			nation.addMetaData(metadata);
 		}
 		else {
 			saveNation(nation);
 		}
+	}
 
+	private static int getIntegerNationMeta(Nation nation, String key, int def) {
+		if (nation.hasMeta()) {
+			for (CustomDataField<?> metadata : nation.getMetadata()) {
+				if (metadata.getKey().equalsIgnoreCase(key)
+						&& metadata.getType() == CustomDataFieldType.IntegerField) {
+					return ((IntegerDataField) metadata).getValue();
+				}
+			}
+		}
+
+		return def;
+	}
+
+	private static final String WARBLOCKS_KEY = "kwars_bonusblocks";
+
+	// Return the number of townblocks the nation has from previous wars (can be negative)
+	public static int getNationWarBlocks(Nation nation) {
+		return getIntegerNationMeta(nation, WARBLOCKS_KEY, 0);
+	}
+
+
+	public static void addNationWarBlocks(Nation nation, int blocks) {
+		addIntegerMeta(nation, WARBLOCKS_KEY, blocks);
+	}
+
+	public static boolean isSameNation(Nation nation1, Nation nation2) {
+		return nation1.equals(nation2) || nation1.getUuid().equals(nation2.getUuid());
 	}
 }

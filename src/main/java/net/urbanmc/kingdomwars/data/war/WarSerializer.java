@@ -1,119 +1,71 @@
 package net.urbanmc.kingdomwars.data.war;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.urbanmc.kingdomwars.KingdomWars;
+import net.urbanmc.kingdomwars.data.LastWar;
+import net.urbanmc.kingdomwars.data.PreWar;
+import net.urbanmc.kingdomwars.data.WarAbstract;
+import net.urbanmc.kingdomwars.data.WarStage;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 public class WarSerializer {
 
-	public static JsonElement serialize(List<War> wars) {
+	public static JsonElement serialize(Gson gson, Collection<WarAbstract> wars) {
 		JsonArray array = new JsonArray();
 
-		for (War war : wars) {
-			array.add(serialize(war));
+		for (WarAbstract war : wars) {
+			JsonElement element = gson.toJsonTree(war);
+			element.getAsJsonObject().addProperty("stage", war.getWarStage().name());
+			array.add(element);
 		}
 
 		return array;
 	}
 
-	public static JsonObject serialize(War war) {
-		JsonObject obj = new JsonObject();
-
-		obj.addProperty("nation1", war.getDeclaringNation());
-		obj.addProperty("nation2", war.getDeclaredNation());
-
-		obj.addProperty("points1", war.getDeclaringPoints());
-		obj.addProperty("points2", war.getDeclaredPoints());
-
-		if (war.hasAllies()) {
-			JsonArray nation1Allies = new JsonArray(), nation2Allies = new JsonArray();
-
-			war.getAllies(true).forEach(nation1Allies::add);
-			war.getAllies(false).forEach(nation2Allies::add);
-
-			obj.add("nation1Allies", nation1Allies);
-			obj.add("nation2Allies", nation2Allies);
-		}
-
-		obj.addProperty("killsToWin", war.getKillsToWin());
-
-		obj.addProperty("startTime", war.getStarted());
-
-		if (war.getDisabled() != null) {
-			JsonArray disabledArray = new JsonArray();
-
-			for (UUID uuid : war.getDisabled()) {
-				disabledArray.add(uuid.toString());
-			}
-
-			obj.add("scoreboardDisabled", disabledArray);
-		}
-
-		return obj;
-	}
-
-	public static List<War> deserializeWars(JsonElement element) throws IllegalArgumentException {
+	public static Collection<WarAbstract> deserializeWars(Gson gson, JsonElement element) throws IllegalArgumentException {
 		if (!element.isJsonArray())
 			throw new IllegalArgumentException("JSON Element is not a json array!");
 
 		JsonArray array = element.getAsJsonArray();
 
-		List<War> wars = new ArrayList<>();
+		List<WarAbstract> wars = new ArrayList<>();
 
 		for (JsonElement warObject : array) {
-			wars.add(deserializeWar(warObject));
+			WarAbstract war = deserializeWar(gson, warObject);
+			if (war != null) {
+				wars.add(war);
+			}
 		}
 
 		return wars;
 	}
 
-	public static War deserializeWar(JsonElement element) throws JsonParseException {
+	public static WarAbstract deserializeWar(Gson gson, JsonElement element) throws JsonParseException {
 		JsonObject obj = element.getAsJsonObject();
 
-		String nation1 = obj.get("nation1").getAsString();
-		String nation2 = obj.get("nation2").getAsString();
+		if (obj.has("stage")) {
+			WarStage stage = WarStage.valueOf(obj.get("stage").getAsString());
 
-		int points1 = obj.get("points1").getAsInt();
-		int points2 = obj.get("points2").getAsInt();
-
-		War war = new War(nation1, nation2);
-
-		war.setDeclaringPoints(points1);
-		war.setDeclaredPoints(points2);
-
-		if (obj.has("nation1Allies")) {
-			for (JsonElement el : obj.getAsJsonArray("nation1Allies")) {
-				war.addNation1Ally(el.getAsString());
+			switch (stage) {
+				case DECLARED:
+					return gson.fromJson(obj, PreWar.class);
+				case FIGHTING:
+					return gson.fromJson(obj, War.class);
+				case ARCHIVED:
+					return gson.fromJson(obj, LastWar.class);
 			}
 		}
-
-		if (obj.has("nation2Allies")) {
-			for (JsonElement el : obj.getAsJsonArray("nation2Allies")) {
-				war.addNation2Ally(el.getAsString());
-			}
+		else {
+			KingdomWars.logger().warning("Unable to deserialize a war because no war stage was found! Json: " + element.toString());
 		}
-
-		war.setKills(obj.get("killsToWin").getAsInt());
-
-		if (obj.has("startTime")) {
-			war.setStarted(obj.get("startTime").getAsLong());
-		} else {
-			war.setStarted();
-		}
-
-		if (obj.has("scoreboardDisabled")) {
-			JsonArray disabledArray = obj.getAsJsonArray("scoreboardDisabled");
-
-			for (JsonElement jsonElement : disabledArray) {
-				war.setDisabled(UUID.fromString(jsonElement.getAsString()),  true);
-			}
-		}
-
-		return war;
+		return null;
 	}
 }

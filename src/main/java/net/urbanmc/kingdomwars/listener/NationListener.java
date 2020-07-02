@@ -1,7 +1,7 @@
 package net.urbanmc.kingdomwars.listener;
 
-import com.palmergames.bukkit.towny.event.DeleteNationEvent;
 import com.palmergames.bukkit.towny.event.NewNationEvent;
+import com.palmergames.bukkit.towny.event.PreDeleteNationEvent;
 import com.palmergames.bukkit.towny.event.RenameNationEvent;
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
@@ -22,60 +22,38 @@ public class NationListener implements Listener {
 		this.plugin = plugin;
 	}
 
-	@EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onNationCreate(NewNationEvent event) {
-		plugin.getWarManager().createNation(event.getNation().getName());
+	@EventHandler
+	public void createNation(NewNationEvent event) {
+		Nation nat = event.getNation();
+		plugin.getArchiveManager().createNation(nat.getUuid(), nat.getName());
 	}
 
 	@EventHandler
 	public void renameNation(RenameNationEvent e) {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
 
-		plugin.getWarManager().renameGraceNation(oldName, newName);
+		plugin.getWarManager().renameWarNation(oldName, newName);
 
-		if (plugin.getWarManager().inWar(oldName)) {
-			War war = plugin.getWarManager().getWar(oldName);
-
-			int ally = war.isDeclaringAlly(oldName);
-
-			if (ally != -1)
-				war.renameAlly(oldName, newName, ally == 1);
-
-			else plugin.getWarManager().renameWarNation(oldName, newName);
-		}
-
-		if (plugin.getWarManager().alreadyScheduledForWar(oldName)) {
-			PreWar preWar = plugin.getWarManager().getPreWar(oldName);
-
-			preWar.renameNation(oldName, newName);
-		}
-
-		plugin.getLastWarManager().lastNationRename(oldName, newName);
+		plugin.getArchiveManager().updateNation(e.getNation().getUuid(), oldName, newName);
 
 		plugin.getLeaderboard().renameNation(oldName, newName);
-
 	}
 
-	@EventHandler
-	public void deleteNation(DeleteNationEvent e) {
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void deleteNation(PreDeleteNationEvent e) {
 		String nation = e.getNationName();
 
 		if (plugin.getWarManager().inWar(nation)) {
 			War war = plugin.getWarManager().getWar(nation);
 
-			int ally = war.isDeclaringAlly(nation);
-
-			if (ally != -1) {
-				war.removeAlly(nation, ally == 1);
-				WarBoard.removeAllyFromBoard(war, nation, ally == 1);
+			if (war.isAlly(nation)) {
+				war.removeAlly(nation);
+				WarBoard.removeAllyFromBoard(war, nation);
 				plugin.getWarManager().saveCurrentWars();
 			}
-
 			else {
 				// We have to run a task because DeleteNation can be ran async.
-				Bukkit.getScheduler().runTask(plugin, () -> {
-					plugin.getWarManager().winByDeletion(war, nation);
-				});
+				Bukkit.getScheduler().runTask(plugin, () -> plugin.getWarManager().winByDeletion(war, nation));
 			}
 		}
 
@@ -89,13 +67,11 @@ public class NationListener implements Listener {
 					TownyUtil.sendNationMessage(otherNation, "The war against " + nation + " has been cancelled because they were disbanded!");
 
 				preWar.cancelTask();
-
-				plugin.getWarManager().removePreWar(preWar);
+				plugin.getWarManager().cancelDeclaredWar(preWar);
 			}
 		}
 
-		plugin.getLastWarManager().removeAllLastWars(nation);
-
+		plugin.getArchiveManager().removeRecentWars(nation);
 		plugin.getLeaderboard().deleteNationFromLeaderboard(nation);
 	}
 }

@@ -17,14 +17,15 @@ import java.util.Scanner;
 
 public class LeaderboardManager {
 
-    private final String FILE_PATH = "plugins/KingdomWars/leaderboard.json";
-    private List<Leaderboard> leaderboardList;
+    private final File FILE;
+    private List<Leaderboard> leaderboardList = new ArrayList<>();
+
+    public LeaderboardManager(File dataDirectory) {
+        this.FILE = new File(dataDirectory, "leaderboard.json");
+    }
 
     public void loadLeaderboard() {
-        final File FILE = new File(FILE_PATH);
-
         if (!FILE.exists()) {
-            leaderboardList = new ArrayList<>();
             try {
                 FILE.createNewFile();
             } catch (IOException ex) {
@@ -36,20 +37,20 @@ public class LeaderboardManager {
 
                 Gson gson = new Gson();
 
-                Type leaderboardListType = new TypeToken<ArrayList<Leaderboard>>() {
-                }.getType();
+                Type leaderboardListType = new TypeToken<List<Leaderboard>>() {}.getType();
 
-                leaderboardList = gson.fromJson(scanner.nextLine(), leaderboardListType);
+                leaderboardList.addAll(gson.fromJson(scanner.nextLine(), leaderboardListType));
             } catch (Exception ignored) {
             }
         }
 
+        filterLeaderboard();
         sortLeaderboard();
     }
 
     public void saveLeaderboard() {
         try(PrintWriter writer =
-                    new PrintWriter(new File(FILE_PATH))) {
+                    new PrintWriter(FILE)) {
             writer.write(new Gson().toJson(leaderboardList));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -123,14 +124,7 @@ public class LeaderboardManager {
     }
 
     public void filterLeaderboard() {
-        List<Leaderboard> newLeaderBoardList = new ArrayList<>();
-        for (Leaderboard leaderboard : leaderboardList) {
-            Nation n = TownyUtil.getNation(leaderboard.getNation());
-
-            if (n != null) newLeaderBoardList.add(leaderboard);
-        }
-
-        leaderboardList = newLeaderBoardList;
+        leaderboardList.removeIf(lw -> TownyUtil.getNation(lw.getNation()) == null);
         saveLeaderboard();
     }
 

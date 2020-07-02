@@ -15,6 +15,11 @@ public class JSONMessageBuilder {
     private final ComponentBuilder builder;
     private TextComponent lastComp;
 
+    // Persistant Format
+    private net.md_5.bungee.api.ChatColor compColor;
+    private ClickEvent persistantClick;
+    private HoverEvent persistantHover;
+
     private JSONMessageBuilder(String text) {
         lastComp = new TextComponent(text);
         builder = new ComponentBuilder("");
@@ -29,6 +34,7 @@ public class JSONMessageBuilder {
     }
 
     public JSONMessageBuilder then(String text) {
+        applyPersistentFormatting();
         builder.append(lastComp);
 
         lastComp = new TextComponent(text);
@@ -38,6 +44,7 @@ public class JSONMessageBuilder {
     }
 
     public JSONMessageBuilder then(TextComponent comp) {
+        applyPersistentFormatting();
         builder.append(lastComp);
         lastComp = comp;
         return this;
@@ -58,13 +65,43 @@ public class JSONMessageBuilder {
         return this;
     }
 
+    public ClickEvent clickCommand(String command) {
+        if (command != null)
+            return new ClickEvent(ClickEvent.Action.RUN_COMMAND, command);
+        return null;
+    }
+
+    public JSONMessageBuilder click(ClickEvent clickEvent) {
+        lastComp.setClickEvent(clickEvent);
+        return this;
+    }
+
+    public JSONMessageBuilder persistClick(ClickEvent event) {
+        this.persistantClick = event;
+        return this;
+    }
+
     public JSONMessageBuilder tooltip(String tooltip) {
         lastComp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tooltip).create()));
         return this;
     }
 
+    public HoverEvent tooltipHover(JSONMessageBuilder tooltip) {
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip.compile());
+    }
+
     public JSONMessageBuilder tooltip(JSONMessageBuilder tooltip) {
-        lastComp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip.compile()));
+        lastComp.setHoverEvent(tooltipHover(tooltip));
+        return this;
+    }
+
+    public JSONMessageBuilder tooltip(HoverEvent hoverEvent) {
+        lastComp.setHoverEvent(hoverEvent);
+        return this;
+    }
+
+    public JSONMessageBuilder persistTooltip(HoverEvent event) {
+        this.persistantHover = event;
         return this;
     }
 
@@ -96,7 +133,11 @@ public class JSONMessageBuilder {
     }
 
     private BaseComponent[] compile() {
-        if (lastComp != null) builder.append(lastComp);
+        if (lastComp != null) {
+            applyPersistentFormatting();
+            builder.append(lastComp);
+            lastComp = null;
+        }
         return builder.create();
     }
 
@@ -108,11 +149,21 @@ public class JSONMessageBuilder {
         return lastComp;
     }
 
+    private void applyPersistentFormatting() {
+        if (lastComp != null) {
+            if (compColor != null)
+                lastComp.setColor(compColor);
+            if (persistantClick != null && lastComp.getClickEvent() == null)
+                lastComp.setClickEvent(persistantClick);
+            if (persistantHover != null && lastComp.getHoverEvent() == null)
+                lastComp.setHoverEvent(persistantHover);
+        }
+    }
+
     public void send(Player... players) {
         if (players == null) return;
 
         final BaseComponent[] compiled = compile();
-        this.lastComp = null;
 
         for (Player player : players) {
             player.spigot().sendMessage(compiled);
@@ -123,7 +174,6 @@ public class JSONMessageBuilder {
         if (players == null) return;
 
         final BaseComponent[] compiled = compile();
-        this.lastComp = null;
 
         for (Player player : players) {
             player.spigot().sendMessage(compiled);

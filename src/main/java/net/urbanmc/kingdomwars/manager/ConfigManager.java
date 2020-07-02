@@ -107,35 +107,21 @@ public class ConfigManager {
 
     // Time is in seconds
     public static String formatTime(long time) {
-        int days = 0, hours = 0, minutes = 0, seconds;
-
-        while (time >= 86400) {
-            days++;
-            time -= 86400;
-        }
-
-        while (time >= 3600) {
-            hours++;
-            time -= 3600;
-        }
-
-        while (time >= 60) {
-            minutes++;
-            time -= 60;
-        }
-
-        seconds = Long.valueOf(time).intValue();
-
-        if (seconds == 60) {
-            minutes++;
-            seconds = 0;
-        }
-
         StringBuilder output = new StringBuilder();
 
+        int days = (int) TimeUnit.SECONDS.toDays(time);
+        time -= TimeUnit.DAYS.toSeconds(days);
         appendTime(output, days, "day");
+
+        int hours = (int) TimeUnit.SECONDS.toHours(time);
+        time -= TimeUnit.HOURS.toSeconds(hours);
         appendTime(output, hours, "hour");
+
+        int minutes = (int) TimeUnit.SECONDS.toMinutes(time);
+        time -= TimeUnit.MINUTES.toSeconds(minutes);
         appendTime(output, minutes, "minute");
+
+        int seconds = (int) time;
         appendTime(output, seconds, "second");
 
         return output.toString().trim();

@@ -6,10 +6,6 @@ api-version: 1.14
 description: Allows for individual wars between nations
 softdepend: [Essentials, Towny, Vault]
 
-commands:
-  townywar:
-    description: Manage your nation's wars
-    aliases: [twar, twars]
 permissions:
   kingdomwars.*:
     default: op
@@ -20,6 +16,9 @@ permissions:
       kingdomwars.last: true
       kingdomwars.reload: true
       kingdomwars.warblocks: true
+      kingdomwars.archive.refresh: true
+      kingdomwars.archive.remove: true
+
   kingdomwars.nationstaff:
     default: false
     children:
@@ -36,6 +35,10 @@ permissions:
       kingdomwars.status: true
       kingdomwars.wars: true
       kingdomwars.leaderboard: true
+      kingdomwars.archive: true
+      kingdomwars.archive.id: true
+      kingdomwars.archive.nation: true
+
   kingdomwars.start:
     default: false
   kingdomwars.end:
@@ -57,4 +60,14 @@ permissions:
   kingdomwars.reload:
     default: false
   kingdomwars.warblocks:
+    default: false
+  kingdomwars.archive:
+    default: false
+  kingdomwars.archive.nation:
+    default: false
+  kingdomwars.archive.id:
+    default: false
+  kingdomwars.archive.refresh:
+    default: false
+  kingdomwars.archive.remove:
     default: false

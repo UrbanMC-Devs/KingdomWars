@@ -3,7 +3,7 @@ package net.urbanmc.kingdomwars.data;
 public class Leaderboard implements Comparable<Leaderboard> {
 
 	private int wins, losses;
-	private String nation, lastWarInfo;
+	private String nation;
 
 	public Leaderboard(String nation) {
 		this.nation = nation;
@@ -25,14 +25,6 @@ public class Leaderboard implements Comparable<Leaderboard> {
 
 	public void setLosses(int losses) {
 		this.losses = losses;
-	}
-
-	public String getLastWarInfo() {
-		return this.lastWarInfo;
-	}
-
-	public void setLastWarInfo(String lastWarInfo) {
-		this.lastWarInfo = lastWarInfo;
 	}
 
 	public String getNation() {

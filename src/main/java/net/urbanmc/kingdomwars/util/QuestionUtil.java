@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.util;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.urbanmc.kingdomwars.KingdomWars;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -43,10 +44,9 @@ public class QuestionUtil {
     }
 
     private void scheduleRemoval(UUID nationUUID) {
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-        {
-            if (nationQuestionMap.containsKey(nationUUID)) nationQuestionMap.remove(nationUUID);
-        }, 20*30);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
+                () -> nationQuestionMap.remove(nationUUID),
+                20*30);
     }
 
     public boolean hasTruceRequest(UUID nationID) {

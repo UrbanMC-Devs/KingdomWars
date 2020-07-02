@@ -1,63 +1,92 @@
 package net.urbanmc.kingdomwars.data;
 
-public class LastWar {
+import net.urbanmc.kingdomwars.data.war.War;
 
-    private String declaringNation;
-    private String declaredNation;
+import java.util.UUID;
+
+public class LastWar extends WarAbstract {
+
+    private int archiveID = 0;
     private boolean isDeclaringWinner;
-    private boolean truce;
-    private long millisTillNextWar, revengeMillis;
+    private transient UUID declaringUUID, declaredUUID;
+    private long startTime, endTime;
+    private double monetaryReward,
+                   monetaryLoss;
+    private int townBlockReward,
+                townBlockLoss;
 
-    public LastWar(String declaringNation, String declaredNation, boolean isDeclaringWinner, boolean truce,
-                   long millis, long revengeMillis) {
-        this.declaringNation = declaringNation;
-        this.declaredNation = declaredNation;
-        this.isDeclaringWinner = isDeclaringWinner;
-        this.truce = truce;
-        this.millisTillNextWar = millis;
-        this.revengeMillis = revengeMillis;
+    private int declaringPoints, declaredPoints;
+    private WarResult result;
+
+    public LastWar(War war, WarReward warReward, UUID declaringUUID, UUID declaredUUID) {
+        super(war.getDeclaringNation(), war.getDeclaredNation());
+
+        this.declaringUUID = declaringUUID;
+        this.declaredUUID = declaredUUID;
+
+        this.declaringPoints = war.getDeclaringPoints();
+        this.declaredPoints = war.getDeclaredPoints();
+
+        this.startTime = war.getStartTIme();
+        this.endTime = System.currentTimeMillis();
+
+        this.monetaryReward = warReward.getMonetaryReward();
+        this.monetaryLoss = warReward.getMonetaryLoss();
+        this.townBlockReward = warReward.getTownblockWon();
+        this.townBlockLoss = warReward.getTownblocksLoss();
+
+        this.isDeclaringWinner = declaringPoints > declaredPoints;
     }
 
-    public String getDeclaringNation() {
-        return declaringNation;
-    }
+    public  LastWar(int archiveID,
+                   String declaringNation, String declaredNation,
+                   int declaringPoints, int declaredPoints,
+                   long startTime, long endTime,
+                   double moneyWon, double moneyLoss,
+                   int townblocksWon, int townblocksLost,
+                   WarResult result) {
+        super(declaringNation, declaredNation);
+        this.archiveID = archiveID;
 
-    public void setDeclaringNation(String nation) {
-        declaringNation = nation;
-    }
+        this.declaringPoints = declaringPoints;
+        this.declaredPoints = declaredPoints;
 
-    public String getDeclaredNation() {
-        return declaredNation;
-    }
+        this.startTime = startTime;
+        this.endTime = endTime;
 
-    public void setDeclaredNation(String nation) {
-        declaredNation = nation;
+        this.townBlockReward = townblocksWon;
+        this.townBlockLoss = townblocksLost;
+
+        this.monetaryReward = moneyWon;
+        this.monetaryLoss = moneyLoss;
+
+        this.result = result;
     }
 
     private String getLoser() {
         if (isDeclaringWinner)
-            return declaredNation;
+            return getDeclaredNation();
         else
-            return declaringNation;
+            return getDeclaredNation();
     }
 
     public boolean wasTruce() {
-        return truce;
+        return result == WarResult.TRUCE;
     }
 
-    public long getMillisTillNextWar() {
-        return millisTillNextWar;
+    public long getEndTime() {
+        return endTime;
     }
 
-    public long getRevengeMillis() {
-        return revengeMillis;
-    }
-
-    public boolean isDeclaringNation(String nation) {
-        return declaringNation.equals(nation);
+    public long getStartTime() {
+        return startTime;
     }
 
     public boolean isDeclaringWinner() {
+        return isDeclaringWinner;
+    }
+
+    public boolean setDeclaringWinner() {
         return isDeclaringWinner;
     }
 
@@ -65,7 +94,69 @@ public class LastWar {
         return getLoser().equals(nation);
     }
 
-    public void setRevengeMillis(long millis) {
-        this.revengeMillis = millis;
+    public boolean foughtWar(String nation) {
+        return isDeclaringNation(nation) || isDeclaredNation(nation);
+    }
+
+    public boolean foughtWar(String nation1, String nation2) {
+        return foughtWar(nation1) && foughtWar(nation2);
+    }
+
+    public int getDeclaringPoints() {
+        return declaringPoints;
+    }
+
+    public int getDeclaredPoints() {
+        return declaredPoints;
+    }
+
+    public double getMoneyWon() {
+        return monetaryLoss;
+    }
+
+    public double getMoneyLost() {
+        return monetaryReward;
+    }
+
+    public int getTownblocksWon() {
+        return townBlockReward;
+    }
+
+    public int getTownblocksLost() {
+        return townBlockLoss;
+    }
+
+    public void setArchiveID(int id) {
+        this.archiveID = id;
+    }
+
+    public int getArchiveID() {
+        return archiveID;
+    }
+
+    @Override
+    public void removeAlly(String nation) {
+        throw new UnsupportedOperationException("Cannot remove allies from an archived war!");
+    }
+
+    @Override
+    public WarStage getWarStage() {
+        return WarStage.ARCHIVED;
+    }
+
+    public WarResult getResult() {
+        return result;
+    }
+
+    public void setResult(WarResult result) {
+        this.result = result;
+    }
+
+    public UUID getDeclaringUUID() {
+        return declaringUUID;
+    }
+
+    public UUID getDeclaredUUID() {
+        return declaredUUID;
     }
 }

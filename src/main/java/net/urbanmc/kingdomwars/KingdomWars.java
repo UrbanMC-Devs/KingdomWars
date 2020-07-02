@@ -1,15 +1,17 @@
 package net.urbanmc.kingdomwars;
 
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.PaperCommandManager;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
-import net.urbanmc.kingdomwars.command.BaseCommand;
+import net.urbanmc.kingdomwars.command.TWarsCmd;
 import net.urbanmc.kingdomwars.listener.ChangeKingListener;
 import net.urbanmc.kingdomwars.listener.NationListener;
 import net.urbanmc.kingdomwars.listener.WarBlocksListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.manager.ConfigManager;
-import net.urbanmc.kingdomwars.manager.LastWarManager;
 import net.urbanmc.kingdomwars.manager.LeaderboardManager;
+import net.urbanmc.kingdomwars.manager.WarArchiveManager;
 import net.urbanmc.kingdomwars.manager.WarManager;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
 import org.bukkit.Bukkit;
@@ -18,8 +20,11 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class KingdomWars extends JavaPlugin {
+
+	private static Logger pluginLogger;
 
 	private Towny towny;
 	private QuestionUtil questionUtil;
@@ -27,10 +32,11 @@ public class KingdomWars extends JavaPlugin {
 
 	private WarManager warManager;
 	private LeaderboardManager lbManager;
-	private LastWarManager lastWarManager;
+	private WarArchiveManager archiveManager;
 
 	@Override
 	public void onEnable() {
+		pluginLogger = getLogger();
 
 		// Check for Towny
 		if (!getServer().getPluginManager().isPluginEnabled("Towny")) {
@@ -55,8 +61,8 @@ public class KingdomWars extends JavaPlugin {
 		questionUtil = new QuestionUtil(this);
 
 		warManager = new WarManager(this);
-		lbManager = new LeaderboardManager();
-		lastWarManager = new LastWarManager();
+		lbManager = new LeaderboardManager(getDataFolder());
+		archiveManager = new WarArchiveManager(getDataFolder());
 
 		// Load current war data
 		warManager.loadCurrentWars();
@@ -64,16 +70,22 @@ public class KingdomWars extends JavaPlugin {
 		// Load leaderboard
 		lbManager.loadLeaderboard();
 
-		// Load last war
-		lastWarManager.loadLastWars();
+		if (!archiveManager.testAccess()) {
+			getLogger().severe("Error loading last wars!");
+		}
+		else {
+			// Load last war
+			archiveManager.loadRecentWars();
+		}
 
 		// Load config options
 		new ConfigManager();
 
-		lbManager.filterLeaderboard();
-
-		// Register command
-		getCommand("townywar").setExecutor(new BaseCommand(this));
+		// Register Command
+		PaperCommandManager cmdManager = new PaperCommandManager(this);
+		TWarsCmd.registerResolvers(this, cmdManager);
+		BaseCommand cmd = new TWarsCmd();
+		cmdManager.registerCommand(cmd);
 
 		// Register events
 		PluginManager pm = getServer().getPluginManager();
@@ -84,6 +96,11 @@ public class KingdomWars extends JavaPlugin {
 		// Register events that are only in the Silver version of Towny
 		registerChangeLeaderListener();
 		registerWarBlocksListener();
+	}
+
+	@Override
+	public void onDisable() {
+		warManager.saveCurrentWars();
 	}
 
 	private void registerChangeLeaderListener() {
@@ -132,6 +149,13 @@ public class KingdomWars extends JavaPlugin {
 
 	public LeaderboardManager getLeaderboard() { return lbManager; }
 
-	public LastWarManager getLastWarManager() { return lastWarManager; }
+
+	public WarArchiveManager getArchiveManager() {
+		return archiveManager;
+	}
+
+	public static Logger logger() {
+		return pluginLogger;
+	}
 
 }

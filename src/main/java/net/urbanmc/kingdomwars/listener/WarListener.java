@@ -38,21 +38,21 @@ public class WarListener implements Listener {
 		if (attacker == null || defender == null)
 			return;
 
-		Nation nation1 = TownyUtil.getNation(attacker);
-		Nation nation2 = TownyUtil.getNation(defender);
+		Nation attackerNation = TownyUtil.getNation(attacker);
+		Nation defenderNation = TownyUtil.getNation(defender);
 
-		if (nation1 == null || nation2 == null)
+		if (attackerNation == null || defenderNation == null)
 			return;
 
-		if (nation1.getName().equals(nation2.getName()))
+		if (TownyUtil.isSameNation(attackerNation, defenderNation))
 			return;
 
-		War war = plugin.getWarManager().getWar(nation1);
+		War war = plugin.getWarManager().getWar(attackerNation);
 
 		if (war == null)
 			return;
 
-		if (war.onSameSide(nation1.getName(), nation2.getName()) != 0)
+		if (!war.isInWar(defenderNation.getName()) || war.isOnSameSide(attackerNation.getName(), defenderNation.getName()))
 			return;
 
 		if (plugin.getWarManager().checkForceEnd(war))
@@ -65,7 +65,6 @@ public class WarListener implements Listener {
 					return;
 				}
 			} catch (NotRegisteredException __) {
-
 			}
 		}
 
@@ -108,53 +107,43 @@ public class WarListener implements Listener {
 		if (killer == null)
 			return;
 
-		Nation nation1 = TownyUtil.getNation(p);
+		Nation victimNation = TownyUtil.getNation(p);
+		Nation killerNation = TownyUtil.getNation(killer);
 
-		if (nation1 == null || !plugin.getWarManager().inWar(nation1))
+		if (victimNation == null || killerNation == null)
 			return;
 
-		Nation nation2 = TownyUtil.getNation(killer);
-
-		if (nation2 == null || !plugin.getWarManager().inWar(nation2))
+		if (TownyUtil.isSameNation(victimNation, killerNation))
 			return;
 
-		if (nation1.getName().equals(nation2.getName()))
-			return;
+		War war = plugin.getWarManager().getWar(victimNation);
 
-		War war = plugin.getWarManager().getWar(nation1);
-
-		if (plugin.getWarManager().checkForceEnd(war))
+		if (!war.isInWar(killerNation.getName()) || war.isOnSameSide(victimNation.getName(), killerNation.getName()))
 			return;
 
 		if (KingdomWars.playerIsJailed(p))
 			return;
 
-		int nation1DeclaringSide = war.isDeclaringSide(nation1.getName()),
-				nation2DeclaringSide = war.isDeclaringSide(nation2.getName());
+		boolean killerNationDeclaring = war.isOnDeclaringSide(killerNation.getName());
 
-		if (nation1DeclaringSide == -1 || nation2DeclaringSide == -1) return;
+		String nationPointName = killerNationDeclaring ? war.getDeclaringNation() : war.getDeclaredNation();
 
-		if (nation1DeclaringSide == nation2DeclaringSide) return;
-
-		String nationPointName = nation2DeclaringSide  == 1 ? war.getDeclaringNation() : war.getDeclaredNation();
-
-		Nation recievingNation = nationPointName.equalsIgnoreCase(nation2.getName()) ? nation2 : TownyUtil.getNation(nationPointName);
+		Nation recievingNation = TownyUtil.getNation(nationPointName);
 
 		WarPointAddEvent event = new WarPointAddEvent(war, recievingNation, 1);
 		Bukkit.getPluginManager().callEvent(event);
 
 		if (event.isCancelled()) return;
 
-		if (TownyUtil.isNationKing(p) && !war.isAllied(nation1.getName())) {
-			plugin.getWarManager().win(recievingNation, nation1);
-			return;
+		if (TownyUtil.isNationKing(p) && !war.isAlly(victimNation.getName())) {
+			plugin.getWarManager().win(recievingNation, victimNation);
 		}
-
-		war.addPoints(recievingNation, 1);
-
-		WarBoard.updateBoard(war);
-		plugin.getWarManager().checkWin(war);
-		plugin.getWarManager().saveCurrentWars();
+		else {
+			war.addPoints(recievingNation, 1);
+			WarBoard.updateBoard(war);
+			plugin.getWarManager().checkWin(war);
+			plugin.getWarManager().saveCurrentWars();
+		}
 	}
 
 	@EventHandler

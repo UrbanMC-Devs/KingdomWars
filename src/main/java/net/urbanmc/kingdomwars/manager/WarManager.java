@@ -1,44 +1,54 @@
 package net.urbanmc.kingdomwars.manager;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.palmergames.bukkit.towny.TownyMessaging;
-import com.palmergames.bukkit.towny.TownySettings;
-import com.palmergames.bukkit.towny.exceptions.EconomyException;
 import com.palmergames.bukkit.towny.object.Nation;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarBoard;
-import net.urbanmc.kingdomwars.data.GraceNation;
 import net.urbanmc.kingdomwars.data.LastWar;
 import net.urbanmc.kingdomwars.data.PreWar;
+import net.urbanmc.kingdomwars.data.WarAbstract;
+import net.urbanmc.kingdomwars.data.WarResult;
+import net.urbanmc.kingdomwars.data.WarReward;
+import net.urbanmc.kingdomwars.data.WarStage;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.data.war.WarSerializer;
 import net.urbanmc.kingdomwars.event.WarEndEvent;
+import net.urbanmc.kingdomwars.event.WarStartEvent;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class WarManager {
 
-    private List<War> currentWars;
-    private List<PreWar> scheduledWars = new ArrayList<>();
-    private List<GraceNation> graceNations = new ArrayList<>();
+    private List<WarAbstract> allWars = new ArrayList<>();
 
     private KingdomWars plugin;
+    private final Gson gson;
 
     public WarManager(KingdomWars plugin) {
         this.plugin = plugin;
+        gson = new GsonBuilder().create();
     }
 
     public void loadCurrentWars() {
-        final File file = new File("plugins/KingdomWars/wars.json");
+        final File file = new File(plugin.getDataFolder(), "wars.json");
 
         if (!file.getParentFile().isDirectory()) {
             file.getParentFile().mkdir();
@@ -47,7 +57,6 @@ public class WarManager {
         if (!file.exists()) {
             try {
                 file.createNewFile();
-                currentWars = new ArrayList<>();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -55,28 +64,42 @@ public class WarManager {
             return;
         }
 
-        if (currentWars != null) currentWars.clear();
+        if (!allWars.isEmpty())
+            allWars.clear();
 
         try(Scanner scanner = new Scanner(file)) {
             if (scanner.hasNext()) {
                 JsonElement element = new JsonParser().parse(scanner.nextLine());
-                currentWars = WarSerializer.deserializeWars(element);
+                allWars.addAll(WarSerializer.deserializeWars(gson, element));
             }
-            else {
-                currentWars = new ArrayList<>();
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.WARNING, "Error loading wars.json!", ex);
+        }
+
+        restartPreWarTasks();
+    }
+
+    private void restartPreWarTasks() {
+        int normalTaskTime = 5;
+        int allyTaskTime = 10;
+
+        for (WarAbstract allWar : allWars) {
+            if (allWar.getWarStage() == WarStage.DECLARED) {
+                PreWar preWar = (PreWar) allWar;
+                BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(preWar),
+                        preWar.hasAllies() ? allyTaskTime : normalTaskTime);
+                preWar.setTask(task);
             }
-        } catch (Exception print) {
-            print.printStackTrace();
         }
     }
 
     public void saveCurrentWars() {
         try(PrintWriter writer = new PrintWriter(
-                new File("plugins/KingdomWars/wars.json")))
+                new File(plugin.getDataFolder(), "wars.json")))
         {
-            writer.write(WarSerializer.serialize(currentWars).toString());
+            writer.write(WarSerializer.serialize(gson, allWars).toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Error saving wars.json!", e);
         }
     }
 
@@ -85,11 +108,7 @@ public class WarManager {
     }
 
     public boolean inWar(String nation) {
-        for (War war : currentWars) {
-            if (war.isInWar(nation)) return true;
-        }
-
-        return false;
+        return getWar(nation) != null;
     }
 
     public War getWar(Nation nation) {
@@ -97,69 +116,88 @@ public class WarManager {
     }
 
     public War getWar(String nation) {
-        for (War war : currentWars) {
-            if (war.isInWar(nation)) return war;
+        for (WarAbstract war : allWars) {
+            if (war.getWarStage() == WarStage.FIGHTING && war.isInWar(nation))
+                return (War) war;
         }
 
         return null;
     }
 
-    public List<War> getCurrentWars() {
-        return currentWars;
+    public Collection<War> getCurrentWars() {
+        return allWars.stream()
+                .filter(wa -> wa != null && wa.getWarStage() == WarStage.FIGHTING)
+                .map(wa -> (War) wa)
+                .collect(Collectors.toList());
     }
 
-    public void startWar(War war) {
+    public void startWar(PreWar preWar) {
+        War war = preWar.toFullWar();
+
+        allWars.remove(preWar);
+
+        WarStartEvent event = new WarStartEvent(war);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled())
+            return;
+
+        Nation declaringNation = TownyUtil.getNation(war.getDeclaringNation());
+        Nation declaredNation = TownyUtil.getNation(war.getDeclaredNation());
+
+        if (declaringNation == null || declaredNation == null) {
+            Bukkit.getLogger().warning("[KingdomWars] Error starting war between " + war.getDeclaringNation() + " and " +
+                    war.getDeclaredNation() + " because could not fetch one of those nations from their names!");
+            return;
+        }
+
         // Generate the amount of kills needed to win
         int kills = ConfigManager.getWinningKills();
 
-        kills += war.getAllies(true).size() * ConfigManager.getAllyKills();
-        kills += war.getAllies(false).size() * ConfigManager.getAllyKills();
+        kills += war.getAllies().size() * ConfigManager.getAllyKills();
 
         war.setKills(kills);
 
         // Set the war start time
-        war.setStarted();
+        war.setStartTIme(System.currentTimeMillis());
 
-        // Add it to the arraylist
-        currentWars.add(war);
+        // Add it to the arraylist, and remove the pre-war
+        allWars.add(war);
 
         saveCurrentWars();
+
+        TownyUtil.sendNationMessage(declaringNation, "Your nation has started a war against " + declaredNation.getName() + "!");
+        TownyUtil.sendNationMessage(declaredNation, declaringNation.getName() + " has began a war against your nation!");
+
+        for (String ally : war.getAllies()) {
+            Nation tempNat = TownyUtil.getNation(ally);
+
+            if(tempNat != null)
+                TownyUtil.sendNationMessage(tempNat, "The war between " + declaringNation.getName() + " and " + declaredNation.getName() +
+                        " has started! Join the fight!");
+        }
 
         WarBoard.createBoard(war);
 
         Nation declaring = TownyUtil.getNation(war.getDeclaringNation());
 
-        TownyUtil.setNationBalance(declaring,
-                TownyUtil.getNationBalance(declaring) - ConfigManager.getStartAmount(),
-                "War start with " + war.getDeclaredNation());
-    }
-
-    public void updateWar(War war) {
-        War oldWar = getWar(TownyUtil.getNation(war.getDeclaringNation()));
-
-        if (oldWar != null) {
-            currentWars.remove(oldWar);
-        }
-
-        currentWars.add(war);
-        saveCurrentWars();
+        TownyUtil.addMoneyToNation(declaring, -ConfigManager.getStartAmount(),
+                            "War start with " + war.getDeclaredNation());
     }
 
     public synchronized boolean checkForceEnd(War war) {
-        long millis = System.currentTimeMillis() - war.getStarted();
+        long millis = System.currentTimeMillis() - war.getStartTIme();
 
         if (millis >= ConfigManager.getEndTime()) {
             wonByTime(war);
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
 
     public synchronized void checkForceEndAll() {
-        for (War war : currentWars) {
-            if (war == null) continue;
-            checkForceEnd(war);
-        }
+        getCurrentWars().forEach(this::checkForceEnd);
     }
 
     public synchronized void checkWin(War war) {
@@ -184,28 +222,26 @@ public class WarManager {
 
         Nation winNation = TownyUtil.getNation(winningNation);
 
-        if (winNation == null) return;
+        if (winNation != null) {
+            WarReward warReward = new WarReward().setRewardFactor(.5);
+            LastWar lastWar = endWar(winNation, TownyUtil.getNation(nationDeleted), false, warReward,
+                    true, true);
 
-        endWar(winNation, null,
-                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
-                true, true,
-                true, true);
-    }
-
-    // Legacy Compat Method
-    public void win(Nation winner, Nation loser, double amount) {
-        endWar(winner, loser,
-                amount, amount,
-                true, true,
-                true, true);
+            setResultAndSave(lastWar, WarResult.DELETION);
+        }
+        else {
+            KingdomWars.logger().severe("Error ending war. The winning nation " + winningNation + " cannot be found!");
+        }
     }
 
     // Normal win method when nation war wins by killing participants
     public void win(Nation winner, Nation loser) {
-        endWar(winner, loser,
-                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
-                false, true,
+        WarReward warReward = new WarReward();
+
+        LastWar lastWar = endWar(winner, loser, false, warReward,
                 true, true);
+
+        setResultAndSave(lastWar, WarResult.VICTORY);
     }
 
     // Called when the war is over
@@ -217,18 +253,23 @@ public class WarManager {
 
         Nation winner = war.getDeclaringPoints() > war.getDeclaredPoints() ? nation1 : nation2;
 
-        endWar(winner, winner == nation1 ? nation2 : nation1,
-                ConfigManager.getWinAmount(), ConfigManager.getLoseAmount(),
-                true, true,
-                true, true);
+        WarReward warReward = new WarReward().setRewardFactor(.5);
+
+        LastWar lastWar = endWar(winner, war.getOtherNation(winner), false,
+                warReward, true, true);
+        setResultAndSave(lastWar, WarResult.VICTORY);
     }
 
     // Called when a truce is reached
     public void truceWar(Nation declaring, Nation declared) {
-        endWar(declaring, declared,
-                ConfigManager.getTruceAmount(), ConfigManager.getTruceAmount(),
-                false, false,
-                false, true);
+        WarReward warReward = new WarReward()
+                            .setTruce(true)
+                            .rewardTownBlocks(false);
+
+        LastWar lastWar = endWar(declaring, declared, true,
+                warReward, false, true);
+
+        setResultAndSave(lastWar, WarResult.TRUCE);
     }
 
     // Called when an admin force ends the war
@@ -241,237 +282,171 @@ public class WarManager {
         Nation nation1 = TownyUtil.getNation(war.getDeclaringNation());
         Nation nation2 = TownyUtil.getNation(war.getDeclaredNation());
 
-        endWar(nation1, nation2,
-                0, 0,
-                false, false,
+        WarReward warReward = new WarReward().rewardTownBlocks(false).rewardMoney(false);
+
+        LastWar lastWar = endWar(nation1, nation2,
+                false, warReward,
                 false, false);
+
+        setResultAndSave(lastWar, WarResult.END);
     }
 
-    public synchronized void endWar(Nation winner, Nation loser,
-                                    double winAmount, double loseAmount,
-                                    boolean halfReward, boolean rewardTownBlocks,
+    public synchronized LastWar endWar(Nation winner, Nation loser,
+                                    boolean truce,
+                                    WarReward warReward,
                                     boolean adjustLeaderBoard, boolean sendNationMessages) {
+
+        // Winner can never be null. Just not how it works
+        Objects.requireNonNull(winner);
+        Objects.requireNonNull(loser);
+
         War war = getWar(winner);
 
         WarEndEvent event = new WarEndEvent(war);
         Bukkit.getPluginManager().callEvent(event);
 
-        if (event.isCancelled()) return;
+        if (event.isCancelled())
+            return null;
 
-        currentWars.remove(war);
+        allWars.remove(war);
         saveCurrentWars();
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             Nation nation = TownyUtil.getNation(p);
 
-            if (nation == null) continue;
-
-            if ((winner != null && nation.equals(winner)) || (loser != null && nation.equals(loser))) {
+            if (nation != null &&
+                    (nation.equals(winner) || (nation.equals(loser)))) {
                 if (p.getScoreboard().equals(war.getScoreBoard())) {
                     p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 }
             }
         }
 
-        boolean isTruce = winAmount == ConfigManager.getTruceAmount();
-
-        String winnerName = winner != null ? winner.getName() : "an unknown nation";
-        String loserName = loser != null ? loser.getName() : "an unknown nation";
+        String winnerName = winner.getName();
+        String loserName = loser.getName();
 
         if (sendNationMessages) {
-            if (winner != null)
-                TownyUtil.sendNationMessage(winner, isTruce ? "Your nation has truced with " + loserName + "!" :
-                        "Your nation has won the war against " + loserName + "!");
+            TownyUtil.sendNationMessage(winner, truce ? "Your nation has truced with " + loserName + "!" :
+                    "Your nation has won the war against " + loserName + "!");
 
-            if (loser != null)
-                TownyUtil.sendNationMessage(loser, isTruce ? "Your nation has truced with " + winnerName + "!" :
-                        "Your nation has lost the war against " + winnerName + "!");
+            TownyUtil.sendNationMessage(loser, truce ? "Your nation has truced with " + winnerName + "!" :
+                    "Your nation has lost the war against " + winnerName + "!");
         }
 
-        LastWar lastWar =
-                new LastWar(winnerName, loserName, war.isDeclaringNation(winner.getName()),
-                         isTruce,
-                        System.currentTimeMillis() + ConfigManager.getLastTime(),
-                        System.currentTimeMillis() + ConfigManager.getLastTimeRevenge());
 
-        // Add last war
-        try {
-            plugin.getLastWarManager().addLast(lastWar);
-        } catch (Exception ignore) {
-            Bukkit.getLogger().warning("[KingdomWars] Error saving last war for war between " + winner.getName() + " and " + loser.getName());
-        }
+        // Process War Reward
+        warReward.process(winner, loser);
 
-        if (halfReward) {
-            winAmount /= 2;
-            loseAmount /= 2;
-        }
+        // Take money from loser
+        if (warReward.getMonetaryLoss() > 0) {
+            double losingBalance = TownyUtil.getNationBalance(loser);
 
-        if (winAmount > 0)
-            rewardMoney(winner, loser,
-                    !isTruce && winner.getName().equals(war.getDeclaringNation()),
-                    winAmount, loseAmount);
-
-        if (rewardTownBlocks)
-            rewardTownBlocks(winner, loser, halfReward);
-
-        if (adjustLeaderBoard) {
-            if (winner != null)
-                plugin.getLeaderboard().addWinToLeaderBoard(winnerName);
-
-            if (loser != null)
-                plugin.getLeaderboard().addLossToLeaderBoard(loserName);
-
-            plugin.getLeaderboard().sortLeaderboard();
-            plugin.getLeaderboard().saveLeaderboard();
-        }
-    }
-
-    private void rewardMoney(Nation winner, Nation loser, boolean returnStartingCost, double winAmount, double loseAmount) {
-        if (winner != null) {
-            double balance = TownyUtil.getNationBalance(winner) + winAmount;
-
-            if (returnStartingCost) {
-                balance += ConfigManager.getStartAmount();
-            }
-
-            TownyUtil.setNationBalance(winner, balance, "War win against " + (loser != null ? loser.getName() : "unknown!"));
-        }
-
-        if (loser != null) {
-            double balance = TownyUtil.getNationBalance(loser);
-
-            if (balance < loseAmount) {
+            if (losingBalance < warReward.getMonetaryLoss()) {
                 TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
                 TownyUtil.deleteNation(loser);
                 plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
             } else {
-                TownyUtil.setNationBalance(loser, balance - loseAmount, "War loss");
+                TownyUtil.addMoneyToNation(loser,  -warReward.getMonetaryLoss(), "War loss");
             }
         }
+
+        // Give money to winner
+        if (warReward.getMonetaryReward() > 0) {
+            TownyUtil.addMoneyToNation(winner, warReward.getMonetaryReward(),
+                    "War win against " + loser.getName());
+        }
+
+        // Give townblocks to winner
+        if (warReward.getTownblockWon() > 0) {
+            int townBlockWinBonus = warReward.getTownblockWon();
+            TownyUtil.addNationWarBlocks(winner, townBlockWinBonus);
+            TownyUtil.sendNationMessage(winner,"The nation won " + townBlockWinBonus + " townblocks!");
+        }
+
+        if (warReward.getTownblocksLoss() > 0) {
+            int townBlockLoss = warReward.getTownblocksLoss();
+            TownyUtil.addNationWarBlocks(loser, -townBlockLoss);
+            TownyUtil.sendNationMessage(loser, "The nation has lost " + townBlockLoss + " townblocks!");
+        }
+
+
+        UUID declaringUUID = war.isDeclaringNation(winnerName) ? winner.getUuid() : loser.getUuid();
+        UUID declaredUUID = war.isDeclaredNation(winnerName) ? winner.getUuid() : loser.getUuid();
+
+        LastWar lastWar = new LastWar(war, warReward, declaringUUID, declaredUUID);
+        lastWar.setResult(WarResult.VICTORY);
+
+        if (adjustLeaderBoard) {
+            plugin.getLeaderboard().addWinToLeaderBoard(winnerName);
+
+            plugin.getLeaderboard().addLossToLeaderBoard(loserName);
+
+            plugin.getLeaderboard().sortLeaderboard();
+            plugin.getLeaderboard().saveLeaderboard();
+        }
+
+        return lastWar;
     }
 
-    private void rewardTownBlocks(Nation winner, Nation loser, boolean halfReward) {
-        // Townblock Bonus
-        // Behavioural Restraints:
-        // If a losing nation has less than the town block minimum, then don't give the winner town blocks
-        // If a losing nation can't give all the town blocks, make the winning townblocks proportional to the ones lost
-        // Winning townblock cap, give townblocks up to the cap.
-        // Half-war rewards
-
-        int negTownBlockMin = ConfigManager.getNegTownBlockMin();
-        int townBlockLoss = ConfigManager.getTownBlockLoss();
-        int townBlockWinBonus = ConfigManager.getTownBlockBonus();
-
-        if (halfReward) {
-            negTownBlockMin /= 2;
-            townBlockLoss /= 2;
-            townBlockWinBonus /= 2;
-        }
-
-        // transferTownBlock boolean checks whether we should award/take townblocks from the winning/losing nations.
-        // Check if the losing nation bonus is greater than than the minimum
-        boolean transferTownBlocks = TownyUtil.getNationWarBlocks(loser) > negTownBlockMin;
-
-        // BonusDifference is positive if losing nation cannot afford to lose any more townblocks
-        int bonusDifference = townBlockLoss - TownySettings.getNationBonusBlocks(loser);
-
-        // If the bound difference is 0 that means the nation has 0 nation bonus and we don't want to transfer townblocks.
-        transferTownBlocks &= bonusDifference != townBlockWinBonus;
-
-        // If the bonus difference is positive then that means they can't afford to give all the town blocks.
-        if (bonusDifference > 0) {
-            // Reduce the win bonus proportionally to the ratio between the win bonus and the take amount.
-            // 30 : 10 * x : 3
-            // (townBlockWinBonus * bonusDifference) / townBlockLoss
-            townBlockWinBonus = (townBlockWinBonus * bonusDifference) / townBlockLoss;
-            townBlockLoss = bonusDifference;
-        }
-
-        if (transferTownBlocks) {
-            if (winner != null) {
-                int maxTownBlocks = ConfigManager.getMaxTownBlocksWin();
-                int currentWinnerWarBlocks = TownyUtil.getNationWarBlocks(winner);
-
-                if ((maxTownBlocks  - currentWinnerWarBlocks) < townBlockWinBonus) {
-                    int townBlockDifference = maxTownBlocks - currentWinnerWarBlocks;
-
-                    townBlockWinBonus = Math.max(townBlockDifference, 0);
-                }
-
-                if (townBlockWinBonus > 0) {
-                    TownyUtil.addNationWarBlocks(winner, townBlockWinBonus);
-                    TownyMessaging.sendNationMessage(winner,"The nation won " + townBlockWinBonus + " townblocks!");
-                }
+    private void setResultAndSave(LastWar war, WarResult result) {
+        if (war != null) {
+            war.setResult(result);
+            // Add last war
+            try {
+                plugin.getArchiveManager().insertLastWar(war);
+            } catch (Exception ex) {
+                KingdomWars.logger().warning("Error saving last war for war between " + war.getDeclaringNation() + " and " + war.getDeclaredNation());
+                ex.printStackTrace();
             }
-
-            TownyUtil.addNationWarBlocks(loser, -townBlockLoss);
-            TownyMessaging.sendNationMessage(loser, "The nation has lost " + townBlockLoss + " townblocks!");
         }
     }
 
     public void renameWarNation(String oldName, String newName) {
-        War war = getWar(oldName);
+        boolean renamedNation = false;
 
-        boolean declaring = war.isDeclaringNation(oldName);
+        for (WarAbstract war : allWars) {
+            if (war.isInWar(oldName)) {
+                renamedNation = true;
+                war.renameNation(oldName, newName);
 
-        if (declaring) {
-            war.setDeclaringNation(newName);
-        } else {
-            war.setDeclaredNation(newName);
+                if (war.getWarStage() == WarStage.FIGHTING) {
+                    WarBoard.updateNationNames((War) war, oldName, war.isDeclaringNation(newName));
+                }
+            }
         }
 
-        WarBoard.updateNationNames(war, oldName, declaring);
-
-        saveCurrentWars();
+        if (renamedNation)
+            saveCurrentWars();
     }
 
-    public boolean alreadyScheduledForWar( String nation) {
-        for (PreWar preWar : scheduledWars) {
-            if (preWar.alreadyDeclared(nation)) return true;
-        }
-
-        return false;
+    public boolean alreadyScheduledForWar(String nation) {
+        return getPreWar(nation) != null;
     }
 
-    public PreWar getPreWar( String nation) {
-        for (PreWar preWar : scheduledWars) {
-            if (preWar.alreadyDeclared(nation)) return preWar;
+    public PreWar getPreWar(String nation) {
+        for (WarAbstract preWar : allWars) {
+            if (preWar.getWarStage() == WarStage.DECLARED
+                    && preWar.isInWar(nation))
+                return (PreWar) preWar;
         }
 
         return null;
     }
 
-    public void addPreWar(PreWar preWar) {
-        scheduledWars.add(preWar);
+    public void declareWar(PreWar preWar) {
+        allWars.add(preWar);
     }
 
-    public void removePreWar(PreWar preWar) {
-        scheduledWars.remove(preWar);
+    public void cancelDeclaredWar(PreWar preWar) {
+        allWars.remove(preWar);
     }
 
-    public void createNation(String nationName) {
-        if (isGraceNation(nationName)) return;
+    public boolean isGraceNation(Nation nation) {
+        long creationTime = TownyUtil.getNationCreationTime(nation);
 
-        GraceNation graceNation = new GraceNation(nationName);
+        long dif = System.currentTimeMillis() - creationTime;
+        long graceTimeMillis = TimeUnit.MINUTES.toMillis(ConfigManager.getGracePeriod());
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () ->
-                graceNations.remove(graceNation), 20 * 60 * ConfigManager.getGracePeriod());
+        return graceTimeMillis > dif;
     }
-
-    public boolean isGraceNation(String nationName) {
-        for (GraceNation grace : graceNations) {
-            if (grace.getNationName().equalsIgnoreCase(nationName)) return true;
-        }
-
-        return false;
-    }
-
-    public void renameGraceNation(String oldName, String newName) {
-        for (GraceNation grace : graceNations) {
-            if (grace.getNationName().equalsIgnoreCase(oldName))
-                grace.setNationName(newName);
-        }
-    }
-
-
 }

@@ -13,6 +13,7 @@ import com.palmergames.bukkit.towny.object.Nation;
 
 import net.urbanmc.kingdomwars.data.war.War;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class WarBoard {
@@ -48,12 +49,12 @@ public class WarBoard {
 			obj.getScore(translateColor("&b\u25EF Allies:")).setScore(counter);
 			counter--;
 
-			for (String nation1Ally : war.getAllies(true)) {
+			for (String nation1Ally : war.getDeclaringAllies()) {
 				obj.getScore(translateColor("&6 - " + nation1Ally)).setScore(counter);
 				counter--;
 			}
 
-			for (String nation2Ally : war.getAllies(false)) {
+			for (String nation2Ally : war.getDeclaredAllies()) {
 				obj.getScore(translateColor("&3 - " + nation2Ally)).setScore(counter);
 				counter--;
 			}
@@ -112,10 +113,10 @@ public class WarBoard {
 		displayScoreboard(war, warboard);
 	}
 
-	public static void removeAllyFromBoard(War war, String allyNation, boolean declaringAlly) {
+	public static void removeAllyFromBoard(War war, String allyNation) {
 		Scoreboard warboard = war.getScoreBoard();
 
-		char c = declaringAlly ? '6' : 3;
+		char c = war.isDeclaringAlly(allyNation) ? '6' : 3;
 
 		warboard.resetScores(translateColor("&" + c + " - "  + allyNation));
 
@@ -148,7 +149,7 @@ public class WarBoard {
 	}
 
 	private static void displayScoreboard(War war, Scoreboard board) {
-		Set<String> nationNames = war.getAllNationNames();
+		Collection<String> nationNames = war.getAllParticipatingNations();
 
 		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 			Nation nation = TownyUtil.getNation(p);
