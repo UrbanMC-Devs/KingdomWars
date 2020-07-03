@@ -1,132 +1,86 @@
 package net.urbanmc.kingdomwars.manager;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.palmergames.bukkit.towny.object.Nation;
+import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.Leaderboard;
 import net.urbanmc.kingdomwars.util.TownyUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Type;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class LeaderboardManager {
 
-    private final File FILE;
-    private List<Leaderboard> leaderboardList = new ArrayList<>();
+    private SQLManager sqlManager;
 
-    public LeaderboardManager(File dataDirectory) {
-        this.FILE = new File(dataDirectory, "leaderboard.json");
+    private final String CACHE_KEY = "leaderboard";
+
+    public LeaderboardManager(SQLManager manager) {
+       this.sqlManager = manager;
+       createTable();
     }
 
-    public void loadLeaderboard() {
-        if (!FILE.exists()) {
-            try {
-                FILE.createNewFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-        else {
-            try (Scanner scanner = new Scanner(FILE)) {
-
-                Gson gson = new Gson();
-
-                Type leaderboardListType = new TypeToken<List<Leaderboard>>() {}.getType();
-
-                leaderboardList.addAll(gson.fromJson(scanner.nextLine(), leaderboardListType));
-            } catch (Exception ignored) {
-            }
-        }
-
-        filterLeaderboard();
-        sortLeaderboard();
-    }
-
-    public void saveLeaderboard() {
-        try(PrintWriter writer =
-                    new PrintWriter(FILE)) {
-            writer.write(new Gson().toJson(leaderboardList));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void sortLeaderboard() {
-        if (!leaderboardList.isEmpty())
-            Collections.sort(leaderboardList);
+    private void createTable() {
+        sqlManager.executeUpdate(false, "create-leaderboard-table",
+                "Error creating leaderboard table!");
     }
 
     public void deleteNationFromLeaderboard(String nation) {
-        int index = -1;
+        UUID nationUUID = TownyUtil.getNationUUID(nation);
 
-        for(int i = 0; i < leaderboardList.size(); i++) {
-            final Leaderboard lb = leaderboardList.get(i);
-
-            if (lb.getNation().equals(nation)) {
-                index = i;
-                break;
-            }
+        if (nationUUID == null) {
+            KingdomWars.logger().severe("Cannot delete nation " + nation + " from leaderboard because nation not found!");
+            return;
         }
 
-        if (index != -1) {
-            leaderboardList.remove(index);
-            sortLeaderboard();
-            saveLeaderboard();
-        }
+        sqlManager.executeUpdate(true, "delete-nation-leaderboard",
+                "Error deleting nation " + nation + " from leaderboard!",
+                nationUUID.toString());
     }
 
-    public void addWinToLeaderBoard(String nation) {
-        Leaderboard lb = getLeaderboardForNation(nation);
-
-        if (lb == null) {
-            lb = new Leaderboard(nation);
-            leaderboardList.add(lb);
-        }
-
-        lb.setWins(lb.getWins() + 1);
+    public void addWinToLeaderBoard(UUID nationUUID) {
+        sqlManager.executeUpdate(true, "add-leaderboard-win",
+                "Error adding leaderboard win for nation " + nationUUID,
+                nationUUID.toString());
+        sqlManager.invalidateCache(CACHE_KEY);
     }
 
-    public void addLossToLeaderBoard(String nation) {
-        Leaderboard lb = getLeaderboardForNation(nation);
-
-        if (lb == null) {
-            lb = new Leaderboard(nation);
-            leaderboardList.add(lb);
-        }
-
-        lb.setLosses(lb.getLosses() + 1);
+    public void addLossToLeaderBoard(UUID nationUUID) {
+        sqlManager.executeUpdate(true, "add-leaderboard-loss",
+                "Error adding leaderboard loss for nation " + nationUUID,
+                nationUUID.toString());
+        sqlManager.invalidateCache(CACHE_KEY);
     }
 
-    private Leaderboard getLeaderboardForNation(String nation) {
-        for (Leaderboard lb : leaderboardList) {
-            if (lb.getNation().equals(nation))
-                return lb;
-        }
+    public CompletableFuture<List<Leaderboard>> getLeaderboard() {
+        CompletableFuture<List<Leaderboard>> future = new CompletableFuture<>();
 
-        return null;
+        sqlManager.useFromCacheOrFetch(true, CACHE_KEY,
+                o -> future.complete((List<Leaderboard>) o),
+                con -> {
+                    final List<Leaderboard> leaderBoardList = new ArrayList<>();
+                    sqlManager.executePreparedQuery(con, "select-leaderboard", null,
+                            rs -> {
+                                while (rs.next()) {
+                                    leaderBoardList.add(buildLeaderboard(rs));
+                                }
+                            });
+                    return leaderBoardList.isEmpty() ? Collections.emptyList() : leaderBoardList;
+                });
+
+        return future;
     }
 
-    public List<Leaderboard> getLeaderboard() { return leaderboardList; }
-
-    public void renameNation(String oldName, String newName) {
-        Leaderboard leaderboard = getLeaderboardForNation(oldName);
-
-        if (leaderboard != null) {
-            leaderboard.setNation(newName);
-            saveLeaderboard();
-        }
+    private Leaderboard buildLeaderboard(ResultSet rs) throws SQLException {
+        return new Leaderboard(rs.getString("NAME"),
+                rs.getInt("WINS"), rs.getInt("LOSSES"));
     }
 
-    public void filterLeaderboard() {
-        leaderboardList.removeIf(lw -> TownyUtil.getNation(lw.getNation()) == null);
-        saveLeaderboard();
+    public void invalidateLeaderboardCache() {
+        sqlManager.invalidateCache(CACHE_KEY);
     }
-
 
 }

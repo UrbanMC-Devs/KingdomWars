@@ -18,6 +18,10 @@ public class LastWar extends WarAbstract {
     private int declaringPoints, declaredPoints;
     private WarResult result;
 
+    public LastWar() {
+        super("", "");
+    }
+
     public LastWar(War war, WarReward warReward, UUID declaringUUID, UUID declaredUUID) {
         super(war.getDeclaringNation(), war.getDeclaredNation());
 

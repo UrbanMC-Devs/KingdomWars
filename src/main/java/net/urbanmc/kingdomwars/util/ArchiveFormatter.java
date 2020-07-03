@@ -2,6 +2,7 @@ package net.urbanmc.kingdomwars.util;
 
 import net.md_5.bungee.api.ChatColor;
 import net.urbanmc.kingdomwars.data.LastWar;
+import net.urbanmc.kingdomwars.data.Leaderboard;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -14,7 +15,9 @@ public class ArchiveFormatter {
 
         // Click to view war
         msgBuilder.persistClick(msgBuilder.clickCommand("/twars archive id " + lastWar.getArchiveID()));
-        msgBuilder.persistTooltip(msgBuilder.tooltipHover(JSONMessageBuilder.create("Click to view this war!").color(ChatColor.GOLD)));
+        msgBuilder.persistTooltip(
+                JSONMessageBuilder.tooltipHover(JSONMessageBuilder.create("Click to view this war!").color(ChatColor.GOLD))
+        );
 
         msgBuilder.then(lastWar.getDeclaringNation()).color(getColorForNation(lastWar, true));
         msgBuilder.then(" vs ").color(ChatColor.GOLD);
@@ -22,6 +25,8 @@ public class ArchiveFormatter {
         String dateRange = " (" + getDateFromMillis(lastWar.getStartTime()) + " - "
                 + getDateFromMillis(lastWar.getEndTime()) + ")";
         msgBuilder.then(dateRange).color(ChatColor.AQUA);
+        // Flush and clear
+        flushAndClear(msgBuilder);
     }
 
     private static String getDateFromMillis(long millis) {
@@ -125,6 +130,26 @@ public class ArchiveFormatter {
         for (String allyName : allyNames) {
             builder.then("- " + allyName).color(color).then("\n");
         }
+    }
+
+    public static void buildLeaderBoard(JSONMessageBuilder builder, Leaderboard lb) {
+        builder.persistTooltip(
+                JSONMessageBuilder.tooltipHover(
+                        JSONMessageBuilder.create("Click to see the wars for " + lb.getNation()).color(ChatColor.GOLD)
+                )
+        );
+        builder.persistClick(builder.clickCommand("/twars archive nation " + lb.getNation()));
+        builder.then(lb.getNation()).color(ChatColor.GREEN).then(" ");
+        builder.then(String.valueOf(lb.getWins())).color(ChatColor.AQUA).then(" ");
+        builder.then(String.valueOf(lb.getLosses())).color(ChatColor.RED);
+        flushAndClear(builder);
+    }
+
+    private static void flushAndClear(JSONMessageBuilder builder) {
+        // Flush components
+        builder.flush();
+        builder.persistClick(null);
+        builder.persistTooltip(null);
     }
 
 

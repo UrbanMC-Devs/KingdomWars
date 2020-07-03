@@ -70,6 +70,10 @@ public class TownyUtil {
 		return null;
 	}
 
+	public static UUID getNationUUID(Nation nation) {
+    	return nation.getUuid();
+	}
+
 	public static double getNationBalance(Nation nation) {
 		try {
 			return nation.getAccount().getHoldingBalance();

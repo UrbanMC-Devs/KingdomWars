@@ -344,7 +344,6 @@ public class WarManager {
             if (losingBalance < warReward.getMonetaryLoss()) {
                 TownyUtil.sendNationMessage(loser, "Your nation could not pay the war loss fee and has fallen!");
                 TownyUtil.deleteNation(loser);
-                plugin.getLeaderboard().deleteNationFromLeaderboard(loser.getName());
             } else {
                 TownyUtil.addMoneyToNation(loser,  -warReward.getMonetaryLoss(), "War loss");
             }
@@ -370,19 +369,15 @@ public class WarManager {
         }
 
 
-        UUID declaringUUID = war.isDeclaringNation(winnerName) ? winner.getUuid() : loser.getUuid();
-        UUID declaredUUID = war.isDeclaredNation(winnerName) ? winner.getUuid() : loser.getUuid();
+        UUID declaringUUID = TownyUtil.getNationUUID(war.isDeclaringNation(winnerName) ? winner : loser);
+        UUID declaredUUID = TownyUtil.getNationUUID(war.isDeclaredNation(winnerName) ? winner : loser);
 
         LastWar lastWar = new LastWar(war, warReward, declaringUUID, declaredUUID);
         lastWar.setResult(WarResult.VICTORY);
 
         if (adjustLeaderBoard) {
-            plugin.getLeaderboard().addWinToLeaderBoard(winnerName);
-
-            plugin.getLeaderboard().addLossToLeaderBoard(loserName);
-
-            plugin.getLeaderboard().sortLeaderboard();
-            plugin.getLeaderboard().saveLeaderboard();
+            plugin.getLeaderboard().addWinToLeaderBoard(TownyUtil.getNationUUID(winner));
+            plugin.getLeaderboard().addLossToLeaderBoard(TownyUtil.getNationUUID(loser));
         }
 
         return lastWar;

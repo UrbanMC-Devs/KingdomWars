@@ -11,6 +11,12 @@ public class Leaderboard implements Comparable<Leaderboard> {
 		this.losses = 0;
 	}
 
+	public Leaderboard(String nation, int wins, int losses) {
+		this.nation = nation;
+		this.wins = wins;
+		this.losses = losses;
+	}
+
 	public int getWins() {
 		return this.wins;
 	}

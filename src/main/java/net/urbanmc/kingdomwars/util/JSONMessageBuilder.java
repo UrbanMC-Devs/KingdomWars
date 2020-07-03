@@ -33,10 +33,17 @@ public class JSONMessageBuilder {
         return new JSONMessageBuilder(text);
     }
 
-    public JSONMessageBuilder then(String text) {
-        applyPersistentFormatting();
-        builder.append(lastComp);
+    public JSONMessageBuilder flush() {
+        if (lastComp != null) {
+            applyPersistentFormatting();
+            builder.append(lastComp);
+            lastComp = null;
+        }
+        return this;
+    }
 
+    public JSONMessageBuilder then(String text) {
+        flush();
         lastComp = new TextComponent(text);
         lastComp.setHoverEvent(null);
         lastComp.setClickEvent(null);
@@ -44,8 +51,7 @@ public class JSONMessageBuilder {
     }
 
     public JSONMessageBuilder then(TextComponent comp) {
-        applyPersistentFormatting();
-        builder.append(lastComp);
+        flush();
         lastComp = comp;
         return this;
     }
@@ -82,12 +88,16 @@ public class JSONMessageBuilder {
     }
 
     public JSONMessageBuilder tooltip(String tooltip) {
-        lastComp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tooltip).create()));
+        lastComp.setHoverEvent(tooltipHover(tooltip));
         return this;
     }
 
-    public HoverEvent tooltipHover(JSONMessageBuilder tooltip) {
+    public static HoverEvent tooltipHover(JSONMessageBuilder tooltip) {
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip.compile());
+    }
+
+    public static HoverEvent tooltipHover(String tooltip) {
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(tooltip).create());
     }
 
     public JSONMessageBuilder tooltip(JSONMessageBuilder tooltip) {
@@ -133,11 +143,7 @@ public class JSONMessageBuilder {
     }
 
     private BaseComponent[] compile() {
-        if (lastComp != null) {
-            applyPersistentFormatting();
-            builder.append(lastComp);
-            lastComp = null;
-        }
+        flush();
         return builder.create();
     }
 

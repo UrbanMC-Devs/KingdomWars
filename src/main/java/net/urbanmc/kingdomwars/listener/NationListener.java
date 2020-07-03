@@ -32,11 +32,7 @@ public class NationListener implements Listener {
 	public void renameNation(RenameNationEvent e) {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
 
-		plugin.getWarManager().renameWarNation(oldName, newName);
-
-		plugin.getArchiveManager().updateNation(e.getNation().getUuid(), oldName, newName);
-
-		plugin.getLeaderboard().renameNation(oldName, newName);
+		plugin.updateNationName(e.getNation().getUuid(), oldName, newName);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

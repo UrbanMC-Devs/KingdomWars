@@ -27,7 +27,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.data.LastWar;
-import net.urbanmc.kingdomwars.data.Leaderboard;
 import net.urbanmc.kingdomwars.data.PreWar;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
@@ -433,27 +432,30 @@ public class TWarsCmd extends BaseCommand {
     @Subcommand("leaderboard")
     @CommandPermission("kingdomwars.leaderboard")
     @Description("Check out which nation has the most wins and losses!")
-    public void leaderboard(CommandSender sender) {
-        List<Leaderboard> leaderboardList = plugin.getLeaderboard().getLeaderboard();
+    public void leaderboard(Player player) {
+        player.sendMessage(ChatColor.GREEN + "Fetching leaderboard...");
+        plugin.getLeaderboard().getLeaderboard()
+                .thenAccept(lbList -> {
+                   if (lbList.isEmpty()) {
+                       player.sendMessage(
+                               ChatColor.GREEN + "=== Kingdom Wars Leaderboard ===\n" + ChatColor.GRAY + "No current data!"
+                       );
+                   }
+                   else {
+                       JSONMessageBuilder msgBuilder = JSONMessageBuilder.create();
+                       for (int i = 0; i < lbList.size(); i++) {
+                           msgBuilder.then(i + 1 + ". ").color(net.md_5.bungee.api.ChatColor.YELLOW);
+                           ArchiveFormatter.buildLeaderBoard(msgBuilder, lbList.get(i));
 
-        String message;
+                           if (i + 1 < lbList.size())
+                               msgBuilder.then("\n");
+                       }
 
-        if (leaderboardList.isEmpty()) {
-            message = ChatColor.GREEN + "=== Kingdom Wars Leaderboard ===\n" + ChatColor.GRAY + "No current data!";
-        } else {
-            message = ChatColor.GREEN + "=== Kingdom Wars Leaderboard ===\n" + ChatColor.GREEN + "Nation "
-                    + ChatColor.AQUA + "Wins " + ChatColor.RED + "Losses\n";
-
-            for (int i = 0; i < leaderboardList.size(); i++) {
-                Leaderboard lb = leaderboardList.get(i);
-
-                message += "" + ChatColor.YELLOW + (i + 1) + ChatColor.YELLOW + ". " + ChatColor.GREEN
-                        + lb.getNation() + " " + ChatColor.AQUA + lb.getWins() + " " + ChatColor.RED + lb.getLosses()
-                        + "\n";
-            }
-        }
-
-        sender.sendMessage(message);
+                       player.sendMessage(ChatColor.GREEN + "=== Kingdom Wars Leaderboard ===\n"
+                               + ChatColor.GREEN + "Nation " + ChatColor.AQUA + "Wins " + ChatColor.RED + "Losses");
+                       msgBuilder.send(player);
+                   }
+                });
     }
 
     @Subcommand("reload")
@@ -462,7 +464,6 @@ public class TWarsCmd extends BaseCommand {
     public void reload(CommandSender sender) {
         new ConfigManager();
         plugin.getWarManager().loadCurrentWars();
-        plugin.getLeaderboard().loadLeaderboard();
         plugin.getArchiveManager().loadRecentWars();
         sender.sendMessage(ChatColor.GREEN + "KingdomWars has been reloaded!");
     }
@@ -472,7 +473,6 @@ public class TWarsCmd extends BaseCommand {
     @Description("Save the plugin and its data!")
     public void save(CommandSender sender) {
         plugin.getWarManager().saveCurrentWars();
-        plugin.getLeaderboard().saveLeaderboard();
         sender.sendMessage(ChatColor.GREEN + "KingdomWars has been saved!");
     }
 
@@ -701,7 +701,7 @@ public class TWarsCmd extends BaseCommand {
         @Subcommand("refresh")
         @CommandPermission("kingdomwars.archive.refresh")
         public void refreshCache(CommandSender sender, Nation targetNation) {
-            plugin.getArchiveManager().removeCache(targetNation.getUuid());
+            plugin.getArchiveManager().removeNationCache(targetNation.getUuid());
             sender.sendMessage(ChatColor.GREEN + "Refreshed archive cache for nation " + targetNation.getName());
         }
 

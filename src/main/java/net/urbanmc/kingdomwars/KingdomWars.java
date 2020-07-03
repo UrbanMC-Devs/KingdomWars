@@ -11,6 +11,7 @@ import net.urbanmc.kingdomwars.listener.WarBlocksListener;
 import net.urbanmc.kingdomwars.listener.WarListener;
 import net.urbanmc.kingdomwars.manager.ConfigManager;
 import net.urbanmc.kingdomwars.manager.LeaderboardManager;
+import net.urbanmc.kingdomwars.manager.SQLManager;
 import net.urbanmc.kingdomwars.manager.WarArchiveManager;
 import net.urbanmc.kingdomwars.manager.WarManager;
 import net.urbanmc.kingdomwars.util.QuestionUtil;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,8 @@ public class KingdomWars extends JavaPlugin {
 	private WarManager warManager;
 	private LeaderboardManager lbManager;
 	private WarArchiveManager archiveManager;
+
+	private SQLManager sqlManager;
 
 	@Override
 	public void onEnable() {
@@ -61,22 +65,14 @@ public class KingdomWars extends JavaPlugin {
 		questionUtil = new QuestionUtil(this);
 
 		warManager = new WarManager(this);
-		lbManager = new LeaderboardManager(getDataFolder());
-		archiveManager = new WarArchiveManager(getDataFolder());
+		sqlManager = new SQLManager(getDataFolder());
 
-		// Load current war data
-		warManager.loadCurrentWars();
-
-		// Load leaderboard
-		lbManager.loadLeaderboard();
-
-		if (!archiveManager.testAccess()) {
-			getLogger().severe("Error loading last wars!");
+		if (!sqlManager.testConnection()) {
+			getLogger().severe("Error connecting to flatfile database!");
 		}
-		else {
-			// Load last war
-			archiveManager.loadRecentWars();
-		}
+
+		archiveManager = new WarArchiveManager(sqlManager);
+		lbManager = new LeaderboardManager(sqlManager);
 
 		// Load config options
 		new ConfigManager();
@@ -101,6 +97,7 @@ public class KingdomWars extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		warManager.saveCurrentWars();
+		sqlManager.shutdown();
 	}
 
 	private void registerChangeLeaderListener() {
@@ -156,6 +153,14 @@ public class KingdomWars extends JavaPlugin {
 
 	public static Logger logger() {
 		return pluginLogger;
+	}
+
+	public void updateNationName(UUID nationUUID, String oldName, String newName) {
+		sqlManager.executeUpdate(true, "update-nation-name",
+				"Error updating nation for " + newName,
+				newName, nationUUID.toString());
+		warManager.renameWarNation(oldName, newName);
+		lbManager.invalidateLeaderboardCache();
 	}
 
 }
