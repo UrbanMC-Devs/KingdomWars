@@ -15,6 +15,7 @@ public class ConfigManager {
     private static double startAmount, winAmount, loseAmount, truceAmount;
     private static int winningKills, allyKills,
                        townBlockBonus, townBlockLoss, townBlockMin, townBlockMax,
+                       startDelay, allyStartDelay,
                        gracePeriod;
     private static long lastTime, lastTimeRevenge, endTime;
 
@@ -42,6 +43,9 @@ public class ConfigManager {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
         gracePeriod = data.getInt("grace-period", 10);
+
+        startDelay = data.getInt("preparation-time", 5);
+        allyStartDelay = data.getInt("ally-prep-time", 10);
 
         startAmount = data.getDouble("start-amount", 25000);
         winAmount = data.getDouble("win-amount", 100000);
@@ -80,6 +84,14 @@ public class ConfigManager {
     }
 
     public static int getAllyKills() { return allyKills; }
+
+    public static int getStartDelay() {
+        return startDelay;
+    }
+
+    public static int getAllyStartDelay() {
+        return allyStartDelay;
+    }
 
     public static long getLastTime() {
         return lastTime;

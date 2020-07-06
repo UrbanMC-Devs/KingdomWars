@@ -248,7 +248,7 @@ public class TWarsCmd extends BaseCommand {
     }
 
     private void declareWar(Nation nation1, Nation nation2) {
-        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), 1); //5 minutes is default time. Can be modified through event.
+        WarDeclareEvent declareEvent = new WarDeclareEvent(nation1.getName(), nation2.getName(), ConfigManager.getStartDelay());
         Bukkit.getPluginManager().callEvent(declareEvent);
 
         if (declareEvent.isCancelled())
@@ -490,7 +490,7 @@ public class TWarsCmd extends BaseCommand {
             return;
         }
 
-        WarRequestAlliesEvent event = new WarRequestAlliesEvent(preWar, 10);
+        WarRequestAlliesEvent event = new WarRequestAlliesEvent(preWar, ConfigManager.getAllyStartDelay());
 
         Bukkit.getPluginManager().callEvent(event);
 

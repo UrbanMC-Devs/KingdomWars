@@ -16,6 +16,12 @@ truce-amount: 50000
 # How many kills a nation must receive to win the war
 winning-kills: 25
 
+# Time between declaring a war and the war starting (in mins)
+preparation-time: 5
+
+# When a nation calls allies, the time between the call and when the war starts (in mins)
+ally-prep-time: 10
+
 # Grace Period. How much time does a new nation have before they can get warred? (in mins)
 grace-period: 10
 
