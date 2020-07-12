@@ -48,7 +48,21 @@ public class SQLManager {
 
     public SQLManager(File pluginDir) {
         this.file = new File(pluginDir, "wars.db");
+        createFile();
         loadBundle();
+    }
+
+    private void createFile() {
+        if (!file.exists()) {
+            if (!file.getParentFile().exists())
+                file.getParentFile().mkdir();
+
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                KingdomWars.logger().log(Level.SEVERE, "Error creating wars.db!", e);
+            }
+        }
     }
 
     public void shutdown() {
