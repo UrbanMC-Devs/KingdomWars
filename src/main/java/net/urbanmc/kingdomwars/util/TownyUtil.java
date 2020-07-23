@@ -160,51 +160,12 @@ public class TownyUtil {
 		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender);
 	}
 
-	private static void addIntegerMeta(Nation nation, String key, int amount) {
-		boolean hasMeta = false;
-		IntegerDataField removeMeta = null;
-
-		if (nation.hasMeta()) {
-			for (CustomDataField<?> metadata : nation.getMetadata()) {
-				if (metadata.getKey().equalsIgnoreCase(key)
-						&& metadata.getType() == CustomDataFieldType.IntegerField) {
-
-					IntegerDataField dataField = (IntegerDataField) metadata;
-
-					int newVal = dataField.getValue() + amount;
-
-					if (newVal == 0) {
-						removeMeta = dataField;
-						break;
-					}
-
-					dataField.setValue(newVal);
-					hasMeta = true;
-					break;
-				}
-			}
-		}
-
-		if (removeMeta != null)
-			nation.removeMetaData(removeMeta);
-		else if (!hasMeta) {
-			IntegerDataField metadata = new IntegerDataField(key, amount);
-			// Adding metadata automatically saves the nation
-			nation.addMetaData(metadata);
-		}
-		else {
-			saveNation(nation);
-		}
-	}
-
 	private static int getIntegerNationMeta(Nation nation, String key, int def) {
 		if (nation.hasMeta()) {
-			for (CustomDataField<?> metadata : nation.getMetadata()) {
-				if (metadata.getKey().equalsIgnoreCase(key)
-						&& metadata.getType() == CustomDataFieldType.IntegerField) {
-					return ((IntegerDataField) metadata).getValue();
-				}
-			}
+			CustomDataField<?> cdf = nation.getMetadata(key);
+
+			if (cdf != null && cdf.getType() == CustomDataFieldType.IntegerField)
+				return ((IntegerDataField) cdf).getValue();
 		}
 
 		return def;
@@ -219,7 +180,40 @@ public class TownyUtil {
 
 
 	public static void addNationWarBlocks(Nation nation, int blocks) {
-		addIntegerMeta(nation, WARBLOCKS_KEY, blocks);
+		if (blocks == 0)
+			return;
+
+		final String key = WARBLOCKS_KEY;
+
+		boolean hasMeta = false;
+
+		if (nation.hasMeta()) {
+			CustomDataField<?> cdf = nation.getMetadata(key);
+
+			if (cdf != null && cdf.getType() == CustomDataFieldType.IntegerField) {
+				hasMeta = true;
+				IntegerDataField dataField = (IntegerDataField) cdf;
+
+				int newVal = dataField.getValue() + blocks;
+
+				if (newVal == 0) {
+					nation.removeMetaData(cdf);
+				}
+				else {
+					if (!dataField.hasLabel())
+						dataField.setLabel("War Blocks");
+
+					dataField.setValue(newVal);
+					saveNation(nation);
+				}
+			}
+		}
+
+		if (!hasMeta) {
+			IntegerDataField metadata = new IntegerDataField(key, blocks, "War Blocks");
+			// Adding metadata automatically saves the nation
+			nation.addMetaData(metadata);
+		}
 	}
 
 	public static boolean isSameNation(Nation nation1, Nation nation2) {
