@@ -119,10 +119,12 @@ public class WarReward {
         boolean transferTownBlocks = TownyUtil.getNationWarBlocks(loser) > negTownBlockMin;
 
         // BonusDifference is positive if losing nation cannot afford to lose any more townblocks
+        // We expect the nation bonus blocks to be a positive number and the townblock loss to be a smaller number
+        // than the nation blocks
         int bonusDifference = townBlockLoss - TownySettings.getNationBonusBlocks(loser);
 
         // If the bound difference is 0 that means the nation has 0 nation bonus and we don't want to transfer townblocks.
-        transferTownBlocks &= bonusDifference != townBlockWinBonus;
+        transferTownBlocks &= bonusDifference != 0 && townBlockLoss > bonusDifference ;
 
         // If the bonus difference is positive then that means they can't afford to give all the town blocks.
         if (bonusDifference > 0) {
