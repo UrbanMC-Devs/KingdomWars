@@ -18,6 +18,7 @@ public class ConfigManager {
                        startDelay, allyStartDelay,
                        gracePeriod;
     private static long lastTime, lastTimeRevenge, endTime;
+    private static boolean receiveStartAmountBack;
 
     public ConfigManager() {
         loadConfig();
@@ -52,6 +53,8 @@ public class ConfigManager {
         loseAmount = data.getDouble("lose-amount", 10000);
         truceAmount = data.getDouble("truce-amount", 50000);
 
+        receiveStartAmountBack = data.getBoolean("receive-start-amount-back", true);
+
         winningKills = data.getInt("winning-kills", 25);
         allyKills = data.getInt("ally-bonus-kills", 5);
 
@@ -77,6 +80,10 @@ public class ConfigManager {
 
     public static double getTruceAmount() {
         return truceAmount;
+    }
+
+    public static boolean receiveStartAmountBack() {
+        return receiveStartAmountBack;
     }
 
     public static int getWinningKills() {

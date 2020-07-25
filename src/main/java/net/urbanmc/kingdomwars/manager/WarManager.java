@@ -334,6 +334,7 @@ public class WarManager {
         }
 
 
+        warReward.returnStartingCost(ConfigManager.receiveStartAmountBack());
         // Process War Reward
         warReward.process(winner, loser);
 
