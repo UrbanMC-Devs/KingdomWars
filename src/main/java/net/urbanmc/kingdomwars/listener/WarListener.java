@@ -136,6 +136,8 @@ public class WarListener implements Listener {
 		if (event.isCancelled()) return;
 
 		if (TownyUtil.isNationKing(p) && !war.isAlly(victimNation.getName())) {
+			// Add the kill to the war
+			war.addPoints(recievingNation, 1);
 			plugin.getWarManager().win(recievingNation, victimNation);
 		}
 		else {
