@@ -118,7 +118,7 @@ public class WarListener implements Listener {
 
 		War war = plugin.getWarManager().getWar(victimNation);
 
-		if (!war.isInWar(killerNation.getName()) || war.isOnSameSide(victimNation.getName(), killerNation.getName()))
+		if (war == null || !war.isInWar(killerNation.getName()) || war.isOnSameSide(victimNation.getName(), killerNation.getName()))
 			return;
 
 		if (KingdomWars.playerIsJailed(p))
