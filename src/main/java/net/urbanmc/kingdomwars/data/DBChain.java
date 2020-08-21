@@ -70,7 +70,7 @@ public class DBChain {
     public DBChain query(String queryKey, SQLConsumer<ResultSet> rsConsumer) {
         append("Error executing query " + queryKey, con -> {
             try (Statement stmt = con.createStatement()) {
-                ResultSet rs = stmt.executeQuery(queryKey);
+                ResultSet rs = stmt.executeQuery(getSQLStmt(queryKey));
                 rsConsumer.accept(rs);
             }
         });

@@ -18,6 +18,8 @@ permissions:
       kingdomwars.warblocks: true
       kingdomwars.archive.refresh: true
       kingdomwars.archive.remove: true
+      kingdomwars.war: true
+      kingdomwars.ally: true
 
   kingdomwars.nationstaff:
     default: false
@@ -70,4 +72,8 @@ permissions:
   kingdomwars.archive.refresh:
     default: false
   kingdomwars.archive.remove:
+    default: false
+  kingdomwars.ally:
+    default: false
+  kingdomwars.war:
     default: false

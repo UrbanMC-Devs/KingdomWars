@@ -68,7 +68,8 @@ public abstract class WarAbstract {
     }
 
     public boolean hasAllies() {
-        return declaringAllies != null || declaredAllies != null;
+        return (declaringAllies != null && !declaringAllies.isEmpty()) ||
+                (declaredAllies != null && !declaredAllies.isEmpty());
     }
 
     public void addDeclaringAlly(String nation) {
@@ -89,9 +90,8 @@ public abstract class WarAbstract {
         if (isDeclaringAlly(nation)) {
             declaringAllies.remove(nation);
         }
-        else {
-            if (declaredAllies != null)
-                declaredAllies.remove(nation);
+        else if (declaredAllies != null) {
+            declaredAllies.remove(nation);
         }
     }
 
@@ -151,7 +151,7 @@ public abstract class WarAbstract {
         }
     }
 
-    public void setStartTIme(long time) {
+    public void setStartTime(long time) {
         this.startTIme = time;
     }
 

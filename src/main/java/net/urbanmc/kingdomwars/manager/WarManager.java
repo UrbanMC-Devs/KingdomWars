@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -80,15 +81,19 @@ public class WarManager {
     }
 
     private void restartPreWarTasks() {
-        int normalTaskTime = 5;
-        int allyTaskTime = 10;
+        long normalTaskTime = TimeUnit.MINUTES.toSeconds(5);
+        long allyTaskTime = TimeUnit.MINUTES.toSeconds(10);
 
         for (WarAbstract allWar : allWars) {
             if (allWar.getWarStage() == WarStage.DECLARED) {
                 PreWar preWar = (PreWar) allWar;
+                long secondsTillWar = (preWar.hasAllies() ? allyTaskTime : normalTaskTime);
                 BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> startWar(preWar),
-                        preWar.hasAllies() ? allyTaskTime : normalTaskTime);
+                        secondsTillWar * 20);
                 preWar.setTask(task);
+                // Log information
+                KingdomWars.logger().info(preWar.getDeclaringNation() + " and " + preWar.getDeclaredNation() + " are going to war in "
+                        + TimeUnit.SECONDS.toMinutes(secondsTillWar) + " minutes!");
             }
         }
     }
@@ -159,7 +164,7 @@ public class WarManager {
         war.setKills(kills);
 
         // Set the war start time
-        war.setStartTIme(System.currentTimeMillis());
+        war.setStartTime(System.currentTimeMillis());
 
         // Add it to the arraylist, and remove the pre-war
         allWars.add(war);
@@ -414,6 +419,15 @@ public class WarManager {
         if (renamedNation)
             saveCurrentWars();
     }
+
+    public Collection<PreWar> getScheduledWars() {
+        return Collections.unmodifiableCollection(
+                allWars.stream().filter(war -> war.getWarStage() == WarStage.DECLARED)
+                      .map(war -> (PreWar) war)
+                      .collect(Collectors.toList())
+        );
+    }
+
 
     public boolean alreadyScheduledForWar(String nation) {
         return getPreWar(nation) != null;

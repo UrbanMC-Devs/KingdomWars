@@ -18,7 +18,9 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Private;
+import co.aikar.commands.annotation.Single;
 import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Values;
 import co.aikar.commands.contexts.IssuerAwareContextResolver;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.TownySettings;
@@ -28,6 +30,8 @@ import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.WarBoard;
 import net.urbanmc.kingdomwars.data.LastWar;
 import net.urbanmc.kingdomwars.data.PreWar;
+import net.urbanmc.kingdomwars.data.WarAbstract;
+import net.urbanmc.kingdomwars.data.WarStage;
 import net.urbanmc.kingdomwars.data.war.War;
 import net.urbanmc.kingdomwars.event.WarDeclareEvent;
 import net.urbanmc.kingdomwars.event.WarRequestAlliesEvent;
@@ -42,8 +46,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -258,6 +264,8 @@ public class TWarsCmd extends BaseCommand {
         TownyUtil.sendNationMessage(nation2, nation1.getName() + " has declared war against your nation! The war will begin in " + declareEvent.getTimeTillWar() + " minutes!");
 
         PreWar preWar = new PreWar(nation1.getName(), nation2.getName());
+        // Set declare time
+        preWar.setStartTime(System.currentTimeMillis());
 
         plugin.getWarManager().declareWar(preWar);
 
@@ -396,9 +404,9 @@ public class TWarsCmd extends BaseCommand {
     @Subcommand("wars")
     @CommandPermission("kingdomwars.wars")
     @Description("View the current wars!")
-    public void wars(Player p) {
+    public void wars(CommandSender sender) {
         plugin.getWarManager().checkForceEndAll();
-        p.sendMessage(ChatColor.GREEN + " === Current Wars ===");
+        sender.sendMessage(ChatColor.GREEN + " === Current Wars ===");
 
         Collection<War> wars = plugin.getWarManager().getCurrentWars();
 
@@ -421,12 +429,12 @@ public class TWarsCmd extends BaseCommand {
                 }
             }
 
-            builder.send(p);
+            builder.send(sender);
         } else {
-            p.sendMessage(ChatColor.ITALIC + "No Current Wars!");
+            sender.sendMessage(ChatColor.ITALIC + "No Current Wars!");
         }
 
-        p.sendMessage(ChatColor.GREEN + "=======");
+        sender.sendMessage(ChatColor.GREEN + "=======");
     }
 
     @Subcommand("leaderboard")
@@ -462,6 +470,11 @@ public class TWarsCmd extends BaseCommand {
     @Description("Reload the plugin!")
     @CommandPermission("kingdomwars.reload")
     public void reload(CommandSender sender) {
+        // Cancel all scheduled war tasks to prevent duplicates
+        for (PreWar scheduledWar : plugin.getWarManager().getScheduledWars()) {
+            scheduledWar.cancelTask();
+        }
+
         new ConfigManager();
         plugin.getWarManager().loadCurrentWars();
         plugin.getArchiveManager().loadRecentWars();
@@ -545,7 +558,7 @@ public class TWarsCmd extends BaseCommand {
             return;
         }
 
-        if (!preWar.isAlly(targetNation.getName())) {
+        if (preWar.isAlly(targetNation.getName())) {
             p.sendMessage(ChatColor.RED + "That nation is allying in another nation's war!");
             return;
         }
@@ -713,5 +726,188 @@ public class TWarsCmd extends BaseCommand {
         }
 
     }
+
+    @Subcommand("war")
+    @CommandPermission("kingdomwars.war")
+    @Description("View information about a war!")
+    public void status(CommandSender sender, Nation nation) {
+        WarAbstract warAbs = plugin.getWarManager().getWar(nation);
+
+        if (warAbs == null) {
+            warAbs = plugin.getWarManager().getPreWar(nation.getName());
+
+            if (warAbs == null) {
+                sender.sendMessage(ChatColor.RED + "That nation is not in a war nor scheduled to participate in one!");
+                return;
+            }
+        }
+
+        StringBuilder message = new StringBuilder();
+        // Header: === War / Scheduled War ===
+        message.append(ChatColor.GREEN).append("==== ")
+                .append(ChatColor.GOLD).append(warAbs.getWarStage() == WarStage.DECLARED ? "Scheduled" : "War")
+                .append(ChatColor.GREEN).append(" ====\n");
+
+        // Declaring Nation: Laconia
+        message.append(ChatColor.GREEN).append("Declaring: ").append(ChatColor.YELLOW).append(warAbs.getDeclaringNation()).append("\n");
+        // Declared Nation: Hyperion
+        message.append(ChatColor.RED).append("Declared: ").append(ChatColor.YELLOW).append(warAbs.getDeclaredNation()).append("\n");
+
+        // Start / Declared:
+        long startTime = warAbs.getStartTIme();
+        if (startTime > 0) {
+            message.append(ChatColor.LIGHT_PURPLE).append(warAbs.getWarStage() == WarStage.DECLARED ? "Declared" : "Started")
+                    .append(" at ");
+            Date date = new Date(startTime);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy hh:mm a z"); // the format of your date
+            message.append(dateFormat.format(date))
+                    .append("\n");
+        }
+
+        if (warAbs.hasAllies()) {
+            // Allies:
+            message.append(ChatColor.AQUA).append("Allies:\n");
+            for (String declaringAlly : warAbs.getDeclaringAllies()) {
+                message.append(ChatColor.GREEN).append("    -").append(declaringAlly)
+                        .append("\n");
+            }
+
+            for (String declaredAlly : warAbs.getDeclaredAllies()) {
+                message.append(ChatColor.RED).append("    -").append(declaredAlly)
+                        .append("\n");
+            }
+        }
+
+        if (warAbs.getWarStage() == WarStage.FIGHTING) {
+            War war = (War) warAbs;
+            message.append(ChatColor.GOLD).append("Kills (").append(war.getKillsToWin()).append("): ")
+                    .append(ChatColor.GREEN).append(war.getDeclaringPoints())
+                    .append(ChatColor.WHITE).append("-")
+                    .append(ChatColor.RED).append(war.getDeclaredPoints())
+                    .append("\n");
+        }
+
+        sender.sendMessage(message.toString());
+    }
+
+    @Subcommand("ally")
+    @CommandPermission("kingdomwars.ally")
+    @Description("Manage allies for a scheduled war!")
+    @CommandCompletion("@nations add|remove|call @nations")
+    public void ally(CommandSender sender, Nation preWarNation, @Flags("previous") PreWar preWar, @Values("add|remove|call") String option, @Optional @Single String value) {
+        if (option.equalsIgnoreCase("call")) {
+            if (preWar.hasAllies()) {
+                sender.sendMessage(ChatColor.RED + "Allies have already been called!");
+                return;
+            }
+
+            int delay = ConfigManager.getAllyStartDelay();
+
+            if (value != null) {
+                try {
+                    delay = Integer.parseInt(value);
+                } catch (NumberFormatException ex) {
+                    sender.sendMessage(ChatColor.RED + "Invalid delay specified!");
+                    return;
+                }
+            }
+
+            WarRequestAlliesEvent event = new WarRequestAlliesEvent(preWar, delay);
+
+            Bukkit.getPluginManager().callEvent(event);
+
+            if (event.isCancelled()) return;
+
+            preWar.callAllies();
+
+            Nation declaringNation = TownyUtil.getNation(preWar.getDeclaringNation());
+            Nation declaredNation = TownyUtil.getNation(preWar.getDeclaredNation());
+
+            if (declaringNation == null || declaredNation == null) {
+                sender.sendMessage(ChatColor.RED + "Error: Nations could not be parsed!");
+                return;
+            }
+
+            // Send message to allied nations
+            for (Nation allyNation : declaringNation.getAllies()) {
+                if (allyNation != null)
+                    TownyUtil.sendNationMessage(allyNation, declaringNation.getName() + " has called for allies! Join them in the war!");
+            }
+
+            for (Nation allyNation : declaredNation.getAllies()) {
+                if (allyNation != null)
+                    TownyUtil.sendNationMessage(allyNation, declaredNation.getName() + " is under attack! Their war allows for allies, join them!");
+            }
+
+            int minsLeft = event.getPreparationTime();
+
+            TownyUtil.sendNationMessage(declaringNation, "An admin has called for allies in the war against " + declaredNation.getName()
+                    + ". The war will now begin in " + minsLeft  +" minutes!");
+            TownyUtil.sendNationMessage(declaringNation, "An admin has called for allies in the war against " + declaringNation.getName()
+                    + ". The war will now begin in " + minsLeft  +" minutes!");
+
+            preWar.cancelTask();
+
+            //20 ticks per second * 60 seconds per minute * Time till War in minutes generates the amount of ticks.
+            BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getWarManager().startWar(preWar),
+                    20* 60 * event.getPreparationTime());
+
+            preWar.setTask(task);
+            return;
+        }
+
+        if (!preWar.hasAllies()) {
+            sender.sendMessage(ChatColor.RED + "Allies have not been called!");
+            return;
+        }
+
+        Nation targetNation;
+
+        if (value == null || (targetNation = TownyUtil.getNation(value)) == null) {
+            sender.sendMessage(ChatColor.RED + "Invalid target nation specified!");
+            return;
+        }
+
+        if (option.equalsIgnoreCase("add")) {
+            if (!preWar.isMainNation(preWarNation.getName())) {
+                sender.sendMessage(ChatColor.RED + "You must specify a main warring nation in order to add an ally!");
+                return;
+            }
+
+            if (preWar.isMainNation(targetNation.getName())) {
+                sender.sendMessage(ChatColor.RED + "You cannot add a main nation as an ally to their own war!");
+                return;
+            }
+
+            if (preWar.isAlly(targetNation.getName())) {
+                sender.sendMessage(ChatColor.RED + "This nation is already participating in the war!");
+                return;
+            }
+
+            if (preWar.isDeclaringNation(preWarNation.getName())) {
+                preWar.addDeclaringAlly(targetNation.getName());
+                sender.sendMessage(ChatColor.GREEN + "Added " + targetNation.getName() + " as a declaring ally!");
+            }
+            else {
+                preWar.addDeclaredAlly(targetNation.getName());
+                sender.sendMessage(ChatColor.GREEN + "Added " + targetNation.getName() + " as a declared ally!");
+            }
+
+            TownyUtil.sendNationMessage(preWarNation, targetNation.getName() + " has now joined your side in the upcoming war!");
+            TownyUtil.sendNationMessage(targetNation, "Your nation is now participating in the war between "  + preWar.getDeclaringNation() + " vs " + preWar.getDeclaredNation() + "!");
+        }
+        else if (option.equalsIgnoreCase("remove")) {
+            if (!preWar.isAlly(targetNation.getName())) {
+                sender.sendMessage(ChatColor.RED + "That nation is not an ally in this war!");
+                return;
+            }
+
+            preWar.removeAlly(targetNation.getName());
+            sender.sendMessage(ChatColor.GREEN + "Removed " + targetNation.getName() + " as an ally in the war!");
+            TownyUtil.sendNationMessage(targetNation, "Your nation has been removed as an ally in the upcoming war by an admin!");
+        }
+    }
+
+
 
 }

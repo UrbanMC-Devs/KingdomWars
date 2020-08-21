@@ -6,7 +6,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
 
@@ -166,23 +166,23 @@ public class JSONMessageBuilder {
         }
     }
 
-    public void send(Player... players) {
-        if (players == null) return;
+    public void send(CommandSender... senders) {
+        if (senders == null) return;
 
         final BaseComponent[] compiled = compile();
 
-        for (Player player : players) {
-            player.spigot().sendMessage(compiled);
+        for (CommandSender sender : senders) {
+            sender.spigot().sendMessage(compiled);
         }
     }
 
-    public void send(Collection<Player> players) {
-        if (players == null) return;
+    public void send(Collection<? extends CommandSender> senders) {
+        if (senders == null) return;
 
         final BaseComponent[] compiled = compile();
 
-        for (Player player : players) {
-            player.spigot().sendMessage(compiled);
+        for (CommandSender sender : senders) {
+            sender.spigot().sendMessage(compiled);
         }
     }
 
