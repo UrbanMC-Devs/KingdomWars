@@ -102,7 +102,7 @@ public class ArchiveFormatter {
 
         // Winterhold Kills: 5
         msgBuilder.then(lastWar.getDeclaredNation() + " Kills: ").color(getColorForNation(lastWar, false))
-                .then(String.valueOf(lastWar.getDeclaringPoints())).color(ChatColor.GOLD).then("\n");
+                .then(String.valueOf(lastWar.getDeclaredPoints())).color(ChatColor.GOLD).then("\n");
 
         // Allies
         if (lastWar.hasAllies()) {
