@@ -9,14 +9,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class DBChain {
 
     private boolean async;
     private SQLManager manager;
-    private CompletableFuture<Connection> future = new CompletableFuture<>();
+    private Queue<Consumer<Connection>> callQueue = new ArrayDeque<>();
 
     public DBChain(SQLManager manager, boolean async) {
         this.manager = manager;
@@ -24,7 +26,7 @@ public class DBChain {
     }
 
     private void append(String errorMsg, SQLConsumer<Connection> conConsumer) {
-        future.thenAccept(con -> {
+        callQueue.add(con -> {
             try {
                 conConsumer.accept(con);
             } catch (SQLException e) {
@@ -80,7 +82,9 @@ public class DBChain {
     public void execute() {
         String errorMsg = "Error getting connection for connection chain!";
         SQLConsumer<Connection> conConsumer = con -> {
-            future.complete(con);
+            while (!callQueue.isEmpty()) {
+                callQueue.poll().accept(con);
+            }
         };
 
         manager.connectionConsumer(async, errorMsg, conConsumer);

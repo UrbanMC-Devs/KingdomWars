@@ -86,6 +86,7 @@ public class WarArchiveManager {
             // "INSERT INTO PAST_WAR_ALLIES (WAR_ID, ALLY, DECLARING) VALUES (?, ?, ?)"
             if (war.getArchiveID() == 0) {
                 KingdomWars.logger().severe("Archive ID is invalid!");
+                return;
             }
 
             stmt.setInt(1, war.getArchiveID());
