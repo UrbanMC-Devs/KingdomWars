@@ -96,8 +96,12 @@ public class KingdomWars extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		warManager.saveCurrentWars();
-		sqlManager.shutdown();
+		// Nullity checks
+		if (warManager != null)
+			warManager.saveCurrentWars();
+
+		if (sqlManager != null)
+			sqlManager.shutdown();
 	}
 
 	private void registerChangeLeaderListener() {
