@@ -103,6 +103,8 @@ public class WarManager {
                 new File(plugin.getDataFolder(), "wars.json")))
         {
             writer.write(WarSerializer.serialize(gson, allWars).toString());
+            if (allWars.size() > 0)
+                plugin.getLogger().info("Saved " + allWars.size() + " wars to 'wars.json'!");
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Error saving wars.json!", e);
         }

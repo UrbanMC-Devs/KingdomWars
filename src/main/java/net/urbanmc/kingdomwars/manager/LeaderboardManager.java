@@ -2,7 +2,6 @@ package net.urbanmc.kingdomwars.manager;
 
 import net.urbanmc.kingdomwars.KingdomWars;
 import net.urbanmc.kingdomwars.data.Leaderboard;
-import net.urbanmc.kingdomwars.util.TownyUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,16 +27,14 @@ public class LeaderboardManager {
                 "Error creating leaderboard table!");
     }
 
-    public void deleteNationFromLeaderboard(String nation) {
-        UUID nationUUID = TownyUtil.getNationUUID(nation);
-
+    public void deleteNationFromLeaderboard(UUID nationUUID, String nationName) {
         if (nationUUID == null) {
-            KingdomWars.logger().severe("Cannot delete nation " + nation + " from leaderboard because nation not found!");
+            KingdomWars.logger().severe("Cannot delete nation '" + nationName + "' from leaderboard because nation not found!");
             return;
         }
 
         sqlManager.executeUpdate(true, "delete-nation-leaderboard",
-                "Error deleting nation " + nation + " from leaderboard!",
+                "Error deleting nation " + nationName + " from leaderboard!",
                 nationUUID.toString());
     }
 

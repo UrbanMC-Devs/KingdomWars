@@ -1,5 +1,6 @@
 package net.urbanmc.kingdomwars.listener;
 
+import com.palmergames.bukkit.towny.event.DeleteNationEvent;
 import com.palmergames.bukkit.towny.event.NewNationEvent;
 import com.palmergames.bukkit.towny.event.PreDeleteNationEvent;
 import com.palmergames.bukkit.towny.event.RenameNationEvent;
@@ -13,6 +14,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+
+import java.util.UUID;
 
 public class NationListener implements Listener {
 
@@ -36,7 +39,7 @@ public class NationListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void deleteNation(PreDeleteNationEvent e) {
+	public void preDeleteNation(PreDeleteNationEvent e) {
 		String nation = e.getNationName();
 
 		if (plugin.getWarManager().inWar(nation)) {
@@ -66,8 +69,14 @@ public class NationListener implements Listener {
 				plugin.getWarManager().cancelDeclaredWar(preWar);
 			}
 		}
+	}
 
-		plugin.getArchiveManager().removeRecentWars(nation);
-		plugin.getLeaderboard().deleteNationFromLeaderboard(nation);
+	@EventHandler
+	public void deleteNation(DeleteNationEvent event) {
+		final String nationName = event.getNationName();
+		final UUID nationUUID = event.getNationUUID();
+
+		plugin.getArchiveManager().removeRecentWars(nationName);
+		plugin.getLeaderboard().deleteNationFromLeaderboard(nationUUID, nationName);
 	}
 }

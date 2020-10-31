@@ -32,7 +32,7 @@ public class SQLManager {
     }
 
     @FunctionalInterface
-    public interface SQLFunctionr<T, R> {
+    public interface SQLFunction<T, R> {
         R accept(T obj) throws SQLException;
     }
 
@@ -208,7 +208,7 @@ public class SQLManager {
     }
 
     public void useFromCacheOrFetch(boolean async, String cacheKey, Consumer<Object> cacheConsumer,
-                                    SQLFunctionr<Connection, Object> fetchConsumer) {
+                                    SQLFunction<Connection, Object> fetchConsumer) {
 
         Object o = dbCache.getIfPresent(cacheKey);
 

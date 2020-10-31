@@ -20,7 +20,8 @@ public class QuestionUtil {
     }
 
     public void askQuestion(String question, UUID nationUUID, Runnable accept, Runnable deny, List<Player> targets) {
-        if (nationQuestionMap.containsKey(nationUUID)) return;
+        if (nationQuestionMap.containsKey(nationUUID))
+            return;
 
         JSONMessageBuilder builder = JSONMessageBuilder.create();
 
