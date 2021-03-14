@@ -1,8 +1,8 @@
 # KingdomWars
-An unofficial Towny war plugin that allows for simple Nation vs. Nation wars. A nation can go to war with another non-peaceful nation. Once the war begins, whichever nation to reach the configured amount of kills will win the war. Rewards include a configurable amount of townblocks and money (via Vault). For more information about how the war system works, see the Wiki.
+An unofficial Towny war plugin that allows for simple Nation vs. Nation wars. A nation can go to war with another non-peaceful nation. Once the war begins, whichever nation to reach the configured amount of kills will win the war. Rewards include a configurable amount of townblocks and money (via Vault). For more information about how the war system works, see the [Wiki](https://github.com/UrbanMC-Devs/KingdomWars/wiki).
 
 ## Installing
-The plugin can be installed via the releases page.
+The plugin can be installed via the [releases page](https://github.com/UrbanMC-Devs/KingdomWars/releases/latest).
 
 ## Building
 The project is a standard maven project and can be compiled via `mvn clean package`.
