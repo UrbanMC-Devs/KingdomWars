@@ -1,26 +1,20 @@
 package net.urbanmc.kingdomwars.listener;
 
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
-import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
-import net.urbanmc.kingdomwars.manager.ConfigManager;
+import com.earth2me.essentials.User;
+import com.palmergames.bukkit.towny.event.damage.TownyPlayerDamagePlayerEvent;
+import com.palmergames.bukkit.towny.object.Nation;
+import com.palmergames.bukkit.towny.object.Town;
+import net.urbanmc.kingdomwars.KingdomWars;
+import net.urbanmc.kingdomwars.WarBoard;
+import net.urbanmc.kingdomwars.data.war.War;
+import net.urbanmc.kingdomwars.event.WarPointAddEvent;
+import net.urbanmc.kingdomwars.util.TownyUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import com.earth2me.essentials.User;
-import com.palmergames.bukkit.towny.event.DisallowedPVPEvent;
-import com.palmergames.bukkit.towny.object.Nation;
-
-import net.urbanmc.kingdomwars.KingdomWars;
-import net.urbanmc.kingdomwars.util.TownyUtil;
-import net.urbanmc.kingdomwars.WarBoard;
-import net.urbanmc.kingdomwars.data.war.War;
-import net.urbanmc.kingdomwars.event.WarPointAddEvent;
 
 public class WarListener implements Listener {
 
@@ -31,9 +25,9 @@ public class WarListener implements Listener {
 	}
 
 	@EventHandler
-	public void onDisallowedPVP(DisallowedPVPEvent e) {
-		Player attacker = e.getAttacker();
-		Player defender = e.getDefender();
+	public void onPlayerDamage(TownyPlayerDamagePlayerEvent e) {
+		Player attacker = e.getAttackingPlayer();
+		Player defender = e.getVictimPlayer();
 
 		if (attacker == null || defender == null)
 			return;
@@ -58,14 +52,9 @@ public class WarListener implements Listener {
 		if (plugin.getWarManager().checkForceEnd(war))
 			return;
 
-		TownBlock tB = TownyUniverse.getTownBlock(e.getAttacker().getLocation());
-		if (tB != null && tB.hasTown()) {
-			try {
-				if (tB.getTown().getMayor().isNPC()) {
-					return;
-				}
-			} catch (NotRegisteredException __) {
-			}
+		Town town = e.getTown();
+		if (town != null && town.getMayor().isNPC()) {
+			return;
 		}
 
 		if (plugin.hasEssentials()) {
@@ -91,12 +80,7 @@ public class WarListener implements Listener {
 			defender.setAllowFlight(false);
 		}
 
-		e.setCancelled(true);
-	}
-
-	@EventHandler
-	public void onEntityDamage(EntityDamageByEntityEvent e) {
-		TownyUtil.damageCancelled(plugin, e.getDamager(), e.getEntity());
+		e.setCancelled(false);
 	}
 
 	@EventHandler

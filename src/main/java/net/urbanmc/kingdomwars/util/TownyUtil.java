@@ -25,11 +25,12 @@ import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Nation;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.utils.CombatUtil;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 public class TownyUtil {
 
     public static Collection<String> getNationNames() {
-        return TownyUniverse.getInstance().getNationsMap().values()
+        return TownyUniverse.getInstance().getNations()
                 .stream().map(TownyObject::getName).collect(Collectors.toList());
     }
 
@@ -38,15 +39,16 @@ public class TownyUtil {
 	}
 
 	public static void sendNationMessage(Nation nation, String message) {
-		TownyMessaging.sendNationMessage(nation, ChatColor.AQUA + message);
+		TownyMessaging.sendNationMessagePrefixed(nation, ChatColor.AQUA + message);
 	}
 
 	public static Nation getNation(Player p) {
-		try {
-			return TownyAPI.getInstance().getDataSource().getResident(p.getName()).getTown().getNation();
-		} catch (NotRegisteredException ex) {
-			return null;
-		}
+    	Resident res = TownyAPI.getInstance().getResident(p.getUniqueId());
+
+    	if (res != null)
+    		return TownyAPI.getInstance().getResidentNationOrNull(res);
+
+    	return null;
 	}
 
 	public static Nation getNation(String name) {
@@ -71,7 +73,7 @@ public class TownyUtil {
 	}
 
 	public static UUID getNationUUID(Nation nation) {
-    	return nation.getUuid();
+    	return nation.getUUID();
 	}
 
 	public static double getNationBalance(Nation nation) {
@@ -91,14 +93,10 @@ public class TownyUtil {
 		}
 	}
 	public static void addMoneyToNation(Nation nation, double amount, String reason) {
-		try {
-			if (amount < 0) {
-				nation.getAccount().pay(amount, reason);
-			} else if (amount > 0) {
-				nation.getAccount().collect(amount, reason);
-			}
-		} catch (EconomyException ex) {
-			ex.printStackTrace();
+		if (amount < 0) {
+			nation.getAccount().deposit(amount, reason);
+		} else if (amount > 0) {
+			nation.getAccount().withdraw(amount, reason);
 		}
 	}
 
@@ -117,12 +115,9 @@ public class TownyUtil {
 	}
 
 	public static void truceQuestion(KingdomWars plugin, Nation receivingNation, Nation otherNation) {
-		if (!receivingNation.hasValidUUID())
-				receivingNation.setUuid(UUID.randomUUID());
-
 		plugin.getQuestionUtil().askQuestion("Would you like to accept a truce with " + otherNation.getName() + "? You will receive $"
 						+ ConfigManager.getTruceAmount() + " from their nation bank.",
-				receivingNation.getUuid(),
+				receivingNation.getUUID(),
 				() -> {
 					plugin.getWarManager().truceWar(receivingNation, otherNation);
 				},
@@ -157,15 +152,15 @@ public class TownyUtil {
 	}
 
 	public static boolean damageCancelled(KingdomWars plugin, Entity attacker, Entity defender) {
-		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender);
+		return CombatUtil.preventDamageCall(plugin.getTowny(), attacker, defender, EntityDamageEvent.DamageCause.ENTITY_ATTACK);
 	}
 
 	private static int getIntegerNationMeta(Nation nation, String key, int def) {
 		if (nation.hasMeta()) {
-			CustomDataField<?> cdf = nation.getMetadata(key);
+			IntegerDataField idf = nation.getMetadata(key, IntegerDataField.class);
 
-			if (cdf != null && cdf.getType() == CustomDataFieldType.IntegerField)
-				return ((IntegerDataField) cdf).getValue();
+			if (idf != null)
+				return idf.getValue();
 		}
 
 		return def;
@@ -188,22 +183,21 @@ public class TownyUtil {
 		boolean hasMeta = false;
 
 		if (nation.hasMeta()) {
-			CustomDataField<?> cdf = nation.getMetadata(key);
+			IntegerDataField idf = nation.getMetadata(key, IntegerDataField.class);
 
-			if (cdf != null && cdf.getType() == CustomDataFieldType.IntegerField) {
+			if (idf != null) {
 				hasMeta = true;
-				IntegerDataField dataField = (IntegerDataField) cdf;
 
-				int newVal = dataField.getValue() + blocks;
+				int newVal = idf.getValue() + blocks;
 
 				if (newVal == 0) {
-					nation.removeMetaData(cdf);
+					nation.removeMetaData(idf);
 				}
 				else {
-					if (!dataField.hasLabel())
-						dataField.setLabel("War Blocks");
+					if (!idf.hasLabel())
+						idf.setLabel("War Blocks");
 
-					dataField.setValue(newVal);
+					idf.setValue(newVal);
 					saveNation(nation);
 				}
 			}

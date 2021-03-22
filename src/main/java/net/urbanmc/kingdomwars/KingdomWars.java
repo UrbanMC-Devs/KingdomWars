@@ -88,10 +88,10 @@ public class KingdomWars extends JavaPlugin {
 
 		pm.registerEvents(new NationListener(this), this);
 		pm.registerEvents(new WarListener(this), this);
+		pm.registerEvents(new WarBlocksListener(), this);
 
 		// Register events that are only in the Silver version of Towny
 		registerChangeLeaderListener();
-		registerWarBlocksListener();
 	}
 
 	@Override
@@ -114,18 +114,6 @@ public class KingdomWars extends JavaPlugin {
 		}
 
 		new ChangeKingListener(this);
-	}
-
-	private void registerWarBlocksListener() {
-		// Check if event class exists
-		try {
-			Class.forName("com.palmergames.bukkit.towny.event.NationBonusCalculationEvent");
-		} catch (ClassNotFoundException ex) {
-			getLogger().warning("Could not find calculate NationBonusCalculationEvent. Skipping registering listener for that event!");
-			return;
-		}
-
-		Bukkit.getPluginManager().registerEvents(new WarBlocksListener(), this);
 	}
 
 	public Towny getTowny() {

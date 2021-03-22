@@ -332,7 +332,7 @@ public class TWarsCmd extends BaseCommand {
         if (event.isCancelled())
             return;
 
-        TownyMessaging.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName());
+        TownyUtil.sendNationMessage(nation, "Your nation has requested a truce with " + receivingNation.getName());
         TownyUtil.truceQuestion(plugin, receivingNation, nation);
     }
 
