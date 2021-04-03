@@ -28,14 +28,14 @@ public class NationListener implements Listener {
 	@EventHandler
 	public void createNation(NewNationEvent event) {
 		Nation nat = event.getNation();
-		plugin.getArchiveManager().createNation(nat.getUuid(), nat.getName());
+		plugin.getArchiveManager().createNation(nat.getUUID(), nat.getName());
 	}
 
 	@EventHandler
 	public void renameNation(RenameNationEvent e) {
 		String oldName = e.getOldName(), newName = e.getNation().getName();
 
-		plugin.updateNationName(e.getNation().getUuid(), oldName, newName);
+		plugin.updateNationName(e.getNation().getUUID(), oldName, newName);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

@@ -90,7 +90,6 @@ public class KingdomWars extends JavaPlugin {
 		pm.registerEvents(new WarListener(this), this);
 		pm.registerEvents(new WarBlocksListener(), this);
 
-		// Register events that are only in the Silver version of Towny
 		registerChangeLeaderListener();
 	}
 
@@ -105,11 +104,11 @@ public class KingdomWars extends JavaPlugin {
 	}
 
 	private void registerChangeLeaderListener() {
-		// Check if event class exists
+		// Check if event class exists. Exists in Towny 0.96.7.11+
 		try {
-			Class.forName("com.palmergames.bukkit.towny.event.NationChangeLeaderEvent");
+			Class.forName("com.palmergames.bukkit.towny.event.nation.NationKingChangeEvent");
 		} catch (ClassNotFoundException ex) {
-			getLogger().warning("Could not find NationChangeLeader Event. Skipping registering listener for that event!");
+			getLogger().warning("Could not find NationKingChangeEvent Event. Skipping registering listener for that event!");
 			return;
 		}
 
