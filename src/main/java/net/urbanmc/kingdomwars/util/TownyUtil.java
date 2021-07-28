@@ -77,20 +77,11 @@ public class TownyUtil {
 	}
 
 	public static double getNationBalance(Nation nation) {
-		try {
-			return nation.getAccount().getHoldingBalance();
-		} catch (EconomyException ex) {
-			ex.printStackTrace();
-			return 0;
-		}
+		return nation.getAccount().getHoldingBalance();
 	}
 
 	public static void setNationBalance(Nation nation, double balance, String reason) {
-		try {
-			nation.getAccount().setBalance(balance, reason);
-		} catch (EconomyException ex) {
-			ex.printStackTrace();
-		}
+		nation.getAccount().setBalance(balance, reason);
 	}
 	public static void addMoneyToNation(Nation nation, double amount, String reason) {
 		if (amount < 0) {
